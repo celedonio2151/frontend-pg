@@ -1,0 +1,15 @@
+.balance-summary {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 20px;
+	align-items: center;
+}
+
+/* Paid and unpaid row styles */
+.paid-row {
+	background-color: #edffed; /* Light green background */
+}
+
+.unpaid-row {
+	background-color: #ffe0f0; /* Light red background */
+}
