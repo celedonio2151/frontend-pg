@@ -47,7 +47,7 @@ import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 // import authorsTableData from "layouts/users/data/authorsTableData";
 import { useEffect, useMemo, useState } from "react";
 import CustomTable from "examples/Table";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import MDButton from "components/MDButton";
 import MDScrollDialog from "components/MDDialog";
 import useFetchEvent from "hooks/useFetchEvent";
@@ -58,10 +58,15 @@ import { useAuthContext } from "context/AuthContext";
 import type { User, Users } from "layouts/users/interfaces/user.interface";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formateDate } from "helpers/formatDate";
+import CustomModal from "components/Modal/CustomModal";
+import paths from "routes/paths";
 
 export default function ListUsers() {
 	const { token } = useAuthContext();
+	const navigate = useNavigate();
 	const [openDiaolog, setOpenDialog] = useState(false);
+	const [modal, setModal] = useState(false); // Modal para eliminar
+	const [userId, setUserId] = useState("");
 	const [waterMeters, setWaterMeters] = useState();
 	const [loadingMeter, setLoadingMeter] = useState(false);
 	const [row, setRow] = useState(null);
@@ -90,6 +95,20 @@ export default function ListUsers() {
 		return () => {};
 	}, [data]);
 
+	const openModal = (userId: string) => {
+		setUserId(userId);
+		setModal(true);
+	};
+
+	const closeModal = () => {
+		setModal(false);
+	};
+
+	const handlerConfirmModal = () => {
+		console.log("Modal confirm: Eliminando usuario", userId);
+		setModal(false);
+	};
+
 	// console.log("🚀 ~ ListUsers ~ data:", data);
 	const handleClickOpenDialog = (row) => {
 		setOpenDialog(true);
@@ -108,12 +127,8 @@ export default function ListUsers() {
 			});
 		// console.log("Abriendo dialog", row.original);
 	};
-	function handleOnClickEdit(getValue) {
-		console.log("Edit ", getValue());
-	}
-
-	function handleOnClickDelete(getValue) {
-		console.log("Delete ", getValue());
+	function handleOnClickEdit(userId: string) {
+		navigate(paths.editUser.split(":")[0] + `${userId}`);
 	}
 
 	const columns = useMemo<ColumnDef<User, any>[]>(
@@ -187,15 +202,15 @@ export default function ListUsers() {
 				cell: ({ row }) => (
 					<Stack direction="row" spacing={1}>
 						<IconButton
-							size="small"
-							onClick={() => handleOnClickEdit(row.original)}
+							size="medium"
+							onClick={() => handleOnClickEdit(row.original._id)}
 						>
 							<EditNoteRoundedIcon color="info" />
 							{/* <IconifyIcon icon={"mdi:account-edit"} color="primary.main" /> */}
 						</IconButton>
 						<IconButton
-							size="small"
-							// onClick={() => openModal(row.original._id)}
+							size="medium"
+							onClick={() => openModal(row.original._id)}
 						>
 							<DeleteIcon color="error" />
 							{/* <IconifyIcon icon={"mdi:delete"} color={"error.main"} /> */}
@@ -221,8 +236,6 @@ export default function ListUsers() {
 	return (
 		<>
 			<MDBox pt={6} pb={3}>
-				{/* <Grid container spacing={6}>
-					<Grid item xs={12}> */}
 				<Card>
 					<MDBox
 						mx={2}
@@ -260,8 +273,14 @@ export default function ListUsers() {
 						{loading && <MDTableLoading title={"Cargando Usuarios"} rows={5} />}
 					</MDBox>
 				</Card>
-				{/* </Grid>
-				</Grid> */}
+				<CustomModal
+					title="Eliminar usuario"
+					open={modal}
+					onClose={closeModal}
+					onConfirm={handlerConfirmModal}
+					cancelText="Cancelar"
+					confirmText="Eliminar"
+				/>
 			</MDBox>
 			{/* DIALOG */}
 			{/* <MDScrollDialog

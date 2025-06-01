@@ -19,27 +19,27 @@ export interface Invoice {
 export interface Reading {
   createdAt:   Date;
   updatedAt:   Date;
-  deletedAt:   null;
+  deletedAt:   Date | null;
   _id:         string;
   date:        Date;
   beforeMonth: BeforeMonth;
   lastMonth:   LastMonth;
   cubicMeters: number;
   balance:     number;
-  meterImage:  null;
-  description: string;
-  waterMeter?: WaterMeter;
+  meterImage:  string | null;
+  description: string | null;
+  waterMeter:  WaterMeter;
   invoice?:    Invoice;
 }
 
 export interface BeforeMonth {
   date:       Date;
-  meterValue: string;
+  value:      number;
 }
 
 export interface LastMonth {
   date:       Date;
-  meterValue: number;
+  value:      number;
 }
 
 export interface WaterMeter {
@@ -52,4 +52,14 @@ export interface WaterMeter {
   surname:      string;
   meter_number: number;
   status:       boolean;
+}
+
+export type ReadingForm = {
+  date:           Date;
+  beforeMonth:    BeforeMonth;
+  lastMonth:      LastMonth;
+  cubicMeters:    number;
+  balance:        number;
+  description:    string;
+  water_meterId:  string;
 }

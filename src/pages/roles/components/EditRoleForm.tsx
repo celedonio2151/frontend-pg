@@ -49,23 +49,26 @@ export default function EditRoleForm({ id, role }: Props) {
 	});
 
 	const onSubmit = async (data: RoleForm) => {
-		const role = await patch(`/role/${id}`, data, token);
-		if (role) {
-			console.log("Rol editado:", role);
-			enqueueSnackbar("Rol editado correctamente", {
-				variant: "success",
-				autoHideDuration: 3000,
+		try {
+			const role = await patch(`/role/${id}`, data, token);
+			if (role) {
+				console.log("Rol editado:", role);
+				enqueueSnackbar("Rol editado correctamente", {
+					variant: "success",
+					autoHideDuration: 3000,
+				});
+				navigate(paths.roles);
+			}
+		} catch (err: any) {
+			// enqueueSnackbar("Error al editar rol", { variant: "error" });
+			enqueueSnackbar(error?.response?.data.message || "Error al editar rol", {
+				variant: "error",
 			});
-			navigate(paths.roles);
+			console.error("Error al registrar rol:", error);
 		}
 		// Simular petición al servidor
 		// await new Promise((resolve) => setTimeout(resolve, 2000));
 		// console.log("Petición enviada al servidor:", data);
-		if (error) {
-			enqueueSnackbar("Error al editar rol", { variant: "error" });
-			enqueueSnackbar(error.response?.data.message, { variant: "error" });
-			console.error("Error al registrar rol:", error);
-		}
 	};
 
 	console.log({ patch, loading, error });
@@ -158,8 +161,7 @@ export default function EditRoleForm({ id, role }: Props) {
 												fullWidth
 												label="Descripción"
 												multiline
-												rows={2}
-												// sx={{ mt: 3 }}
+												rows={2.1}
 												{...register("description", {
 													required: "La descripción es obligatoria",
 													minLength: {

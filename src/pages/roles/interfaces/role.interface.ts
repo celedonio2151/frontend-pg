@@ -1,8 +1,8 @@
 export interface Roles {
   limit?:  number;
   offset?: number;
-  total:  number;
-  roles:  Role[];
+  total:   number;
+  roles:   Role[];
 }
 
 export interface Role {

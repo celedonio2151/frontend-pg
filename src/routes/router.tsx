@@ -15,7 +15,7 @@ const MainLayout = lazy(() => import("layouts/main-layout"));
 const AuthLayout = lazy(() => import("layouts/auth-layout"));
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
-import ListUsers from "layouts/users";
+import ListUsers from "pages/users";
 import Cover from "layouts/authentication/sign-up";
 import Meters from "layouts/meters/Meters";
 import Charts from "layouts/charts";
@@ -25,7 +25,9 @@ import DirectorPage from "layouts/Directors/DirectorPage";
 import RolesPage from "pages/roles/RolesPage";
 import CreateRolePage from "pages/roles/CreateRolePage";
 import EditRolePage from "pages/roles/EditRolePage";
-import MeterReadingsPage from "layouts/meterReadings/MeterReadingsPage";
+import MeterReadingsPage from "pages/readings/MeterReadingsPage";
+import CreateReadingPage from "pages/readings/CreateReadingPage";
+import EditUserPage from "pages/users/EditUserPage";
 // const ResetPassword = lazy(() => import("pages/authentication/ResetPassword"));
 const Error404 = lazy(() => import("pages/errors/Error404"));
 
@@ -73,7 +75,7 @@ const routes = [
 							},
 							{
 								path: paths.editUser,
-								element: <ListUsers />,
+								element: <EditUserPage />,
 							},
 							{
 								path: paths.userMe,
@@ -102,6 +104,10 @@ const routes = [
 								path: paths.readings,
 								element: <MeterReadingsPage />,
 							},
+							// {
+							// 	path: paths.createReading,
+							// 	element: <CreateReadingPage />,
+							// },
 							// Gráficas
 							{
 								path: paths.charts,

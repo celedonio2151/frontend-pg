@@ -1,9 +1,13 @@
 import { Box, Skeleton } from "@mui/material";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import React from "react";
 
-export default function MDTableLoading({ title, rows = 5 }) {
+type Props = {
+	title: string;
+	rows?: number;
+};
+
+export default function MDTableLoading({ title, rows = 5 }: Props) {
 	return (
 		<MDBox sx={{ m: 2 }}>
 			<MDTypography component="h4" variant="body">

@@ -4,7 +4,6 @@ import {
 	DialogContent,
 	DialogActions,
 	IconButton,
-	Button,
 	Typography,
 	Box,
 } from "@mui/material";
@@ -54,7 +53,7 @@ export default function CustomModal({
 			</DialogContent>
 
 			<DialogActions sx={{ p: 2 }}>
-				<MDButton onClick={onClose} color="inherit">
+				<MDButton onClick={onClose} color="light">
 					{cancelText}
 				</MDButton>
 				<MDButton onClick={onConfirm} color="error">

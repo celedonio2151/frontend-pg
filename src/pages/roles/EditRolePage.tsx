@@ -3,7 +3,7 @@ import ErrorLoader from "components/loader/ErrorLoader";
 import Splash from "components/loader/Splash";
 import { useAuthContext } from "context/AuthContext";
 import useFetch from "hooks/useFetch";
-import EditRoleForm from "pages/roles/componentes/EditRoleForm";
+import EditRoleForm from "pages/roles/components/EditRoleForm";
 import type { Role } from "pages/roles/interfaces/role.interface";
 import { useParams } from "react-router-dom";
 

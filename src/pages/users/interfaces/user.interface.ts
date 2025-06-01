@@ -7,7 +7,7 @@ export interface Users {
 export interface User {
   createdAt:     Date;
   updatedAt:     Date;
-  deletedAt:     null;
+  deletedAt:     Date | null;
   _id:           string;
   ci:            number | null;
   name:          string;
@@ -20,7 +20,7 @@ export interface User {
   profileImg:    string;
   authProvider:  string;
   status:        boolean;
-  roles:         Role[];
+  roles:         Role[] | null;
 }
 
 export interface Role {
@@ -31,4 +31,18 @@ export interface Role {
   name:        string;
   description: string;
   status:      boolean;
+}
+
+export type UserForm = {
+  ci:             number;
+  name:           string;
+  surname:        string;
+  email?:         string;
+  password?:      string;
+  phoneNumber:    string;
+  birthDate?:     Date;
+  profileImg?:    string;
+  meter_number?:  number;
+  status?:        boolean;
+  role_id:        string[];
 }

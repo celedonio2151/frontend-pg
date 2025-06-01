@@ -1,4 +1,4 @@
-import CreateRoleForm from "pages/roles/componentes/CreateRoleForm";
+import CreateRoleForm from "pages/roles/components/CreateRoleForm";
 
 export default function CreateRolePage() {
 	return (

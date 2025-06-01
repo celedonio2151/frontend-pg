@@ -3,6 +3,7 @@ import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import TableViewRoundedIcon from "@mui/icons-material/TableViewRounded";
 import NotificationsActiveRoundedIcon from "@mui/icons-material/NotificationsActiveRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import MonetizationOnRoundedIcon from '@mui/icons-material/MonetizationOnRounded';
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import PersonAddRoundedIcon from "@mui/icons-material/PersonAddRounded";
@@ -16,7 +17,6 @@ import AddCardRoundedIcon from "@mui/icons-material/AddCardRounded";
 
 import paths from "routes/paths";
 import { formateDate } from "helpers/formatDate";
-import path from "path";
 
 export interface SubMenuItem {
 	name: string;
@@ -30,7 +30,7 @@ export interface MenuItem {
 	type: string;
 	name: string;
 	route: string;
-	icon?: string;
+	icon?: any;
 	// items?: SubMenuItem[];
 	// messages?: number;
 	// hidden?: boolean;
@@ -49,62 +49,62 @@ const sitemap: MenuItem[] = [
 		type: "collapse",
 		name: "Usuarios",
 		route: paths.users,
-		icon: "mdi:users-group-outline",
+		icon: <PeopleRoundedIcon />,
 	},
 	{
 		key: paths.roles,
 		type: "collapse",
 		name: "Roles",
 		route: paths.roles,
-		icon: "mdi:account-key",
+		icon: <KeyRoundedIcon />,
 	},
 	{
 		key: paths.waterMeters,
 		type: "collapse",
 		name: "Medidores",
 		route: paths.waterMeters,
-		icon: "mdi:users-group-outline",
+		icon: <SpeedRoundedIcon />,
 	},
 	{
 		key: paths.charts,
 		type: "collapse",
 		name: "Gráficas",
 		route: paths.charts,
-		icon: "mdi:users-group-outline",
+		icon: <InsightsRoundedIcon />,
 	},
 	{
 		key: paths.billings,
 		type: "collapse",
 		name: "Tarifas",
 		route: paths.billings,
-		icon: "mdi:users-group-outline",
+		icon: <MonetizationOnRoundedIcon />,
 	},
 	{
 		type: "collapse",
 		name: `Lecturas : ${formateDate(new Date(), "MMMM YYYY")} `,
 		key: paths.readings,
-		icon: "",
+		icon: <BackupTableRoundedIcon />,
 		route: paths.readings,
 	},
 	{
 		type: "collapse",
 		name: `Reportes : ${formateDate(new Date(), "MMMM YYYY")} `,
 		key: "report",
-		icon: "",
+		icon: <AssessmentRoundedIcon />,
 		route: "/report",
 	},
 	{
 		type: "collapse",
 		name: `Reporte anual: ${new Date().getFullYear()}`,
 		key: "report/year",
-		icon: "",
+		icon: <AssessmentRoundedIcon />,
 		route: "/report/year",
 	},
 	{
 		type: "collapse",
 		name: `Mesa Directiva: ${new Date().getFullYear()}`,
 		key: paths.directors,
-		icon: "",
+		icon: <Diversity3RoundedIcon />,
 		route: paths.directors,
 	},
 	{
@@ -112,14 +112,14 @@ const sitemap: MenuItem[] = [
 		type: "collapse",
 		name: "Iniciar sesión",
 		route: paths.signin,
-		icon: "mage:lock-fill",
+		icon: <LoginRoundedIcon />,
 	},
 	{
 		key: paths.signup,
 		type: "collapse",
 		name: "Registrarse",
 		route: paths.signup,
-		icon: "mage:user-plus-fill",
+		icon: <PersonAddRoundedIcon />,
 	},
 ];
 

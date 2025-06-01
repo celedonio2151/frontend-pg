@@ -15,19 +15,12 @@ Coded by www.creative-tim.com
 
 // @mui material components
 import { Box, IconButton, Card, Grid, Divider } from "@mui/material";
-
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 // Material Dashboard 2 React base styles
 import breakpoints from "assets/theme/base/breakpoints";
-
-// Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
-import DataTable from "examples/Tables/DataTable";
 
 // MUI ICONS
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -37,19 +30,17 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 // Data
 // import authorsTableData from "layouts/users/data/authorsTableData";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import CustomTable from "examples/Table";
 import { NavLink } from "react-router-dom";
 import useFetch from "hooks/useFetch";
 import { formateDate } from "helpers/formatDate";
-import RegisterFormMR from "./RegisterFormMR";
 
-import useFetchEvent from "hooks/useFetchEvent";
 import MDTabMonth from "components/MDTabMonth/MDTabMonth";
 import MDTableLoading from "components/MDTableLoading/MDTableLoading";
 import { DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { DatePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import usePost from "hooks/usePost";
 import { months } from "dayjs/locale/es";
 import JsonToExcel from "components/XLSX/JsonToExcel";
@@ -58,117 +49,93 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type {
 	Reading,
 	Readings,
-} from "layouts/meterReadings/interfaces/meterReading.interface";
+} from "pages/readings/interfaces/meterReading.interface";
+import CreateReadingPage from "pages/readings/CreateReadingPage";
+import getFirstEndDates from "helpers/getFirstEndDates";
 
 export default function MeterReadingsPage() {
 	const { token } = useAuthContext();
-	const [date, setDate] = useState(dayjs(new Date())); // Select date and time
-	const [tabsOrientation, setTabsOrientation] = useState("horizontal");
-	const [selectedMonth, setSelectedMonth] = useState(date.get("month")); // Select a month
-	// const [eventTrigger, setEventTrigger] = useState(new Date()); // Event trigger
-	const [readingUrl, setReadingUrl] = useState(`/reading`); // URL for reading
 
-	const [newMeterReading, setNewMeter] = useState(false); // Show form or hidden
+	// Inicializa el mes seleccionado desde sessionStorage solo una vez
+	const getInitialMonth = () => {
+		const savedMonth = sessionStorage.getItem("selectedMonth");
+		return savedMonth ? Number(savedMonth) : dayjs().month();
+	};
+
+	const [selectedMonth, setSelectedMonth] = useState<number>(getInitialMonth());
+	const [date, setDate] = useState<Dayjs>(dayjs().month(selectedMonth));
+	const [params, setParams] = useState(() => {
+		const d = dayjs().month(getInitialMonth());
+		return {
+			startDate: getFirstEndDates(d.toDate()).startDate,
+			endDate: getFirstEndDates(d.toDate()).endDate,
+		};
+	});
+	const [newMeterReading, setNewMeter] = useState(false);
+
+	// Fetch lecturas del mes
 	const { data, loading, error } = useFetch<Readings>({
-		endpoint: readingUrl,
-		eventTrigger: null,
+		endpoint: `/reading?startDate=${params.startDate}&endDate=${params.endDate}`,
+		eventTrigger: params, // Solo dispara cuando cambian los params
 		token,
 	});
+
 	const { post, loading: postLoading, error: postError } = usePost();
 
-	useEffect(() => {
-		const savedMonth = sessionStorage.getItem("selectedMonth");
-		if (savedMonth) setSelectedMonth(Number(savedMonth));
-	}, []); // Se ejecuta solo una vez al cargar
+	// Centraliza el cambio de mes y fecha, y guarda el mes en sessionStorage
+	const handleMonthOrDateChange = useCallback(
+		(newMonth: number, newDate?: Dayjs) => {
+			const d = newDate ? newDate : dayjs(date).month(newMonth);
+			const { startDate, endDate } = getFirstEndDates(
+				new Date(d.year(), newMonth, 20)
+			);
+			setSelectedMonth(newMonth);
+			sessionStorage.setItem("selectedMonth", newMonth.toString());
+			setParams({ startDate, endDate });
+			setDate(d);
+		},
+		[date]
+	);
 
-	useEffect(() => {
-		// A function that sets the orientation state of the tabs.
-		function handleTabsOrientation() {
-			return window.innerWidth < breakpoints.values.sm
-				? setTabsOrientation("vertical")
-				: setTabsOrientation("horizontal");
-		}
-
-		/** 
-    The event listener that's calling the handleTabsOrientation function when resizing the window.
-    */
-		window.addEventListener("resize", handleTabsOrientation);
-
-		// Call the handleTabsOrientation function to set the state with the initial value.
-		handleTabsOrientation();
-
-		// Remove event listener on cleanup
-		return () => window.removeEventListener("resize", handleTabsOrientation);
-	}, [tabsOrientation]);
-
-	const saveSelectedMonth = (monthIndex: number) => {
-		const saveMonth = Number(sessionStorage.getItem("selectedMonth"));
-		if (saveMonth) {
-			console.log("Mes guardado en el sessionStorage", saveMonth);
-			// setSelectedMonth(saveMonth);
-		}
-		sessionStorage.setItem("selectedMonth", monthIndex.toString());
-	};
-
-	// useEffect(() => {
-	// 	setSelectedMonth(Number(sessionStorage.getItem("selectedMonth")));
-	// }, []);
-
-	const handleMonthClick = (monthIndex: number) => {
-		// const dateF = new Date(date.year(), monthIndex, 20); // Siempre fecha 20 del mes
-		const startDate = new Date(date.year(), monthIndex, 1, 0, 0, 0, 0).toISOString();
-		const endDate = new Date(date.year(), monthIndex + 1, 0, 23, 59, 59, 999).toISOString();
-		console.log("fechas:", startDate, endDate, "Mes Index:", monthIndex);
-		setSelectedMonth(monthIndex); // Guarda el mes en el estado
-		saveSelectedMonth(monthIndex); // Guardar el mes fecha en sessionStorage
-		setReadingUrl(`/reading?startDate=${startDate}&endDate=${endDate}`);
-	};
-
+	// Genera recibos para el mes seleccionado
 	const handleGenerateInvoices = async () => {
-		const dateF = new Date(date.year(), selectedMonth, date.date());
+		const { startDate, endDate } = getFirstEndDates(date.toDate());
 		try {
-			const invoices = await post(`/invoice`, { date: dateF }, token);
+			const invoices = await post(`/invoice`, { startDate, endDate }, token);
 			if (invoices) {
 				alert("Recibos generados correctamente");
 			}
 		} catch (err) {
-			if (err) {
+			if (postError) {
 				alert("Error al generar recibos");
-				console.log(err);
 			}
 		}
 	};
 
+	// Descarga el PDF del recibo
 	const handlePrintInvoice = async (readingId: string) => {
-		// Ver y descargar en certificado
 		const apiUrl = `${
 			import.meta.env.VITE_SERVER
 		}/invoice/pdf-double/${readingId}`;
-		const headers = {
-			Authorization: `Bearer ${token}`, // Agregar el token como cabecera de autorización
-		};
+		const headers = { Authorization: `Bearer ${token}` };
 		try {
-			// Realizar una solicitud para verificar si el PDF está disponible
 			const response = await fetch(apiUrl, { headers });
-
 			if (response.status === 200) {
-				// Si la solicitud fue exitosa (status 200), abrir la URL en una nueva ventana
 				const blob = await response.blob();
 				const pdfURL = URL.createObjectURL(blob);
 				window.open(pdfURL, "_blank", "noopener,noreferrer");
 			} else {
-				// Manejar el caso en el que la solicitud no sea exitosa
 				console.error(
 					"Error al obtener el PDF. Estado de respuesta:",
 					response.status
 				);
 			}
 		} catch (error) {
-			// Manejar errores de red u otras excepciones
 			console.error("Error al obtener el PDF:", error);
 		}
 	};
-	
+
+	// Columnas de la tabla
 	const columns = useMemo<ColumnDef<Reading, any>[]>(
 		() => [
 			{
@@ -244,12 +211,10 @@ export default function MeterReadingsPage() {
 								<EditNoteRoundedIcon color="primary" fontSize="large" />
 							</IconButton>
 						</NavLink>
-						{/* <Divider  /> */}
-						{/* {String(row.original.invoice?.isPaid)} */}
 						<IconButton
-							aria-label="delete"
+							aria-label="print"
 							color="info"
-							disabled={row.original.invoice?.isPaid ? false : true}
+							disabled={!row.original.invoice?.isPaid}
 							onClick={() => handlePrintInvoice(row.original._id)}
 						>
 							<ReceiptRoundedIcon fontSize="large" />
@@ -257,31 +222,10 @@ export default function MeterReadingsPage() {
 					</Box>
 				),
 			},
-			// {
-			// 	header: "Recibos",
-			// 	accessorKey: "_id",
-			// 	cell: ({ getValue }) => (
-			// 		<MDBox >
-			// 			<MDButton
-			// 				onClick={() => handlePrintInvoice(getValue)}
-			// 				variant="contained"
-			// 				color="success"
-			// 			>
-			// 				Ver Recibo
-			// 			</MDButton>
-			// 			<MDButton
-			// 				onClick={() => handlePrintInvoice(getValue)}
-			// 				variant="contained"
-			// 				color="primary"
-			// 			>
-			// 				QR
-			// 			</MDButton>
-			// 		</MDBox>
-			// 	),
-			// },
 		],
 		[]
 	);
+
 	const headers = [
 		{ title: "ID", width: 4 },
 		{ title: "CI", width: 20 },
@@ -298,10 +242,34 @@ export default function MeterReadingsPage() {
 		{ title: "Factura Pagada", width: 15 },
 	];
 
+	// Memoiza la transformación de datos para exportar a Excel
+	const excelData = useMemo(() => {
+		if (!data?.readings) return [];
+		return data.readings.map((item) => {
+			const invoiceIsPaid = item.invoice ? item.invoice.isPaid : null;
+			return {
+				id: item._id,
+				ci: item.waterMeter.ci,
+				fullname: item.waterMeter.name + " " + item.waterMeter.surname,
+				meterNumber: item.waterMeter.meter_number,
+				status: item.waterMeter.status ? "ACTIVO" : "INACTIVO",
+				date: formateDate(item.date, "DD-MM-YYYY"),
+				beforeMonthDate: formateDate(item.beforeMonth.date, "DD-MM-YYYY"),
+				beforeMonthValue: item.beforeMonth.value,
+				lastMonthDate: formateDate(item.lastMonth.date, "DD-MM-YYYY"),
+				lastMonthValue: item.lastMonth.value,
+				cubicMeters: item.cubicMeters,
+				balance: item.balance,
+				invoiceIsPaid: invoiceIsPaid ? "PAGADO" : "SIN PAGAR",
+			};
+		});
+	}, [data]);
+
 	return (
 		<>
 			<MDBox pb={3}>
 				<MDBox pb={4} sx={{ display: "flex", justifyContent: "space-between" }}>
+					{/* Botón para mostrar/ocultar formulario de nueva lectura */}
 					<MDButton
 						variant="contained"
 						color="info"
@@ -310,39 +278,39 @@ export default function MeterReadingsPage() {
 					>
 						Nueva Lectura
 					</MDButton>
-					<span>&nbsp;</span>
+
+					<span />
 					<MDButton
 						variant="contained"
 						color="primary"
 						startIcon={<ReceiptRoundedIcon />}
 						onClick={handleGenerateInvoices}
+						disabled={postLoading}
 					>
-						Generar recibos
+						{postLoading ? "Generando..." : "Generar recibos"}
 					</MDButton>
 				</MDBox>
-				{/* FORMUlARIO DE REGISTRO DE METER READING */}
+				{/* Formulario de registro de lectura (desactivado) */}
 				{newMeterReading && (
 					<MDBox sx={{ maxWidth: 500, margin: "0 auto" }}>
-						<RegisterFormMR token={token} setNewMeter={setNewMeter} />
+						<CreateReadingPage />
 					</MDBox>
 				)}
 				<Box sx={{ p: 3, minWidth: 300, maxWidth: 400, margin: "0 auto" }}>
-					<MDBox mb={2} sx={{ backgroundColor: "" }}>
-						<DemoItem label="Selecione una fecha para ver lecturas">
+					<MDBox mb={2}>
+						<DemoItem label="Seleccione una fecha para ver lecturas">
 							<DatePicker
 								sx={{
 									border: "4px solid skyblue",
 									bgcolor: "whitesmoke",
 									borderRadius: 2,
 								}}
-								// label="Selecione una fecha"
 								format="DD MMMM YYYY"
 								value={date}
-								onChange={(newValue) => (
-									setDate(newValue),
-									setSelectedMonth(newValue.month()),
-									handleMonthClick(newValue.month())
-								)}
+								onChange={(newValue) => {
+									if (newValue)
+										handleMonthOrDateChange(newValue.month(), newValue);
+								}}
 							/>
 						</DemoItem>
 					</MDBox>
@@ -355,11 +323,10 @@ export default function MeterReadingsPage() {
 						<MDTabMonth
 							months={months}
 							selectedMonth={selectedMonth}
-							setSelectedMonth={setSelectedMonth}
-							handleMonthClick={handleMonthClick}
+							setSelectedMonth={(month) => handleMonthOrDateChange(month)}
+							handleMonthClick={handleMonthOrDateChange}
 						/>
 					</Grid>
-					{/* TABLA DE LECTURAS DEL MES */}
 					<Grid id="target-table" item xs={12}>
 						<Card>
 							<MDBox
@@ -385,10 +352,7 @@ export default function MeterReadingsPage() {
 									</MDTypography>
 								) : (
 									<>
-										<JsonToExcel
-											headers={headers}
-											data={transformData(data.readings)}
-										/>
+										<JsonToExcel headers={headers} data={excelData} />
 										<CustomTable data={data.readings} columns={columns} />
 									</>
 								)
@@ -404,26 +368,4 @@ export default function MeterReadingsPage() {
 			</MDBox>
 		</>
 	);
-}
-
-function transformData(data) {
-	return data.map((item) => {
-		const invoiceIsPaid = item.invoice ? item.invoice.isPaid : null;
-
-		return {
-			id: item._id,
-			ci: item.waterMeter.ci,
-			fullname: item.waterMeter.fullname,
-			meterNumber: item.waterMeter.meterNumber,
-			status: item.waterMeter.status ? "ACTIVO" : "INACTIVO",
-			date: formateDate(item.date, "DD-MM-YYYY"),
-			beforeMonthDate: formateDate(item.beforeMonth.date, "DD-MM-YYYY"),
-			beforeMonthValue: item.beforeMonth.meterValue,
-			lastMonthDate: formateDate(item.lastMonth.date, "DD-MM-YYYY"),
-			lastMonthValue: item.lastMonth.meterValue,
-			cubicMeters: item.cubicMeters,
-			balance: item.balance,
-			invoiceIsPaid: invoiceIsPaid ? "PAGADO" : "SIN PAGAR",
-		};
-	});
 }
