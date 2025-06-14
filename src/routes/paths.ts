@@ -26,10 +26,14 @@ export default {
 	createReading: `/${rootPaths.pageRoot}/create-reading`,
 	editReading: `/${rootPaths.pageRoot}/edit-reading/:readingId`,
 
+	monthlyReport: `/${rootPaths.pageRoot}/reports/monthly`,
+	annualReport: `/${rootPaths.pageRoot}/reports/annual`,
+	monthlyReportByWaterMeter: `/${rootPaths.pageRoot}/reports/monthly-by-water-meter`,
+
 	roles: `/${rootPaths.pageRoot}/roles`,
 	createRole: `/${rootPaths.pageRoot}/create-role`,
 	editRole: `/${rootPaths.pageRoot}/edit-role/:roleId`,
-	
+
 	directors: `/${rootPaths.pageRoot}/directors`,
 	createDirector: `/${rootPaths.pageRoot}/create-director`,
 	editDirector: `/${rootPaths.pageRoot}/edit-director/:directorId`,

@@ -1,3 +1,18 @@
+/**
+=========================================================
+* Material Dashboard 2 React - v2.2.0
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/material-dashboard-react
+* Copyright 2023 Creative Tim (https://www.creative-tim.com)
+
+Coded by www.creative-tim.com
+
+ =========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+*/
+
 import React, { useContext, useMemo, useState } from "react";
 import Grid from "@mui/material/Grid";
 import { Box, Card, Chip, IconButton, Stack, Typography } from "@mui/material";
@@ -53,36 +68,6 @@ export default function BillingPage() {
 				accessorFn: (row) => formateDate(row.createdAt, "DD-MM-YYYY"),
 				header: "Registrado el ",
 			},
-			// {
-			// 	accessorFn: (row) => row.roles.map((r: any) => r.name).join(", "),
-			// 	header: "Roles",
-			// 	cell: (info) => {
-			// 		const roles = info.getValue().split(", ");
-			// 		return (
-			// 			<Stack direction="row" spacing={1}>
-			// 				{roles.map((r: string, idx: number) => (
-			// 					<Chip
-			// 						key={idx}
-			// 						label={r}
-			// 						color={r === "ADMIN" ? "primary" : "default"}
-			// 						size="small"
-			// 					/>
-			// 				))}
-			// 			</Stack>
-			// 		);
-			// 	},
-			// },
-			// {
-			// 	accessorKey: "status",
-			// 	header: "Estado",
-			// 	cell: (info) => (
-			// 		<Chip
-			// 			label={info.getValue() ? "Activo" : "Inactivo"}
-			// 			color={info.getValue() ? "success" : "error"}
-			// 			size="small"
-			// 		/>
-			// 	),
-			// },
 			{
 				id: "acciones",
 				header: "Acciones",
@@ -91,46 +76,7 @@ export default function BillingPage() {
 		],
 		[]
 	);
-	// console.log("🚀 ~ BillingPage ~ billingData:", billingData);
-	// const columns = [
-	// 	{
-	// 		id: "rowNumber",
-	// 		header: "Nº",
-	// 		cell: (info) => info.row.index + 1,
-	// 	},
-	// 	{
-	// 		header: "Minimo",
-	// 		accessorKey: "min_cubic_meters",
-	// 		cell: ({ getValue }) => (
-	// 			<Box sx={{ borderRadius: 3 }}>{getValue()}m3</Box>
-	// 		),
-	// 	},
-	// 	{
-	// 		header: "Maximo",
-	// 		accessorKey: "max_cubic_meters",
-	// 		cell: ({ getValue }) => (
-	// 			<Box sx={{ borderRadius: 3 }}>{getValue()}m3</Box>
-	// 		),
-	// 	},
-	// 	{
-	// 		header: "Saldo Base",
-	// 		accessorKey: "base_rate",
-	// 		cell: ({ getValue }) => (
-	// 			<Box sx={{ borderRadius: 3 }}>{getValue()}Bs</Box>
-	// 		),
-	// 	},
-	// 	{
-	// 		header: "Acciones",
-	// 		accessorKey: "_id",
-	// 		cell: ({ getValue }) => (
-	// 			<Box sx={{ borderRadius: 3 }}>
-	// 				<IconButton onClick={() => {}}>
-	// 					{/* <AddCardRoundedIcon color="primary" fontSize="large" /> */}
-	// 				</IconButton>
-	// 			</Box>
-	// 		),
-	// 	},
-	// ];
+	console.log("🚀 ~ BillingPage ~ billingData:", data);
 
 	return (
 		<>
@@ -151,7 +97,7 @@ export default function BillingPage() {
 						</MDTypography>
 					</MDBox>
 					{data && !loading && (
-						<BillingTable dataTable={data?.billings} setTrigger={setTrigger} />
+						<BillingTable dataTable={data.billings} setTrigger={setTrigger} />
 					)}
 				</Card>
 				{/* Grid para mostrar los primeros elementos */}
@@ -159,9 +105,9 @@ export default function BillingPage() {
 				{loading && (
 					<Grid container sx={{ justifyContent: "center", mt: 4 }} spacing={3}>
 						<Grid item xs={12} md={4} lg={4}>
-							<MDTypography variant="h4" align="center" mt={1}>
+							<Typography variant="h4" align="center" mt={1}>
 								Cargando tabla de cobros ...
-							</MDTypography>
+							</Typography>
 						</Grid>
 					</Grid>
 				)}

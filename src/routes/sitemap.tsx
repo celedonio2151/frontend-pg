@@ -3,7 +3,7 @@ import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import TableViewRoundedIcon from "@mui/icons-material/TableViewRounded";
 import NotificationsActiveRoundedIcon from "@mui/icons-material/NotificationsActiveRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
-import MonetizationOnRoundedIcon from '@mui/icons-material/MonetizationOnRounded';
+import MonetizationOnRoundedIcon from "@mui/icons-material/MonetizationOnRounded";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import PersonAddRoundedIcon from "@mui/icons-material/PersonAddRounded";
@@ -89,16 +89,16 @@ const sitemap: MenuItem[] = [
 	{
 		type: "collapse",
 		name: `Reportes : ${formateDate(new Date(), "MMMM YYYY")} `,
-		key: "report",
+		key: paths.monthlyReport,
 		icon: <AssessmentRoundedIcon />,
-		route: "/report",
+		route: paths.monthlyReport,
 	},
 	{
 		type: "collapse",
 		name: `Reporte anual: ${new Date().getFullYear()}`,
-		key: "report/year",
+		key: paths.annualReport,
 		icon: <AssessmentRoundedIcon />,
-		route: "/report/year",
+		route: paths.annualReport,
 	},
 	{
 		type: "collapse",

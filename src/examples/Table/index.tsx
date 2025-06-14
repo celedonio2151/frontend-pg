@@ -98,7 +98,7 @@ export default function MainTable({
 					<FormControl>
 						<InputLabel id="label">Filas por pagina</InputLabel>
 						<Select
-							variant="outlined"
+							variant="standard"
 							// label="Filas por página"
 							value={table.getState().pagination.pageSize}
 							onChange={(e) => table.setPageSize(Number(e.target.value))}
@@ -120,7 +120,7 @@ export default function MainTable({
 						<DebouncedInput
 							id="outlined-basic-search-table"
 							type="text"
-							variant="filled"
+							variant="outlined"
 							label="Buscar..."
 							value={filtering ?? ""}
 							onChange={(value) => setFiltering(String(value))}

@@ -28,6 +28,8 @@ import EditRolePage from "pages/roles/EditRolePage";
 import MeterReadingsPage from "pages/readings/MeterReadingsPage";
 import CreateReadingPage from "pages/readings/CreateReadingPage";
 import EditUserPage from "pages/users/EditUserPage";
+import MonthlyReportPage from "pages/reports/MonthlyReportPage";
+import AnnualReportPage from "pages/reports/AnnualReportPage";
 // const ResetPassword = lazy(() => import("pages/authentication/ResetPassword"));
 const Error404 = lazy(() => import("pages/errors/Error404"));
 
@@ -108,6 +110,16 @@ const routes = [
 							// 	path: paths.createReading,
 							// 	element: <CreateReadingPage />,
 							// },
+
+							// Reportes
+							{
+								path: paths.monthlyReport,
+								element: <MonthlyReportPage />,
+							},
+							{
+								path: paths.annualReport,
+								element: <AnnualReportPage />,
+							},
 							// Gráficas
 							{
 								path: paths.charts,

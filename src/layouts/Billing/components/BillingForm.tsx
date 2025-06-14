@@ -40,8 +40,9 @@ export default function BillingForm({ setTrigger }) {
 			.catch((err) => {
 				console.log(err);
 			})
-			.finally(() => {});
-		// reset(); // Resetea el formulario
+			.finally(() => {
+				reset(); // Resetea el formulario
+			});
 	};
 
 	return (
