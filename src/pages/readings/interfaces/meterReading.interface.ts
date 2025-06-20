@@ -57,7 +57,7 @@ export interface WaterMeter {
 export type ReadingForm = {
   date:           Date;
   beforeMonth:    BeforeMonth;
-  lastMonth:      LastMonth;
+  lastMonth:      number;
   cubicMeters:    number;
   balance:        number;
   description:    string;

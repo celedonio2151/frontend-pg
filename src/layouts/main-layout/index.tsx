@@ -14,6 +14,7 @@ import brandDark from "assets/images/logos/logoAgua.svg";
 import sitemap from "routes/sitemap";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import { Box } from "@mui/material";
 
 export default function MainLayout({ children }: PropsWithChildren) {
 	const [controller, dispatch] = useMaterialUIController();
@@ -62,25 +63,28 @@ export default function MainLayout({ children }: PropsWithChildren) {
 
 	return (
 		<DashboardLayout>
-			<div>
-				<DashboardNavbar />
-				<Sidenav
-					color={sidenavColor}
-					brand={
-						(transparentSidenav && !darkMode) || whiteSidenav
-							? brandDark
-							: brandWhite
-					}
-					brandName="Agua Mosoj Llajta"
-					routes={sitemap}
-					onMouseEnter={handleOnMouseEnter}
-					onMouseLeave={handleOnMouseLeave}
-				/>
-			</div>
-			<div>{children}</div>
-			<div>
-				<Footer />
-			</div>
+			<DashboardNavbar />
+			<Sidenav
+				color={sidenavColor}
+				brand={
+					(transparentSidenav && !darkMode) || whiteSidenav
+						? brandDark
+						: brandWhite
+				}
+				brandName="Agua Mosoj Llajta"
+				routes={sitemap}
+				onMouseEnter={handleOnMouseEnter}
+				onMouseLeave={handleOnMouseLeave}
+			/>
+			<Box
+				sx={{
+					width: "100%",
+					minHeight: "85dvh",
+				}}
+			>
+				{children}
+			</Box>
+			<Footer />
 		</DashboardLayout>
 	);
 }

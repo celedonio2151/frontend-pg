@@ -15,6 +15,7 @@ export default function ErrorLoader({
 			direction="column"
 			justifyContent="center"
 			alignItems="center"
+			padding={2}
 			sx={{ height: 300, width: "100%" }}
 		>
 			{icon}

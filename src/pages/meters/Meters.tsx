@@ -14,28 +14,11 @@ Coded by www.creative-tim.com
 */
 
 // @mui material components
-import {
-	Box,
-	IconButton,
-	List,
-	ListItemButton,
-	ListItemIcon,
-	ListItem,
-	ListItemText,
-	Card,
-	Chip,
-	Stack,
-} from "@mui/material";
+import { Box, IconButton, Card, Chip, Stack } from "@mui/material";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-
-// Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
-import DataTable from "examples/Tables/DataTable";
 
 // MUI ICONS
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -46,7 +29,6 @@ import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 // import authorsTableData from "layouts/users/data/authorsTableData";
 import { useMemo, useState } from "react";
 import CustomTable from "examples/Table";
-import { NavLink } from "react-router-dom";
 import MDButton from "components/MDButton";
 import MDScrollDialog from "components/MDDialog";
 import useFetch from "hooks/useFetch";
@@ -56,12 +38,15 @@ import { useAuthContext } from "context/AuthContext";
 import type {
 	WaterMeter,
 	WaterMeters,
-} from "layouts/meters/interfaces/meter.interface";
+} from "pages/meters/interfaces/meter.interface";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formateDate } from "helpers/formatDate";
+import { useNavigate } from "react-router-dom";
+import paths from "routes/paths";
 
 export default function Meters() {
 	const { token } = useAuthContext();
+	const navigate = useNavigate();
 	const [openDiaolog, setOpenDialog] = useState(false);
 	const [waterMeters, setWaterMeters] = useState();
 	const [loadingMeter, setLoadingMeter] = useState(false);
@@ -94,8 +79,9 @@ export default function Meters() {
 			});
 		// console.log("Abriendo dialog", row.original);
 	};
-	function handleOnClickEdit(getValue) {
-		console.log("Edit ", getValue());
+	function handleOnClickEdit(meterId: string) {
+		console.log("Edit ", meterId);
+		navigate(paths.editWaterMeter.split(":")[0] + meterId);
 	}
 
 	function handleOnClickDelete(getValue) {
@@ -143,17 +129,15 @@ export default function Meters() {
 					<Stack direction="row" spacing={1}>
 						<IconButton
 							size="small"
-							onClick={() => handleOnClickEdit(row.original)}
+							onClick={() => handleOnClickEdit(row.original._id)}
 						>
 							<EditRoundedIcon color="info" />
-							{/* <IconifyIcon icon={"mdi:account-edit"} color="primary.main" /> */}
 						</IconButton>
 						<IconButton
 							size="small"
 							// onClick={() => openModal(row.original._id)}
 						>
 							<DeleteIcon color="error" />
-							{/* <IconifyIcon icon={"mdi:delete"} color={"error.main"} /> */}
 						</IconButton>
 					</Stack>
 				),
@@ -166,10 +150,10 @@ export default function Meters() {
 
 	return (
 		<>
-			{/* <DashboardNavbar /> */}
-			<MDBox pt={6} pb={3}>
-				{/* <Grid container spacing={6}>
-					<Grid item xs={12}> */}
+			<Box pt={2} pb={3}>
+				<Box mb={5}>
+					<MDButton color={"info"}>Nuevo Medidor</MDButton>
+				</Box>
 				<Card>
 					<MDBox
 						mx={2}
@@ -197,7 +181,7 @@ export default function Meters() {
 						{loading && <MDTableLoading title={"Cargando Usuarios"} rows={5} />}
 					</MDBox>
 				</Card>
-			</MDBox>
+			</Box>
 			{/* DIALOG */}
 			{/* <MDScrollDialog
 				open={openDiaolog}

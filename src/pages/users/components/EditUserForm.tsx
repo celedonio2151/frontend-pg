@@ -1,5 +1,4 @@
 import {
-	Box,
 	Card,
 	FormControl,
 	FormControlLabel,
@@ -10,8 +9,6 @@ import {
 	OutlinedInput,
 	FormHelperText,
 	Switch,
-	Autocomplete,
-	TextField,
 	Select,
 	MenuItem,
 } from "@mui/material";
@@ -236,7 +233,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 
 					<MDBox mb={2}>
 						<FormControl fullWidth>
-							<FormLabel id="estado-usuario-label">
+							<FormLabel id="estado-usuario-label" sx={{ fontSize: "1rem" }}>
 								Estado del usuario
 							</FormLabel>
 							<FormControlLabel

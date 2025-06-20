@@ -48,3 +48,12 @@ export interface Role {
   description: string;
   status:      boolean;
 }
+
+
+export type DirectorForm = {
+  userId:       string;
+  startDate:    any;
+  endDate:      any;
+  positionRole: string;
+  description:  string;
+}

@@ -9,10 +9,10 @@ import MDBox from "components/MDBox";
 import useFetch from "hooks/useFetch";
 import MDTypography from "components/MDTypography";
 import handlerErrors from "helpers/handlerErrors";
-import FormDirector from "layouts/Directors/components/FormDirector";
+import FormDirector from "pages/directors/components/FormDirector";
 import { formateDate } from "helpers/formatDate";
 import { useAuthContext } from "context/AuthContext";
-import type { Directors } from "layouts/Directors/interfaces/director.interface";
+import type { Directors } from "pages/directors/interfaces/director.interface";
 
 export default function DirectorPage() {
 	const maxRows = 3; // Máximo número de filas para la vista inicial
@@ -194,9 +194,9 @@ export default function DirectorPage() {
 		<>
 			<MDBox py={3}>
 				{/* Grid para mostrar los primeros elementos */}
-				<MDTypography variant="h3" textAlign="center" py={2}>
+				<Typography variant="h3" textAlign="center" py={2}>
 					Mesa directiva {formateDate(new Date(), "YYYY")}{" "}
-				</MDTypography>
+				</Typography>
 				{data && !loading && (
 					<Grid container sx={{ justifyContent: "center" }} spacing={3}>
 						{data.directors.slice(0, 1).map((item, index) => (
@@ -303,9 +303,9 @@ export default function DirectorPage() {
 						</Grid>
 					</Grid>
 				)}
-				{false && (
+				{true && (
 					<Grid container sx={{ justifyContent: "center", mt: 4 }} spacing={3}>
-						<Grid item xs={12} md={4} lg={4}>
+						<Grid item xs={12} md={6} lg={4}>
 							<FormDirector />
 						</Grid>
 					</Grid>

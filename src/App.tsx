@@ -17,52 +17,17 @@ import themeDark from "assets/theme-dark";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 
-import {
-	useMaterialUIController,
-	setMiniSidenav,
-	setOpenConfigurator,
-} from "context";
-
-// Images
-import brandWhite from "assets/images/logos/logoAgua.svg";
-import brandDark from "assets/images/logos/logoAgua.svg";
+import { useMaterialUIController, setOpenConfigurator } from "context";
 
 // Pages
 import { useAuthContext } from "context/AuthContext";
-import sitemap from "routes/sitemap";
 
 function App() {
 	const { loading } = useAuthContext();
 
 	const [controller, dispatch] = useMaterialUIController();
-	const {
-		miniSidenav,
-		direction,
-		layout,
-		openConfigurator,
-		sidenavColor,
-		transparentSidenav,
-		whiteSidenav,
-		darkMode,
-	} = controller;
-	const [onMouseEnter, setOnMouseEnter] = useState(false);
+	const { direction, openConfigurator, darkMode } = controller;
 	const { pathname } = useLocation();
-
-	// Open sidenav when mouse enter on mini sidenav
-	const handleOnMouseEnter = () => {
-		if (miniSidenav && !onMouseEnter) {
-			setMiniSidenav(dispatch, false);
-			setOnMouseEnter(true);
-		}
-	};
-
-	// Close sidenav when mouse leave mini sidenav
-	const handleOnMouseLeave = () => {
-		if (onMouseEnter) {
-			setMiniSidenav(dispatch, true);
-			setOnMouseEnter(false);
-		}
-	};
 
 	// Change the openConfigurator state
 	const handleConfiguratorOpen = () =>

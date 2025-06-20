@@ -25,13 +25,13 @@ import MDTypography from "components/MDTypography";
 import handlerErrors from "helpers/handlerErrors";
 import { formateDate } from "helpers/formatDate";
 import CustomTable from "examples/Table";
-import BillingTable from "layouts/Billing/components/BillingTable";
-import BillingForm from "layouts/Billing/components/BillingForm";
+import BillingTable from "pages/billing/components/BillingTable";
+import BillingForm from "pages/billing/components/BillingForm";
 import { useAuthContext } from "context/AuthContext";
 import type {
 	Billing,
 	Billings,
-} from "layouts/Billing/interfaces/billing.inerface";
+} from "pages/billing/interfaces/billing.inerface";
 import type { ColumnDef } from "@tanstack/react-table";
 
 export default function BillingPage() {

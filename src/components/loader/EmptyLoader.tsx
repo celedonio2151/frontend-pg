@@ -22,7 +22,7 @@ export default function EmptyLoader({
 			direction="column"
 			justifyContent="center"
 			alignItems="center"
-			sx={{ height: 300, width: "100%" }}
+			sx={{ width: "100%" }}
 			spacing={1.5}
 		>
 			{icon}

@@ -16,3 +16,12 @@ export interface WaterMeter {
   meter_number: number;
   status:       boolean;
 }
+
+
+export type MeterForm = {
+  ci:           number,
+  name:         string,
+  surname:      string,
+  meter_number: number,
+  status:       boolean
+}

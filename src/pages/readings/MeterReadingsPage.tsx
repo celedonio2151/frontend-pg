@@ -20,7 +20,6 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 // Material Dashboard 2 React base styles
-import breakpoints from "assets/theme/base/breakpoints";
 
 // MUI ICONS
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -32,7 +31,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 // import authorsTableData from "layouts/users/data/authorsTableData";
 import { useMemo, useState, useCallback } from "react";
 import CustomTable from "examples/Table";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import useFetch from "hooks/useFetch";
 import { formateDate } from "helpers/formatDate";
 
@@ -52,9 +51,11 @@ import type {
 } from "pages/readings/interfaces/meterReading.interface";
 import CreateReadingPage from "pages/readings/CreateReadingPage";
 import getFirstEndDates from "helpers/getFirstEndDates";
+import paths from "routes/paths";
 
 export default function MeterReadingsPage() {
 	const { token } = useAuthContext();
+	const navigate = useNavigate();
 
 	// Inicializa el mes seleccionado desde sessionStorage solo una vez
 	const getInitialMonth = () => {
@@ -96,6 +97,9 @@ export default function MeterReadingsPage() {
 		},
 		[date]
 	);
+
+	const handleEditReading = (readingId: string) =>
+		navigate(paths.editReading.split(":")[0] + readingId);
 
 	// Genera recibos para el mes seleccionado
 	const handleGenerateInvoices = async () => {
@@ -206,11 +210,9 @@ export default function MeterReadingsPage() {
 				id: "acciones",
 				cell: ({ row }) => (
 					<Box sx={{ borderRadius: 3 }}>
-						<NavLink to={`/meter-reading/${row.original._id}/edit`}>
-							<IconButton>
-								<EditNoteRoundedIcon color="primary" fontSize="large" />
-							</IconButton>
-						</NavLink>
+						<IconButton onClick={() => handleEditReading(row.original._id)}>
+							<EditNoteRoundedIcon color="primary" fontSize="large" />
+						</IconButton>
 						<IconButton
 							aria-label="print"
 							color="info"

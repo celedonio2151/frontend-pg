@@ -7,15 +7,23 @@ import MDButton from "components/MDButton";
 import dayjs from "dayjs";
 import useFetch from "hooks/useFetch";
 import { useAuthContext } from "context/AuthContext";
+import type { DirectorForm } from "pages/directors/interfaces/director.interface";
 
 export default function FormDirector() {
 	const [startDate, setStartDate] = useState(dayjs());
 	const [endDate, setEndDate] = useState(dayjs());
 	const { token } = useAuthContext();
-	const [users, loadingUsers, errorUsers] = useFetch(`/user`, null, token);
+	const {
+		data: users,
+		loading,
+		error,
+	} = useFetch({
+		endpoint: `/user`,
+		token,
+	});
 	console.log("🚀 ~ FormDirector ~ users:", users);
 
-	const { control, handleSubmit, reset } = useForm({
+	const { control, handleSubmit, reset } = useForm<DirectorForm>({
 		defaultValues: {
 			userId: "",
 			startDate: startDate,
@@ -25,7 +33,7 @@ export default function FormDirector() {
 		},
 	});
 
-	const onSubmit = (data) => {
+	const onSubmit = (data: DirectorForm) => {
 		console.log("Form Data:", data);
 		// Aquí puedes manejar el envío al backend (fetch/axios)
 	};
@@ -152,12 +160,18 @@ export default function FormDirector() {
 
 						{/* Buttons */}
 						<Grid item xs={12} display="flex" justifyContent="space-between">
-							<MDButton variant="contained" color="primary" type="submit">
+							<MDButton
+								variant="contained"
+								color="primary"
+								type="submit"
+								width={300}
+							>
 								Enviar
 							</MDButton>
 							<MDButton
 								variant="outlined"
 								color="secondary"
+								width={300}
 								onClick={() => reset()}
 							>
 								Resetear

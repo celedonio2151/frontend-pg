@@ -16,7 +16,7 @@ export default {
 
 	waterMeters: `/${rootPaths.pageRoot}/water-meters`,
 	createWaterMeter: `/${rootPaths.pageRoot}/create-water-meter`,
-	editWaterMeter: `/${rootPaths.pageRoot}/edit-water-meter/:waterMeterId`,
+	editWaterMeter: `/${rootPaths.pageRoot}/edit-water-meter/:meterId`,
 
 	billings: `/${rootPaths.pageRoot}/billings`,
 	createBilling: `/${rootPaths.pageRoot}/create-billing`,

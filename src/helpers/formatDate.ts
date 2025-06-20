@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/es"; // Asegúrate de importar el idioma español
 dayjs.locale("es"); // use Spanish locale globally
 
-export function formateDate(datep: string | Date, format = "dddd DD MMM YYYY") {
+export function formateDate(datep: string | Date, format = "ddd DD MMM YYYY") {
 	const date = dayjs(datep);
 	date.locale("es");
 	const formattedDate = date.format(format);

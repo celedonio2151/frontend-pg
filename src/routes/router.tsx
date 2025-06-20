@@ -15,13 +15,14 @@ const MainLayout = lazy(() => import("layouts/main-layout"));
 const AuthLayout = lazy(() => import("layouts/auth-layout"));
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
+// Conviente a lazy loading para mejorar el rendimiento
 import ListUsers from "pages/users";
 import Cover from "layouts/authentication/sign-up";
-import Meters from "layouts/meters/Meters";
+import Meters from "pages/meters/Meters";
 import Charts from "layouts/charts";
-import BillingPage from "layouts/Billing/BillingPage";
+import BillingPage from "pages/billing/BillingPage";
 import RegisterUserPage from "layouts/authentication/register";
-import DirectorPage from "layouts/Directors/DirectorPage";
+import DirectorPage from "pages/directors/DirectorPage";
 import RolesPage from "pages/roles/RolesPage";
 import CreateRolePage from "pages/roles/CreateRolePage";
 import EditRolePage from "pages/roles/EditRolePage";
@@ -30,6 +31,8 @@ import CreateReadingPage from "pages/readings/CreateReadingPage";
 import EditUserPage from "pages/users/EditUserPage";
 import MonthlyReportPage from "pages/reports/MonthlyReportPage";
 import AnnualReportPage from "pages/reports/AnnualReportPage";
+import EditReadingPage from "pages/readings/EditReadingPage";
+import EditMeterPage from "pages/meters/EditMeterPage";
 // const ResetPassword = lazy(() => import("pages/authentication/ResetPassword"));
 const Error404 = lazy(() => import("pages/errors/Error404"));
 
@@ -67,6 +70,7 @@ const routes = [
 					{
 						element: <ProtectedRoute roles={["ADMIN"]} />, // Solo Admin
 						children: [
+							// ===============================	USERS
 							{
 								path: paths.users,
 								element: <ListUsers />,
@@ -83,7 +87,7 @@ const routes = [
 								path: paths.userMe,
 								element: <ListUsers />,
 							},
-							// Roles
+							// ===============================	ROLES
 							{
 								path: paths.roles,
 								element: <RolesPage />,
@@ -96,20 +100,24 @@ const routes = [
 								path: paths.editRole,
 								element: <EditRolePage />,
 							},
-							// Medidores de agua
+							// ===============================	WATER METERES
 							{
 								path: paths.waterMeters,
 								element: <Meters />,
 							},
-							// Lecturas de agua
+							{
+								path: paths.editWaterMeter,
+								element: <EditMeterPage />,
+							},
+							// ===============================	METER READINGS
 							{
 								path: paths.readings,
 								element: <MeterReadingsPage />,
 							},
-							// {
-							// 	path: paths.createReading,
-							// 	element: <CreateReadingPage />,
-							// },
+							{
+								path: paths.editReading,
+								element: <EditReadingPage />,
+							},
 
 							// Reportes
 							{

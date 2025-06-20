@@ -23,6 +23,7 @@ export default function usePost<T = any, E = any>() {
 
 			return response.data;
 		} catch (err) {
+			console.log("🚀 ~ err:", err)
 			const axiosError = err as AxiosError<E>;
 			setError(axiosError);
 			throw err;
