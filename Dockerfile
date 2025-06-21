@@ -1,7 +1,7 @@
 # Etapa 1: Construcción de la aplicación React
-FROM node:20.9.0-alpine AS build
+FROM node:22.2.0-alpine AS build
 
-WORKDIR /frontendAppML
+WORKDIR /frontend
 COPY package*.json ./
 RUN npm install
 COPY . .
@@ -11,7 +11,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copiar el build al directorio de Nginx
-COPY --from=build /frontendAppML/build /usr/share/nginx/html
+COPY --from=build /frontend/build /usr/share/nginx/html
 
 # (Opcional) Si usas React Router, sobreescribe configuración NGINX para rutas
 COPY nginx.conf /etc/nginx/conf.d/default.conf
