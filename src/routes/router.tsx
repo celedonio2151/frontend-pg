@@ -9,36 +9,53 @@ const ProtectedRoute = lazy(() => import("private/ProtectedRoute"));
 const UnauthorizedPage = lazy(
 	() => import("pages/unauthorized/UnauthorizedPage")
 );
+const Error404 = lazy(() => import("pages/errors/Error404"));
 
+// Layouts
 const App = lazy(() => import("App"));
 const MainLayout = lazy(() => import("layouts/main-layout"));
 const AuthLayout = lazy(() => import("layouts/auth-layout"));
+
+// Autenticación
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
-// Conviente a lazy loading para mejorar el rendimiento
-import ListUsers from "pages/users";
-import Cover from "layouts/authentication/sign-up";
-import Meters from "pages/meters/Meters";
-import Charts from "layouts/charts";
-import BillingPage from "pages/billing/BillingPage";
-import RegisterUserPage from "layouts/authentication/register";
-import DirectorPage from "pages/directors/DirectorPage";
-import RolesPage from "pages/roles/RolesPage";
-import CreateRolePage from "pages/roles/CreateRolePage";
-import EditRolePage from "pages/roles/EditRolePage";
-import MeterReadingsPage from "pages/readings/MeterReadingsPage";
-import CreateReadingPage from "pages/readings/CreateReadingPage";
-import EditUserPage from "pages/users/EditUserPage";
-import MonthlyReportPage from "pages/reports/MonthlyReportPage";
-import AnnualReportPage from "pages/reports/AnnualReportPage";
-import EditReadingPage from "pages/readings/EditReadingPage";
-import EditMeterPage from "pages/meters/EditMeterPage";
-// const ResetPassword = lazy(() => import("pages/authentication/ResetPassword"));
-const Error404 = lazy(() => import("pages/errors/Error404"));
+const RegisterUserPage = lazy(() => import("layouts/authentication/register"));
+const Cover = lazy(() => import("layouts/authentication/sign-up"));
 
-// const CreateUserPage = lazy(() => import("pages/admin/users/createUserpage"));
-// const UserPage = lazy(() => import("pages/admin/users"));
-// const EditUserPage = lazy(() => import("pages/admin/edit-user"));
+// Usuarios
+const ListUsers = lazy(() => import("pages/users"));
+const EditUserPage = lazy(() => import("pages/users/EditUserPage"));
+
+// Roles
+const RolesPage = lazy(() => import("pages/roles/RolesPage"));
+const CreateRolePage = lazy(() => import("pages/roles/CreateRolePage"));
+const EditRolePage = lazy(() => import("pages/roles/EditRolePage"));
+
+// Medidores de agua
+const Meters = lazy(() => import("pages/meters/Meters"));
+const EditMeterPage = lazy(() => import("pages/meters/EditMeterPage"));
+
+// Lecturas de medidores
+const MeterReadingsPage = lazy(
+	() => import("pages/readings/MeterReadingsPage")
+);
+const CreateReadingPage = lazy(
+	() => import("pages/readings/CreateReadingPage")
+);
+const EditReadingPage = lazy(() => import("pages/readings/EditReadingPage"));
+
+// Reportes
+const MonthlyReportPage = lazy(() => import("pages/reports/MonthlyReportPage"));
+const AnnualReportPage = lazy(() => import("pages/reports/AnnualReportPage"));
+
+// Gráficas
+const Charts = lazy(() => import("pages/charts"));
+
+// Tarifas
+const BillingPage = lazy(() => import("pages/billing/BillingPage"));
+
+// Directores
+const DirectorPage = lazy(() => import("pages/directors/DirectorPage"));
 
 const routes = [
 	{
@@ -70,85 +87,40 @@ const routes = [
 					{
 						element: <ProtectedRoute roles={["ADMIN"]} />, // Solo Admin
 						children: [
-							// ===============================	USERS
-							{
-								path: paths.users,
-								element: <ListUsers />,
-							},
-							{
-								path: paths.createUser,
-								element: <RegisterUserPage />,
-							},
-							{
-								path: paths.editUser,
-								element: <EditUserPage />,
-							},
-							{
-								path: paths.userMe,
-								element: <ListUsers />,
-							},
-							// ===============================	ROLES
-							{
-								path: paths.roles,
-								element: <RolesPage />,
-							},
-							{
-								path: paths.createRole,
-								element: <CreateRolePage />,
-							},
-							{
-								path: paths.editRole,
-								element: <EditRolePage />,
-							},
-							// ===============================	WATER METERES
-							{
-								path: paths.waterMeters,
-								element: <Meters />,
-							},
-							{
-								path: paths.editWaterMeter,
-								element: <EditMeterPage />,
-							},
-							// ===============================	METER READINGS
-							{
-								path: paths.readings,
-								element: <MeterReadingsPage />,
-							},
-							{
-								path: paths.editReading,
-								element: <EditReadingPage />,
-							},
+							// Usuarios
+							{ path: paths.users, element: <ListUsers /> },
+							{ path: paths.createUser, element: <RegisterUserPage /> },
+							{ path: paths.editUser, element: <EditUserPage /> },
+							{ path: paths.userMe, element: <ListUsers /> },
+
+							// Roles
+							{ path: paths.roles, element: <RolesPage /> },
+							{ path: paths.createRole, element: <CreateRolePage /> },
+							{ path: paths.editRole, element: <EditRolePage /> },
+
+							// Medidores de agua
+							{ path: paths.waterMeters, element: <Meters /> },
+							{ path: paths.editWaterMeter, element: <EditMeterPage /> },
+
+							// Lecturas de medidores
+							{ path: paths.readings, element: <MeterReadingsPage /> },
+							{ path: paths.editReading, element: <EditReadingPage /> },
 
 							// Reportes
-							{
-								path: paths.monthlyReport,
-								element: <MonthlyReportPage />,
-							},
-							{
-								path: paths.annualReport,
-								element: <AnnualReportPage />,
-							},
+							{ path: paths.monthlyReport, element: <MonthlyReportPage /> },
+							{ path: paths.annualReport, element: <AnnualReportPage /> },
+
 							// Gráficas
-							{
-								path: paths.charts,
-								element: <Charts />,
-							},
+							{ path: paths.charts, element: <Charts /> },
+
 							// Tarifas
-							{
-								path: paths.billings,
-								element: <BillingPage />,
-							},
-							// Directors
-							{
-								path: paths.directors,
-								element: <DirectorPage />,
-							},
+							{ path: paths.billings, element: <BillingPage /> },
+
+							// Directores
+							{ path: paths.directors, element: <DirectorPage /> },
 						],
 					},
-					{
-						path: "/unauthorized",
-						element: <UnauthorizedPage />,
-					},
+					{ path: "/unauthorized", element: <UnauthorizedPage /> },
 				],
 			},
 			{
@@ -175,16 +147,10 @@ const routes = [
 							</AuthLayout>
 						),
 					},
-					{
-						path: paths.resetPassword,
-						element: <Cover />,
-					},
+					{ path: paths.resetPassword, element: <Cover /> },
 				],
 			},
-			{
-				path: "*",
-				element: <Error404 />,
-			},
+			{ path: "*", element: <Error404 /> },
 		],
 	},
 ];

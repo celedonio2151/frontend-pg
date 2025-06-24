@@ -12,15 +12,14 @@ Coded by www.creative-tim.com
  
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  */
-import { useContext, useState } from "react";
+import { useState } from "react";
 
 // @mui material components
 import Grid from "@mui/material/Grid";
-import Divider from "@mui/material/Divider";
 import Card from "@mui/material/Card";
 import InputAdornment from "@mui/material/InputAdornment";
 import {
-	Button,
+	Box,
 	FormControl,
 	IconButton,
 	InputLabel,
@@ -40,7 +39,6 @@ import PhoneEnabledRoundedIcon from "@mui/icons-material/PhoneEnabledRounded";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import MDInput from "components/MDInput";
 
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -50,70 +48,24 @@ import Footer from "examples/Footer";
 // Images
 import bgImage from "assets/images/bg-sign-up-cover.jpeg";
 import MDButton from "components/MDButton";
-import usePost from "hooks/usePost";
 import { useNavigate } from "react-router-dom";
-import MDSnackbar from "components/MDSnackbar";
 
-import { formateDate } from "helpers/formatDate";
-import usePostNew from "hooks/usePostNew";
 import handlerErrors from "helpers/handlerErrors";
 import { useAuthContext } from "context/AuthContext";
+import { useSnackbar } from "notistack";
+import usePost from "hooks/usePost";
+import type { User } from "pages/users/interfaces/user.interface";
 
 export default function RegisterUserPage() {
-	const [loading, setLoading] = useState(false);
-	// SnackBar
-	const [successSB, setSuccessSB] = useState(false);
-	const [errorSB, setErrorSB] = useState(false);
-	const [textAlert, setTextAlert] = useState("");
-
+	const { enqueueSnackbar } = useSnackbar();
 	const navigate = useNavigate();
 	const { token } = useAuthContext();
+	const { post, loading, error } = usePost<User>();
+
 	// const postRequest = usePost(`/auth/signup`, token);
 	// console.log("register : ", token);
 
-	// Handler Snackbars
-	const openSuccessSB = (content) => {
-		setSuccessSB(true);
-		setTextAlert(content);
-	};
-	const closeSuccessSB = () => setSuccessSB(false);
-	const openErrorSB = (content) => {
-		setErrorSB(true);
-		setTextAlert(content);
-	};
-	const closeErrorSB = () => setErrorSB(false);
-
-	const renderSuccessSB = (
-		<MDSnackbar
-			color="success"
-			icon={<CheckRoundedIcon color="white" />}
-			title="Registro correctamente"
-			// content={"Hello, world! This is a notification message"}
-			content={textAlert}
-			dateTime={"Hace unos segundos"}
-			open={successSB}
-			onClose={closeSuccessSB}
-			close={closeSuccessSB}
-			// bgWhite
-		/>
-	);
-
-	const renderErrorSB = (
-		<MDSnackbar
-			color="error"
-			icon={<WarningRoundedIcon color="white" />}
-			title="Error al registrar"
-			// content="Hello, world! This is a notification message"
-			content={textAlert}
-			dateTime="Hace unos segundos"
-			open={errorSB}
-			onClose={closeErrorSB}
-			close={closeErrorSB}
-			// bgWhite
-		/>
-	);
-
-	function handleOnSubmit(e) {
+	const handleOnSubmit = async (e) => {
 		e.preventDefault();
 		console.log("onSubmit");
 		const data = new FormData(e.currentTarget);
@@ -134,24 +86,22 @@ export default function RegisterUserPage() {
 			meter_number: data.get("meter_number"),
 			phone_number: data.get("phone_number"),
 		};
-		// console.log(body);
-		setLoading(true);
-		usePostNew(`/auth/signup`, data, token)
-			.then((response) => {
-				console.log("response: ", response);
-				openSuccessSB(response.message);
-				setTimeout(() => {
-					navigate(`/users`);
-				}, 1500);
-			})
-			.catch((err) => {
-				console.log("error:", err);
-				openErrorSB(handlerErrors(err));
-			})
-			.finally(() => {
-				setLoading(false);
-			});
-	}
+		try {
+			const res = await post("/auth/signup", body, token);
+			if (res) {
+				enqueueSnackbar("Usuario registrado correctamente", {
+					variant: "success",
+				});
+				navigate("/users");
+			}
+		} catch (err) {
+			const errorMessage = handlerErrors(err || error);
+			console.error("Error al registrar usuario:", errorMessage);
+			if (error) {
+				enqueueSnackbar(errorMessage, { variant: "error" });
+			}
+		}
+	};
 
 	return (
 		<DashboardLayout>
@@ -331,7 +281,7 @@ export default function RegisterUserPage() {
 											/>
 										</FormControl>
 									</MDBox>
-									<MDBox mt={4} mb={1}>
+									<Box mt={4} mb={1}>
 										<MDButton
 											variant="gradient"
 											color="info"
@@ -342,9 +292,7 @@ export default function RegisterUserPage() {
 										>
 											Registrar usuario
 										</MDButton>
-									</MDBox>
-									{renderSuccessSB}
-									{renderErrorSB}
+									</Box>
 								</MDBox>
 							</MDBox>
 						</Card>

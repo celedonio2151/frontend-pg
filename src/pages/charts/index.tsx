@@ -36,16 +36,21 @@ import Projects from "layouts/dashboard/components/Projects";
 import OrdersOverview from "layouts/dashboard/components/OrdersOverview";
 import MDTypography from "components/MDTypography";
 import LineChart from "./components/Charts/LineCharts/LineChart";
-import { Card } from "@mui/material";
+import { Box, Card } from "@mui/material";
 import { lineChartDataDashboard } from "./data/lineChartData";
 import { lineChartOptionsDashboard } from "./data/lineChartOptions";
+import { useAuthContext } from "context/AuthContext";
+import useFetch from "hooks/useFetch";
 
 export default function Charts() {
 	const { sales, tasks } = reportsLineChartData;
+	const { token } = useAuthContext();
+	const { data, loading, error } = useFetch({ endpoint: "/report", token });
+	console.log("🚀 ~ Charts ~ data:", data);
 
 	return (
 		<>
-			<MDBox py={3}>
+			<Box py={3}>
 				{/* <Grid container spacing={3}>
 					<Grid item xs={12} md={6} lg={3}>
 						<MDBox mb={1.5}>
@@ -107,7 +112,7 @@ export default function Charts() {
 						</MDBox>
 					</Grid>
 				</Grid> */}
-				<MDBox mt={4.5}>
+				<Box mt={4.5}>
 					<Grid container spacing={3}>
 						{/* <Grid item xs={12} md={6} lg={4}>
 							<MDBox mb={3}>
@@ -147,7 +152,7 @@ export default function Charts() {
 							</MDBox>
 						</Grid> */}
 					</Grid>
-				</MDBox>
+				</Box>
 
 				<MDBox sx={{ backgroundColor: "", mb: 3 }}>
 					<Grid container spacing={3}>
@@ -160,7 +165,7 @@ export default function Charts() {
 									p: 2,
 								}}
 							>
-								<MDBox sx={{ height: "100%" }}>
+								<Box sx={{ height: "100%" }}>
 									<MDTypography
 										variant="lg"
 										color="white"
@@ -169,7 +174,7 @@ export default function Charts() {
 									>
 										Consumo de agua en Mosoj Llajta
 									</MDTypography>
-									<MDBox display="flex" alignItems="center" mb="40px">
+									<Box display="flex" alignItems="center" mb="40px">
 										<MDTypography
 											variant="button"
 											color="success"
@@ -184,14 +189,14 @@ export default function Charts() {
 												en 2022
 											</MDTypography>
 										</MDTypography>
-									</MDBox>
+									</Box>
 									<MDBox sx={{ height: "310px" }}>
 										<LineChart
 											lineChartData={lineChartDataDashboard}
 											lineChartOptions={lineChartOptionsDashboard}
 										/>
 									</MDBox>
-								</MDBox>
+								</Box>
 							</Card>
 						</Grid>
 					</Grid>
@@ -207,7 +212,7 @@ export default function Charts() {
 						</Grid>
 					</Grid>
 				</MDBox> */}
-			</MDBox>
+			</Box>
 		</>
 	);
 }

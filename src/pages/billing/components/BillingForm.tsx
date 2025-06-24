@@ -1,13 +1,16 @@
-import { Grid, TextField } from "@mui/material";
+import { Box, Grid, TextField } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
+import { useSnackbar } from "notistack";
 
-import MDBox from "components/MDBox";
 import MDButton from "components/MDButton";
-import usePostNew from "hooks/usePostNew";
 import { useAuthContext } from "context/AuthContext";
+import usePost from "hooks/usePost";
+import type { Billing } from "pages/billing/interfaces/billing.inerface";
 
 export default function BillingForm({ setTrigger }) {
 	const { token } = useAuthContext();
+	const { post, loading, error } = usePost<Billing>();
+	const { enqueueSnackbar } = useSnackbar();
 	const {
 		control,
 		handleSubmit,
@@ -24,29 +27,34 @@ export default function BillingForm({ setTrigger }) {
 			description: "",
 		},
 	});
-	const onSubmit = (newRow) => {
+	const onSubmit = async (data: any) => {
 		const body = {
-			min_cubic_meters: parseInt(newRow.min_cubic_meters),
-			max_cubic_meters: parseInt(newRow.max_cubic_meters),
-			base_rate: parseInt(newRow.base_rate),
-			rate: parseInt(newRow.rate),
-			description: newRow.description,
+			min_cubic_meters: parseInt(data.min_cubic_meters),
+			max_cubic_meters: parseInt(data.max_cubic_meters),
+			base_rate: parseInt(data.base_rate),
+			rate: parseInt(data.rate),
+			description: data.description,
 		};
-		usePostNew(`/billing`, body, token)
-			.then((response) => {
-				console.log(response);
-				setTrigger(new Date());
-			})
-			.catch((err) => {
-				console.log(err);
-			})
-			.finally(() => {
-				reset(); // Resetea el formulario
-			});
+		try {
+			const res = await post("/billing", body, token);
+			if (res) {
+				reset(); // Limpiar el formulario después de enviar
+				setTrigger(new Date()); // Actualizar el estado para refrescar la tabla
+				enqueueSnackbar("Tarifa agregada con éxito", { variant: "success" });
+			}
+			console.log("Formulario enviado con éxito:", res);
+		} catch (err) {
+			console.error("Error al enviar el formulario:", error);
+			if (error) {
+				const errorMessage = error.message || "Error al enviar el formulario.";
+				console.error(errorMessage);
+				enqueueSnackbar(errorMessage, { variant: "error" });
+			}
+		}
 	};
 
 	return (
-		<MDBox
+		<Box
 			component="form"
 			onSubmit={handleSubmit(onSubmit)}
 			sx={{
@@ -133,11 +141,11 @@ export default function BillingForm({ setTrigger }) {
 
 				{/* Botón Agregar */}
 				<Grid item xs={12}>
-					<MDButton type="submit" fullWidth color="info">
+					<MDButton type="submit" fullWidth color="info" variant="gradient">
 						Agregar
 					</MDButton>
 				</Grid>
 			</Grid>
-		</MDBox>
+		</Box>
 	);
 }

@@ -11,7 +11,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copiar el build al directorio de Nginx
-COPY --from=build /frontend/build /usr/share/nginx/html
+COPY --from=build /frontend/dist /usr/share/nginx/html
 
 # (Opcional) Si usas React Router, sobreescribe configuración NGINX para rutas
 COPY nginx.conf /etc/nginx/conf.d/default.conf
@@ -20,3 +20,11 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+
+
+
+# Para desplegar en CapRover, asegúrate de que el puerto 80 esté expuesto
+# y que la configuración de CapRover esté apuntando a este contenedor.
+
+# docker build -t my-react-app .
+# docker run -p 3080:80 my-react-app
