@@ -45,6 +45,7 @@ import breakpoints from "assets/theme/base/breakpoints";
 
 // Material Dashboard 2 React context
 import { useMaterialUIController } from "context";
+import paths from "routes/paths";
 
 export default function DefaultNavbar({ transparent, light, action }) {
 	const [controller] = useMaterialUIController();
@@ -140,13 +141,13 @@ export default function DefaultNavbar({ transparent, light, action }) {
 					<DefaultNavbarLink
 						icon={<AccountCircleRoundedIcon />}
 						name="sign up"
-						route="/authentication/sign-up"
+						route={paths.signup}
 						light={light}
 					/>
 					<DefaultNavbarLink
 						icon={<KeyRoundedIcon />}
 						name="sign in"
-						route="/authentication/sign-in"
+						route={paths.signin}
 						light={light}
 					/>
 				</MDBox>
