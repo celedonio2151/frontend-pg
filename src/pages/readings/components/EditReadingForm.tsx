@@ -255,7 +255,7 @@ export default function EditReadingForm({ reading, token }: Props) {
 								label="Descripción por alterar el precio"
 								placeholder="Descripción por alterar el precio u otros"
 								{...register("description")}
-								rows={2}
+								rows={1.5}
 							/>
 						</Grid>
 						<Grid item xs={12}>

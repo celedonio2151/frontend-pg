@@ -1,104 +1,133 @@
-import { useRef, useState } from "react";
-
-import MDBox from "components/MDBox";
-// @mui icons
-import { IconButton } from "@mui/material";
+import { useEffect, useRef } from "react";
+import { Box, IconButton } from "@mui/material";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-
 import MDButton from "components/MDButton";
+
+type Props = {
+	months: string[];
+	selectedMonth: Date;
+	handleMonthClick: (date: Date) => void;
+};
 
 export default function MDTabMonth({
 	months,
-	handleMonthClick,
 	selectedMonth,
-	setSelectedMonth,
-}) {
-	const scrollContainerRef = useRef(null);
-	const monthRefs = useRef([]);
+	handleMonthClick,
+}: Props) {
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
+	const monthRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-	const scrollToMonth = (index) => {
-		const monthButton = monthRefs.current[index];
+	const selectedIndex = selectedMonth.getMonth();
+
+	const scrollToSelectedMonth = () => {
 		const container = scrollContainerRef.current;
+		const button = monthRefs.current[selectedIndex];
 
-		if (monthButton && container) {
-			const buttonRect = monthButton.getBoundingClientRect();
-			const containerRect = container.getBoundingClientRect();
+		if (container && button) {
+			const offset =
+				button.offsetLeft -
+				container.offsetLeft -
+				container.clientWidth / 2 +
+				button.clientWidth / 2;
 
-			if (buttonRect.left < containerRect.left) {
-				container.scrollBy({
-					left: buttonRect.left - containerRect.left - 8,
-					behavior: "smooth",
-				});
-			} else if (buttonRect.right > containerRect.right) {
-				container.scrollBy({
-					left: buttonRect.right - containerRect.right + 8,
-					behavior: "smooth",
-				});
-			}
+			container.scrollTo({
+				left: offset,
+				behavior: "smooth",
+			});
 		}
 	};
-	const handleArrowClick = (direction) => {
-		let newSelectedMonth = selectedMonth;
-		if (direction === "left" && selectedMonth > 0) {
-			newSelectedMonth = selectedMonth - 1;
-		} else if (direction === "right" && selectedMonth < months.length - 1) {
-			newSelectedMonth = selectedMonth + 1;
-		}
-		setSelectedMonth(newSelectedMonth);
-		scrollToMonth(newSelectedMonth);
-		handleMonthClick(newSelectedMonth);
+
+	const handleArrowClick = (direction: "left" | "right") => {
+		let newIndex = selectedIndex;
+
+		if (direction === "left" && newIndex > 0) newIndex--;
+		else if (direction === "right" && newIndex < months.length - 1) newIndex++;
+
+		const newDate = new Date(
+			selectedMonth.getFullYear(),
+			newIndex,
+			selectedMonth.getDate()
+		);
+
+		handleMonthClick(newDate);
 	};
+
+	useEffect(() => {
+		scrollToSelectedMonth();
+	}, [selectedMonth]);
+
 	return (
-		<MDBox sx={{ display: "flex", backgroundColor: "" }}>
-			<IconButton onClick={() => handleArrowClick("left")}>
+		<Box
+			display="flex"
+			alignItems="center"
+			justifyContent="center"
+			bgcolor="#ffffff"
+			borderRadius={3}
+			// boxShadow={10}
+			paddingTop={1}
+		>
+			<IconButton onClick={() => handleArrowClick("left")} size="small">
 				<SkipPreviousRoundedIcon />
 			</IconButton>
-			<MDBox
-				spacing={2}
+
+			<Box
 				ref={scrollContainerRef}
 				sx={{
 					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-					// margin: "0 auto",
 					overflowX: "auto",
+					scrollBehavior: "smooth", // por si acaso
+					scrollbarWidth: "thin",
+					scrollbarColor: "#999 transparent",
 					"&::-webkit-scrollbar": {
-						height: "8px",
+						height: 6,
 					},
 					"&::-webkit-scrollbar-thumb": {
-						backgroundColor: "#888",
-						borderRadius: "4px",
-					},
-					"&::-webkit-scrollbar-thumb:hover": {
-						backgroundColor: "#555",
+						backgroundColor: "#999",
+						borderRadius: 3,
 					},
 					flexGrow: 1,
 				}}
 			>
-				{months.map((month, index) => (
-					<MDBox
-						key={month}
-						ref={(el) => (monthRefs.current[index] = el)}
-						sx={{ minWidth: 135, m: 0.5 }}
-					>
+				{months.map((month, index) => {
+					const isSelected = selectedMonth.getMonth() === index;
+					return (
 						<MDButton
-							variant="contained"
-							color={selectedMonth === index ? "primary" : "white"}
-							onClick={() => handleMonthClick(index)}
-							sx={{ alignItems: "center" }}
-							startIcon={<CalendarMonthRoundedIcon />}
+							sx={{
+								minWidth: 130,
+								mx: 0.5,
+								backgroundColor: "transparent",
+								"&:hover": {
+									backgroundColor: " rgba(216, 216, 216, 0.57)",
+								},
+							}}
+							key={month}
+							inputRef={(el: HTMLButtonElement | null) =>
+								(monthRefs.current[index] = el)
+							}
+							variant={isSelected ? "gradient" : "outlined"}
+							color={isSelected ? "primary" : "secondary"}
+							onClick={() => {
+								const newDate = new Date(
+									selectedMonth.getFullYear(),
+									index,
+									selectedMonth.getDate()
+								);
+								handleMonthClick(newDate);
+							}}
 							fullWidth
+							startIcon={<CalendarMonthRoundedIcon />}
 						>
 							{month}
 						</MDButton>
-					</MDBox>
-				))}
-			</MDBox>
-			<IconButton onClick={() => handleArrowClick("right")}>
+					);
+				})}
+			</Box>
+
+			<IconButton onClick={() => handleArrowClick("right")} size="small">
 				<SkipNextRoundedIcon />
 			</IconButton>
-		</MDBox>
+		</Box>
 	);
 }

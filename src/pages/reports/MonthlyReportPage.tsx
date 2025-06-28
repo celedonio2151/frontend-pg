@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Box, Card, Chip, Divider, Grid, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { DemoItem } from "@mui/x-date-pickers/internals/demo";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import type { ColumnDef } from "@tanstack/react-table";
 
 // MUI ICONS
@@ -25,6 +25,11 @@ import type {
 	MonthlyReport,
 	Report,
 } from "pages/reports/interfaces/reports.interfaces";
+import DatePickerInput from "components/DataPicker/DataPicker";
+import useLocalStorage from "hooks/useStorage";
+import getFirstEndDates from "helpers/getFirstEndDates";
+import EmptyLoader from "components/loader/EmptyLoader";
+import ErrorLoader from "components/loader/ErrorLoader";
 
 const months = [
 	"Enero",
@@ -42,26 +47,39 @@ const months = [
 ];
 
 export default function MonthlyReportPage() {
-	const [date, setDate] = useState(dayjs(new Date())); // Select date and time
-	const [selectedMonth, setSelectedMonth] = useState(date.month()); // get month from date
-	const [eventTrigger, setEventTrigger] = useState(0); // trigger to refetch reports
 	const { token } = useAuthContext();
+	const { storedValue, setValue } = useLocalStorage(
+		"reports-monthly",
+		dayjs().toISOString()
+	);
+	const initialMonth = useMemo(() => {
+		const savedMonth = sessionStorage.getItem("selectedMonthReport");
+		return savedMonth ? new Date(savedMonth) : dayjs().toDate();
+	}, []);
+
+	const [selectedMonth, setSelectedMonth] = useState<Date>(initialMonth);
+	const date = useMemo(() => dayjs(selectedMonth), [selectedMonth]); // Set date based on selectedMonth
+	const params = useMemo(() => {
+		return getFirstEndDates(selectedMonth);
+	}, [selectedMonth]);
+
 	const {
 		data: reports,
 		error: errorReports,
 		loading: loadingReports,
 	} = useFetch<MonthlyReport>({
-		endpoint: `/report/monthly?startDate=2023-02-01T16%3A37%3A42.000Z&endDate=2023-02-30T16%3A37%3A42.000Z`,
+		endpoint: `/report/monthly?startDate=${params.startDate}&endDate=${params.endDate}`,
 		token,
-		eventTrigger: eventTrigger,
 	});
-
-	const handleMonthClick = (monthIndex) => {
-		// const currentYear = new Date().getFullYear();
-		const dateF = new Date(date.year(), monthIndex, 20); // Siempre 20 del mes
-		setSelectedMonth(monthIndex);
-		console.log({ dateF });
-	};
+	const handleMonthClick = useCallback(
+		(newDate: Dayjs) => {
+			const d = newDate || date;
+			setSelectedMonth(d.toDate());
+			setValue(d.toISOString());
+			sessionStorage.setItem("selectedMonthReport", d.toISOString());
+		},
+		[date]
+	);
 
 	const columns = useMemo<ColumnDef<Report, any>[]>(
 		() => [
@@ -115,44 +133,22 @@ export default function MonthlyReportPage() {
 	);
 
 	return (
-		<>
-			<Box sx={{ p: 3, minWidth: 300, maxWidth: 400, margin: "0 auto" }}>
-				<MDBox mb={2} sx={{ backgroundColor: "" }}>
-					<DemoItem label="Selecione una fecha para ver el reporte">
-						<DatePicker
-							sx={{
-								border: "4px solid skyblue",
-								bgcolor: "whitesmoke",
-								borderRadius: 2,
-							}}
-							// label="Selecione una fecha"
-							format="DD MMMM YYYY"
-							value={date}
-							onChange={(newValue) => (
-								setDate(newValue),
-								setSelectedMonth(
-									newValue?.month(),
-									handleMonthClick(newValue.month())
-								)
-							)}
-						/>
-					</DemoItem>
-				</MDBox>
-			</Box>
+		<Box mt={2} mb={2}>
+			<DatePickerInput date={date} handlerDateChange={handleMonthClick} />
+
 			<MDBox>
-				<MDTypography variant="h4" gutterBottom>
+				<Typography variant="h4" gutterBottom>
 					Seleccione un mes del {date.year()}
-				</MDTypography>
+				</Typography>
 				{/* {loading && <MDTypography>Loading...</MDTypography>} */}
 				<MDTabMonth
 					months={months}
 					selectedMonth={selectedMonth}
-					setSelectedMonth={setSelectedMonth}
-					handleMonthClick={handleMonthClick}
+					handleMonthClick={(d) => handleMonthClick(dayjs(d))} // Update selectedMonth with Date object
 				/>
 			</MDBox>
 			<Divider />
-			<MDBox mt={5} mb={3}>
+			<Box mt={5} mb={3}>
 				<Grid container spacing={1}>
 					<Grid item xs={12}>
 						<Card>
@@ -171,7 +167,10 @@ export default function MonthlyReportPage() {
 									cancelados y no cancelados
 								</MDTypography>
 							</MDBox>
-							{reports && !loadingReports && (
+							{!loadingReports && reports && reports.reports.length === 0 && (
+								<EmptyLoader />
+							)}
+							{!loadingReports && reports && reports.reports.length > 0 && (
 								<>
 									<Box
 										m={2}
@@ -266,19 +265,22 @@ export default function MonthlyReportPage() {
 											</Box>
 										</Box>
 									</Box>
-									<MainTable columns={columns} data={reports.reports} filter />
+									<MainTable columns={columns} data={reports.reports} />
 								</>
 							)}
 							{errorReports && (
-								<Typography variant="h4" sx={{ p: 2 }}>
-									{errorReports.message || "Error al cargar los reportes"}
-								</Typography>
+								<ErrorLoader
+									title="Error al cargar los reportes"
+									description={
+										errorReports?.message || "Intente nuevamente más tarde."
+									}
+								/>
 							)}
 							{loadingReports && <MDTableLoading title="Cargando reportes" />}
 						</Card>
 					</Grid>
 				</Grid>
-			</MDBox>
-		</>
+			</Box>
+		</Box>
 	);
 }
