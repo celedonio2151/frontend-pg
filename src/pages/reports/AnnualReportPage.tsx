@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Box, Card, Grid, Typography } from "@mui/material";
 import type { ColumnDef } from "@tanstack/react-table";
+import dayjs, { Dayjs } from "dayjs";
 
 // MUI ICONS
 import MoneyOffRoundedIcon from "@mui/icons-material/MoneyOffRounded";
@@ -20,18 +21,30 @@ import type {
 	AnnualReport,
 	MonthlyData,
 } from "pages/reports/interfaces/reports.interfaces";
+import DatePickerInput from "components/DataPicker/DataPicker";
+import { getFirstEndDatesYear } from "helpers/getFirstEndDates";
 
 export default function AnnualReportPage() {
 	const { token } = useAuthContext();
+	const [date, setDate] = useState<Dayjs>(dayjs());
+	const params = useMemo(() => getFirstEndDatesYear(date.toDate()), [date]);
 	const {
 		data: reports,
 		error,
 		loading,
 	} = useFetch<AnnualReport>({
-		endpoint:
-			"/report/annual?startDate=2023-01-01T16%3A37%3A42.000Z&endDate=2023-12-30T16%3A37%3A42.000Z",
+		endpoint: `/report/annual?startDate=${params.startDate}&endDate=${params.endDate}`,
 		token,
 	});
+
+	const handleMonthOrDateChange = useCallback(
+		(newDate: Dayjs | null) => {
+			if (newDate) {
+				setDate(newDate);
+			}
+		},
+		[date]
+	);
 
 	const columns = useMemo<ColumnDef<MonthlyData, any>[]>(
 		() => [
@@ -60,7 +73,13 @@ export default function AnnualReportPage() {
 	);
 
 	return (
-		<MDBox mt={5} mb={3}>
+		<Box mt={2} mb={3}>
+			<Box mb={5}>
+				<DatePickerInput
+					date={date}
+					handlerDateChange={handleMonthOrDateChange}
+				/>
+			</Box>
 			<Grid container spacing={1}>
 				<Grid item xs={12}>
 					<Card>
@@ -75,7 +94,7 @@ export default function AnnualReportPage() {
 							coloredShadow="info"
 						>
 							<MDTypography variant="h5" color="white">
-								Reporte mes Enero cancelados y no cancelados
+								Reporte del año {date.year()}
 							</MDTypography>
 						</MDBox>
 						{reports && !loading && (
@@ -139,6 +158,6 @@ export default function AnnualReportPage() {
 					</Card>
 				</Grid>
 			</Grid>
-		</MDBox>
+		</Box>
 	);
 }
