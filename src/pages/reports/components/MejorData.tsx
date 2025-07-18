@@ -3,10 +3,8 @@ import {
 	TableBody,
 	TableCell,
 	TableContainer,
-	TableHead,
 	TableRow,
 } from "@mui/material";
-import React from "react";
 
 // MUI Icons
 import MoneyOffRoundedIcon from "@mui/icons-material/MoneyOffRounded";
@@ -16,6 +14,11 @@ import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 import MDChip from "./MDChip";
 import { months } from "dayjs/locale/es";
+import type { Reading } from "pages/reports/interfaces/reports.annual.interface";
+
+type Props = {
+	readings: Reading[];
+};
 
 // Obtener el estado del mes en base a la lectura
 const getMonthStatus = (readings, monthIndex) => {
@@ -63,8 +66,8 @@ const getMonthStatus = (readings, monthIndex) => {
 	); // Todo está correcto
 };
 
-export default function PaymentTable({ reports }) {
-	// console.log("🚀 ~ PaymentTable ~ reports:", reports);
+export default function PaymentTable({ readings }: Props) {
+	console.log("🚀 ~ PaymentTable ~ reports:", readings);
 	return (
 		<TableContainer>
 			<Table stickyHeader sx={{ width: "100%", textAlign: "left" }}>
@@ -89,15 +92,16 @@ export default function PaymentTable({ reports }) {
 					</TableRow>
 				</thead>
 				<TableBody>
-					{reports.map((user, index) => (
+					{readings.map((meter, index) => (
 						<TableRow hover key={index}>
 							<TableCell>{index + 1}</TableCell>
-							<TableCell>{user.fullname}</TableCell>
-							<TableCell>{user.ci}</TableCell>
-							<TableCell>{user.meterNumber}</TableCell>
-							{months.map((_, monthIndex) => (
+							<TableCell>{meter.ci}</TableCell>
+							<TableCell>{meter.name}</TableCell>
+							<TableCell>{meter.surname}</TableCell>
+							<TableCell>{meter.meter_number}</TableCell>
+							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((_, monthIndex) => (
 								<TableCell key={monthIndex}>
-									{getMonthStatus(user.meterReadings, monthIndex)}
+									{getMonthStatus(meter.meterReadings, monthIndex)}
 								</TableCell>
 							))}
 						</TableRow>

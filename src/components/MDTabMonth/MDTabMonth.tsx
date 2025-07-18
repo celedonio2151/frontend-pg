@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Box, IconButton } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { Box, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
@@ -20,6 +20,14 @@ export default function MDTabMonth({
 	const monthRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
 	const selectedIndex = selectedMonth.getMonth();
+
+
+	// Calcula fecha segura (evita 31/febrero, etc.)
+	const getSafeDate = (year: number, month: number, day: number) => {
+		const lastDay = new Date(year, month + 1, 0).getDate();
+		const safeDay = Math.min(day, lastDay);
+		return new Date(year, month, safeDay);
+	};
 
 	const scrollToSelectedMonth = () => {
 		const container = scrollContainerRef.current;
@@ -45,7 +53,7 @@ export default function MDTabMonth({
 		if (direction === "left" && newIndex > 0) newIndex--;
 		else if (direction === "right" && newIndex < months.length - 1) newIndex++;
 
-		const newDate = new Date(
+		const newDate = getSafeDate(
 			selectedMonth.getFullYear(),
 			newIndex,
 			selectedMonth.getDate()
@@ -65,10 +73,17 @@ export default function MDTabMonth({
 			justifyContent="center"
 			bgcolor="#ffffff"
 			borderRadius={3}
-			// boxShadow={10}
 			paddingTop={1}
+			sx={{
+				width: "100%",
+				overflow: "hidden",
+			}}
 		>
-			<IconButton onClick={() => handleArrowClick("left")} size="small">
+			<IconButton
+				onClick={() => handleArrowClick("left")}
+				size="small"
+				aria-label="Mes anterior"
+			>
 				<SkipPreviousRoundedIcon />
 			</IconButton>
 
@@ -77,7 +92,7 @@ export default function MDTabMonth({
 				sx={{
 					display: "flex",
 					overflowX: "auto",
-					scrollBehavior: "smooth", // por si acaso
+					scrollBehavior: "smooth",
 					scrollbarWidth: "thin",
 					scrollbarColor: "#999 transparent",
 					"&::-webkit-scrollbar": {
@@ -88,10 +103,11 @@ export default function MDTabMonth({
 						borderRadius: 3,
 					},
 					flexGrow: 1,
+					px: 1,
 				}}
 			>
 				{months.map((month, index) => {
-					const isSelected = selectedMonth.getMonth() === index;
+					const isSelected = selectedIndex === index;
 					return (
 						<MDButton
 							sx={{
@@ -99,17 +115,19 @@ export default function MDTabMonth({
 								mx: 0.5,
 								backgroundColor: "transparent",
 								"&:hover": {
-									backgroundColor: " rgba(216, 216, 216, 0.57)",
+									backgroundColor: "rgba(216, 216, 216, 0.57)",
 								},
+								// whiteSpace: "nowrap",
+								// flexShrink: 0,
 							}}
 							key={month}
-							inputRef={(el: HTMLButtonElement | null) =>
+							ref={(el: HTMLButtonElement | null) =>
 								(monthRefs.current[index] = el)
 							}
 							variant={isSelected ? "gradient" : "outlined"}
 							color={isSelected ? "primary" : "secondary"}
 							onClick={() => {
-								const newDate = new Date(
+								const newDate = getSafeDate(
 									selectedMonth.getFullYear(),
 									index,
 									selectedMonth.getDate()
@@ -125,7 +143,11 @@ export default function MDTabMonth({
 				})}
 			</Box>
 
-			<IconButton onClick={() => handleArrowClick("right")} size="small">
+			<IconButton
+				onClick={() => handleArrowClick("right")}
+				size="small"
+				aria-label="Mes siguiente"
+			>
 				<SkipNextRoundedIcon />
 			</IconButton>
 		</Box>

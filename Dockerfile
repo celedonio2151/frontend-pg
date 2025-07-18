@@ -28,3 +28,7 @@ CMD ["nginx", "-g", "daemon off;"]
 
 # docker build -t my-react-app .
 # docker run -p 3080:80 my-react-app
+
+
+# Para ver log en CapRover:
+# docker service logs srv-captain--ml-agua-frontend --since 60m --follow

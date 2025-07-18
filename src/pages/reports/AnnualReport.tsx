@@ -14,57 +14,42 @@ Coded by www.creative-tim.com
 */
 
 // @mui material components
-import Grid from "@mui/material/Grid";
-import Divider from "@mui/material/Divider";
-import { styled } from "@mui/material/styles";
+import { Box, Card } from "@mui/material";
 
 // @mui icons
 import FacebookIcon from "@mui/icons-material/Facebook";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
-import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
-import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 
-// Overview page components
-import Header from "layouts/profile/components/Header";
-
 import useFetch from "hooks/useFetch";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import dayjs from "dayjs";
 
-import "./styles.css";
-import { Box, Button, Card } from "@mui/material";
-import { DemoItem } from "@mui/x-date-pickers/internals/demo";
-import {
-	DatePicker,
-	MobileDatePicker,
-	MobileDateTimePicker,
-} from "@mui/x-date-pickers";
-import useFetchEvent from "hooks/useFetchEvent";
 import MDTableLoading from "components/MDTableLoading/MDTableLoading";
 import ReportAnnualTable from "./components/ReportAnnualTable";
 import CustomTable from "examples/Table";
 import PaymentBarChart from "./components/MejorData";
 import handlerErrors from "helpers/handlerErrors";
 import { useAuthContext } from "context/AuthContext";
+import type { ReportAnnualByMeter } from "pages/reports/interfaces/reports.annual.interface";
 
 export default function AnnualReport() {
-	const { token, userProfile } = useAuthContext();
-	const [date, setDate] = useState(dayjs(new Date())); // Select date and time
-	// const [reports, setReports] = useState(null); // get reports from server
-	const [reports, loadingReports, errorReports] = useFetch(
-		`/report/year?date=${date}`,
-		null,
-		token
-	);
+	const { token } = useAuthContext();
+	const {
+		data: reports,
+		loading,
+		error,
+	} = useFetch<ReportAnnualByMeter>({
+		endpoint:
+			"/report/annual-by-meter?startDate=2023-01-01T16%3A37%3A42.000Z&endDate=2023-12-30T16%3A37%3A42.000Z",
+		token,
+	});
 
 	const columns = [
 		{
@@ -105,30 +90,10 @@ export default function AnnualReport() {
 		},
 	];
 
-	console.log(reports, loadingReports, errorReports);
+	console.log(reports, loading, error);
 	return (
-		<DashboardLayout>
-			<DashboardNavbar />
-			<MDBox mb={2} />
-			<Header userMe={userProfile}></Header>
+		<>
 			{/* <MDBox>{reports && <ReportAnnualTable data={reports} />}</MDBox> */}
-			<Box sx={{ p: 3, minWidth: 300, maxWidth: 400, margin: "0 auto" }}>
-				<MDBox mb={2} sx={{ backgroundColor: "" }}>
-					<DemoItem label="Selecione una fecha para ver el reporte">
-						<DatePicker
-							sx={{
-								border: "4px solid skyblue",
-								bgcolor: "whitesmoke",
-								borderRadius: 2,
-							}}
-							// label="Selecione una fecha"
-							format="DD MMMM YYYY"
-							value={date}
-							onChange={(newValue) => setDate(newValue)}
-						/>
-					</DemoItem>
-				</MDBox>
-			</Box>
 			<Card>
 				<MDBox
 					mx={2}
@@ -141,28 +106,28 @@ export default function AnnualReport() {
 					coloredShadow="info"
 				>
 					<MDTypography variant="h5" color="white">
-						Reporte anual del año {date.get("year")} cancelados y no cancelados
+						Reporte anual del año 202555555 cancelados y no cancelados
 					</MDTypography>
 				</MDBox>
-				{reports && reports.length === 0 && (
+				{reports && reports.readings.length === 0 && (
 					<MDTypography variant="h4" p={2}>
 						Aun no existen lecturas
 					</MDTypography>
 				)}
-				{reports && reports?.length > 0 && !loadingReports && (
-					// <ReportAnnualTable data={reports} />
-					<PaymentBarChart reports={reports} />
+				{reports && reports.readings.length > 0 && !loading && (
+					<>
+						{/* <ReportAnnualTable data={reports.readings} /> */}
+						<PaymentBarChart readings={reports.readings} />
+					</>
 				)}
-				{errorReports && (
+				{error && (
 					<MDTypography variant="h4" sx={{ p: 2 }}>
-						{handlerErrors(errorReports)}
+						{handlerErrors(error)}
 					</MDTypography>
 				)}
-				{loadingReports && (
-					<MDTableLoading title={"Cargando reportes"} rows={5} />
-				)}
+				{loading && <MDTableLoading title={"Cargando reportes"} rows={5} />}
 			</Card>
 			<Footer />
-		</DashboardLayout>
+		</>
 	);
 }

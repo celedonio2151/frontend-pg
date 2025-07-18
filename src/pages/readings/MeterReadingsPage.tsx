@@ -292,45 +292,6 @@ export default function MeterReadingsPage() {
 				</Box>
 			)}
 
-			{/* <Card
-				sx={{
-					margin: "0 auto",
-					px: 2,
-					py: 2,
-					minWidth: 300,
-					maxWidth: 400,
-					borderRadius: 2,
-					backgroundColor: "background.paper",
-					mb: 2,
-				}}
-			>
-				<Typography variant="subtitle1" fontWeight="medium" mb={1}>
-					Seleccione una fecha para ver lecturas
-				</Typography>
-
-				<DatePicker
-					format="DD MMMM YYYY"
-					value={date}
-					onChange={(newValue) => newValue && handleMonthOrDateChange(newValue)}
-					slotProps={{
-						textField: {
-							fullWidth: true,
-							variant: "outlined",
-							// label: "Fecha de lectura",
-							size: "small",
-							InputProps: {
-								sx: {
-									// bgcolor: "whitesmoke",
-									borderRadius: 2,
-									fontWeight: "bold",
-									py: 0.5,
-								},
-							},
-						},
-					}}
-				/>
-			</Card> */}
-
 			<DatePickerInput
 				date={date}
 				handlerDateChange={handleMonthOrDateChange}
@@ -385,8 +346,8 @@ export default function MeterReadingsPage() {
 
 						{!loading && data && data?.readings?.length > 0 && (
 							<>
-								<JsonToExcel headers={headers} data={excelData} />
 								<CustomTable data={data.readings} columns={columns} />
+								<JsonToExcel headers={headers} data={excelData} />
 							</>
 						)}
 					</Card>

@@ -14,59 +14,73 @@ Coded by www.creative-tim.com
 */
 
 // react-router-dom components
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 // @mui material components
-import Card from "@mui/material/Card";
-import { styled } from "@mui/material/styles";
-
-// Material Dashboard 2 React components
-import MDBox from "components/MDBox";
-import MDTypography from "components/MDTypography";
-import MDInput from "components/MDInput";
-import MDButton from "components/MDButton";
-import MDSnackbar from "components/MDSnackbar";
-
-// Authentication layout components
-import CoverLayout from "layouts/authentication/components/CoverLayout";
-
-// Images
-import bgImage from "assets/images/bg-sign-up-cover.jpeg";
 import {
+	Box,
+	Card,
 	FormControl,
 	Grid,
 	IconButton,
 	InputAdornment,
 	InputLabel,
 	OutlinedInput,
+	TextField,
+	Typography,
 } from "@mui/material";
 // Icons from Material UI
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
 import VpnKeyOffRoundedIcon from "@mui/icons-material/VpnKeyOffRounded";
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import GoogleIcon from "@mui/icons-material/Google";
 
-import { formateDate } from "helpers/formatDate";
-import { useAuthContext } from "context/AuthContext";
+// Material Dashboard 2 React components
+import MDBox from "components/MDBox";
+import MDButton from "components/MDButton";
+import MDTypography from "components/MDTypography";
+
+// Authentication layout components
+import CoverLayout from "layouts/authentication/components/CoverLayout";
+
+// Images
+import bgImage from "assets/images/bg-sign-up-cover.jpeg";
+import { useSnackbar } from "notistack";
 import usePost from "hooks/usePost";
-import type { User, UserLogin } from "interfaces/Profile.interface";
-// import { UserContext } from "context";
+import { useForm } from "react-hook-form";
+import paths from "routes/paths";
+import { useAuthContext } from "context/AuthContext";
+
+interface CreateUserForm {
+	ci: number;
+	name: string;
+	surname: string;
+	email?: string;
+	password: string;
+	confirmPassword: string;
+	phoneNumber: string;
+	meter_number?: number;
+	codeAdmin: string;
+}
 
 export default function Cover() {
+	const { enqueueSnackbar } = useSnackbar();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showCodeAdmin, setShowCodeAdmin] = useState(false);
-	const { setToken, setRefreshToken, setProfile } = useAuthContext();
 	const { post, loading, error } = usePost();
+	const { setToken, setRefreshToken, setProfile } = useAuthContext();
 	const navigate = useNavigate();
-	// SnackBar
-	const [successSB, setSuccessSB] = useState(false);
-	const [errorSB, setErrorSB] = useState(false);
-	const [textAlert, setTextAlert] = useState("");
+
+	const {
+		register,
+		handleSubmit,
+		watch,
+		formState: { errors },
+	} = useForm<CreateUserForm>();
 
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
+
 	const signInWithGoogle = () => {
 		console.log("Sign in with google");
 		window.open(`${""}/auth/google`, "_self");
@@ -76,86 +90,39 @@ export default function Cover() {
 		event.preventDefault();
 	};
 
-	// Handler Snackbars
-	const openSuccessSB = (content: string) => {
-		setSuccessSB(true);
-		setTextAlert(content);
-	};
-	const closeSuccessSB = () => setSuccessSB(false);
-	const openErrorSB = (content: string) => {
-		setErrorSB(true);
-		setTextAlert(content);
-	};
-	const closeErrorSB = () => setErrorSB(false);
+	const onSubmit = async (data: CreateUserForm) => {
+		console.log("🚀 ~ onSubmit ~ data:", data);
+		try {
+			// Convertimos los datos a FormData para enviar como multipart/form-data
+			const formData = new FormData();
+			Object.entries(data).forEach(([key, value]) => {
+				if (value !== undefined && value !== null) {
+					formData.append(key, value as string | Blob);
+				}
+			});
+			formData.append(
+				"role_id",
+				JSON.stringify(["dbe7a39d-47bf-4fbc-964c-5f477530c5ff"])
+			); // Ejemplo de roles
 
-	// console.log(textAlert);
-
-	const renderSuccessSB = (
-		<MDSnackbar
-			color="success"
-			icon={<CheckRoundedIcon color="white" />}
-			title="Material Dashboard"
-			content={textAlert}
-			dateTime={formateDate(new Date(), "ddd DD MMM YYYY")}
-			open={successSB}
-			onClose={closeSuccessSB}
-			close={closeSuccessSB}
-			// bgWhite
-		/>
-	);
-
-	const renderErrorSB = (
-		<MDSnackbar
-			color="error"
-			icon={<WarningRoundedIcon color="white" />}
-			title="Material Dashboard"
-			content={textAlert}
-			dateTime="11 mins ago"
-			open={errorSB}
-			onClose={closeErrorSB}
-			close={closeErrorSB}
-			// bgWhite
-		/>
-	);
-
-	const handleOnSubmit = (e) => {
-		e.preventDefault();
-		const data = new FormData(e.currentTarget);
-		// data.append("profileImg", null);
-		data.append("roles", "ADMIN");
-		data.append("status", true);
-		if (!data.get("meter_number")) {
-			data.delete("meter_number");
+			const res = await post("/auth/admin/signup", formData);
+			if (res) {
+				setToken(res.token);
+				setRefreshToken(res.refreshToken);
+				setProfile(res.user);
+				enqueueSnackbar("Usuario registrado exitosamente", {
+					variant: "success",
+				});
+				navigate(paths.users);
+			}
+		} catch (err) {
+			if (error) {
+				console.error("Error al registrar usuario:", error);
+				enqueueSnackbar("Error al registrar usuario", { variant: "error" });
+			}
 		}
-		if (data.get("password") === data.get("password-repeated")) {
-			alert("Las contraseñas no coinciden");
-		}
-		const body = {
-			ci: data.get("ci"),
-			name: data.get("name"),
-			surname: data.get("surname"),
-			password: data.get("password"),
-			phone_number: data.get("phone_number"),
-			meter_number: data.get("meter_number"),
-			roles: data.get("roles"),
-			status: data.get("status"),
-			email: data.get("email"),
-			codeAdmin: data.get("codeAdmin"),
-		};
-		// console.log("Sendign to server..", body);
-		post(`/auth/admin/signup`, {})
-			.then((response) => {
-				openSuccessSB(response.message);
-				setToken(response.token);
-				setProfile(response.newUser);
-				// console.log(response);
-				navigate(`/users`);
-			})
-			.catch((err) => {
-				openErrorSB(err.message);
-			})
-			.finally(() => {});
 	};
+
 	return (
 		<CoverLayout image={bgImage}>
 			<Card sx={{ marginBottom: 3 }}>
@@ -170,68 +137,108 @@ export default function Cover() {
 					mb={1}
 					textAlign="center"
 				>
-					<MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
+					<Typography
+						variant="h4"
+						fontWeight="medium"
+						color="light.main"
+						mt={1}
+					>
 						Agua Potable Mosoj Llajta
-						{/* <span color=""> Administrador</span> */}
-					</MDTypography>
-					{/* <MDTypography display="block" variant="button" color="white" my={1}>
-						Un nuevo usuario debe ser aprobado por el comite de agua de Mosoj
-						Llajta
-					</MDTypography> */}
+					</Typography>
 					<Grid item xs={12}>
-						<MDButton
-							color="inherit"
-							size="small"
-							fullWidth
+						<IconButton
+							aria-label="google-sign-in"
+							color="light"
+							size="medium"
 							onClick={() => signInWithGoogle()}
 						>
 							<GoogleIcon />
-						</MDButton>
+						</IconButton>
 					</Grid>
 				</MDBox>
-				<MDBox pt={4} pb={3} px={3}>
-					<MDBox
+				<Box pt={4} pb={3} px={2}>
+					<Box
 						component="form"
 						// noValidate
-						onSubmit={handleOnSubmit}
+						onSubmit={handleSubmit(onSubmit)}
 						role="form"
 					>
-						<MDBox mb={2}>
-							<MDInput
+						<Box mb={2}>
+							<TextField
 								type="number"
 								label="Carnet identidad"
-								name="ci"
-								required
+								{...register("ci", {
+									required: "El CI es obligatorio",
+									min: {
+										value: 100000,
+										message: "Debe tener al menos 6 dígitos",
+									},
+									max: {
+										value: 9999999999,
+										message: "No puede tener más de 10 dígitos",
+									},
+								})}
+								error={!!errors.ci}
+								helperText={errors.ci?.message}
 								fullWidth
 							/>
-						</MDBox>
-						<MDBox mb={2}>
-							<MDInput
+						</Box>
+						<Box mb={2}>
+							<TextField
 								type="text"
-								label="Nombre Completo"
-								required
-								name="name"
+								label="Nombres"
+								{...register("name", {
+									required: "El nombre es obligatorio",
+									minLength: {
+										value: 2,
+										message: "Debe tener al menos 2 caracteres",
+									},
+									maxLength: {
+										value: 50,
+										message: "No puede tener más de 50 caracteres",
+									},
+								})}
+								error={!!errors.name}
+								helperText={errors.name?.message}
 								fullWidth
 							/>
-						</MDBox>
-						<MDBox mb={2}>
-							<MDInput
+						</Box>
+						<Box mb={2}>
+							<TextField
 								type="text"
 								label="Apellidos"
-								required
-								name="surname"
+								{...register("surname", {
+									required: "El apellido es obligatorio",
+									minLength: {
+										value: 2,
+										message: "Debe tener al menos 2 caracteres",
+									},
+									maxLength: {
+										value: 150,
+										message: "No puede tener más de 150 caracteres",
+									},
+								})}
+								error={!!errors.surname}
+								helperText={errors.surname?.message}
 								fullWidth
 							/>
-						</MDBox>
-						<MDBox mb={2}>
-							<MDInput
+						</Box>
+						<Box mb={2}>
+							<TextField
 								type="email"
 								label="Gmail"
-								name="email"
-								required
+								{...register("email", {
+									required: "El correo electrónico es obligatorio",
+									pattern: {
+										value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+										message: "Correo electrónico inválido",
+									},
+								})}
+								error={!!errors.email}
+								helperText={errors.email?.message}
 								fullWidth
 							/>
-						</MDBox>
+						</Box>
 						{/* <MDBox mb={2}>
 							<MDInput
 								type="number"
@@ -241,7 +248,7 @@ export default function Cover() {
 								fullWidth
 							/>
 						</MDBox> */}
-						<MDBox mb={2}>
+						<Box mb={2}>
 							<FormControl fullWidth variant="outlined">
 								<InputLabel htmlFor="outlined-adornment-password">
 									Contraseña
@@ -249,8 +256,14 @@ export default function Cover() {
 								<OutlinedInput
 									id="outlined-adornment-password"
 									type={showPassword ? "text" : "password"}
-									name="password"
-									required
+									{...register("password", {
+										required: "La contraseña es obligatoria",
+										minLength: {
+											value: 6,
+											message: "Debe tener al menos 6 caracteres",
+										},
+									})}
+									error={!!errors.password}
 									endAdornment={
 										<InputAdornment position="end">
 											<IconButton
@@ -266,8 +279,11 @@ export default function Cover() {
 									label="Password"
 								/>
 							</FormControl>
-						</MDBox>
-						<MDBox mb={2}>
+							<Typography variant="caption" color="error">
+								{errors.password?.message}
+							</Typography>
+						</Box>
+						<Box mb={2}>
 							<FormControl fullWidth variant="outlined">
 								<InputLabel htmlFor="outlined-adornment-password-repeat">
 									Repita la contraseña
@@ -275,8 +291,13 @@ export default function Cover() {
 								<OutlinedInput
 									id="outlined-adornment-password-repeat"
 									type={showPassword ? "text" : "password"}
-									name="passwordRepeated"
-									required
+									{...register("confirmPassword", {
+										required: "La repetición de la contraseña es obligatoria",
+										validate: (value) =>
+											value === watch("password") ||
+											"Las contraseñas no coinciden",
+									})}
+									error={!!errors.confirmPassword}
 									endAdornment={
 										<InputAdornment position="end">
 											<IconButton
@@ -292,8 +313,11 @@ export default function Cover() {
 									label="Repita la contraseña"
 								/>
 							</FormControl>
-						</MDBox>
-						<MDBox
+							<Typography variant="caption" color="error">
+								{errors.confirmPassword?.message}
+							</Typography>
+						</Box>
+						<Box
 							mb={2}
 							sx={{ display: "flex", justifyContent: "space-between" }}
 						>
@@ -304,13 +328,15 @@ export default function Cover() {
 								<OutlinedInput
 									id="outlined-adornment-code-admin"
 									type={showCodeAdmin ? "text" : "password"}
-									name="codeAdmin"
-									required
+									{...register("codeAdmin", {
+										required: "El código de administrador es obligatorio",
+									})}
+									error={!!errors.codeAdmin}
 									endAdornment={
 										<InputAdornment position="end">
 											<IconButton
 												aria-label="toggle password visibility"
-												onClick={(e) => setShowCodeAdmin(!showCodeAdmin)}
+												onClick={() => setShowCodeAdmin(!showCodeAdmin)}
 												edge="end"
 											>
 												{showCodeAdmin ? (
@@ -324,39 +350,27 @@ export default function Cover() {
 									label="Cod. admin"
 								/>
 							</FormControl>
-							{/* <MDBox mb={2}> */}
-							<MDInput
+							<TextField
 								sx={{ width: "50%" }}
 								type="number"
 								label="Número de celular"
-								name="phone_number"
-								required
+								{...register("phoneNumber", {
+									required: "El número de celular es obligatorio",
+									min: {
+										value: 100000,
+										message: "Debe tener al menos 6 dígitos",
+									},
+									max: {
+										value: 999999999999,
+										message: "No puede tener más de 12 dígitos",
+									},
+								})}
+								error={!!errors.phoneNumber}
+								helperText={errors.phoneNumber?.message}
 								fullWidth
 							/>
-							{/* </MDBox> */}
-						</MDBox>
-						{/* <MDBox display="flex" alignItems="center" ml={-1}>
-							<Checkbox />
-							<MDTypography
-								variant="button"
-								fontWeight="regular"
-								color="text"
-								sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
-							>
-								&nbsp;&nbsp;I agree the&nbsp;
-							</MDTypography>
-							<MDTypography
-								component="a"
-								href="#"
-								variant="button"
-								fontWeight="bold"
-								color="info"
-								textGradient
-							>
-								Terms and Conditions
-							</MDTypography>
-						</MDBox> */}
-						<MDBox mt={3} mb={1}>
+						</Box>
+						<Box mt={3} mb={1}>
 							<MDButton
 								type="submit"
 								variant="gradient"
@@ -367,13 +381,13 @@ export default function Cover() {
 							>
 								Registrar usuario
 							</MDButton>
-						</MDBox>
-						<MDBox mt={2} mb={1} textAlign="center">
+						</Box>
+						<Box mt={2} mb={1} textAlign="center">
 							<MDTypography variant="button" color="text">
 								Ya tienes una cuenta?{" "}
 								<MDTypography
 									component={Link}
-									to="/authentication/sign-in"
+									to={paths.signin}
 									variant="button"
 									color="info"
 									fontWeight="medium"
@@ -382,14 +396,10 @@ export default function Cover() {
 									Iniciar sessión
 								</MDTypography>
 							</MDTypography>
-						</MDBox>
-					</MDBox>
-				</MDBox>
+						</Box>
+					</Box>
+				</Box>
 			</Card>
-			<MDBox>
-				{renderSuccessSB}
-				{renderErrorSB}
-			</MDBox>
 		</CoverLayout>
 	);
 }

@@ -21,7 +21,6 @@ import { Link, useNavigate } from "react-router-dom";
 // @mui material components
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
-import MuiLink from "@mui/material/Link";
 
 // @mui icons
 import GoogleIcon from "@mui/icons-material/Google";
@@ -43,29 +42,39 @@ import BasicLayout from "layouts/authentication/components/BasicLayout";
 // Images
 import bgImage from "assets/images/bg-sign-in-basic.jpeg";
 import {
+	Box,
 	FormControl,
 	IconButton,
 	InputAdornment,
 	InputLabel,
 	OutlinedInput,
-	setRef,
+	Typography,
 } from "@mui/material";
 import usePost from "hooks/usePost";
-import MDSnackbar from "components/MDSnackbar";
 
 import { useAuthContext } from "context/AuthContext";
 import type { UserLogin } from "interfaces/Profile.interface";
+import { useForm } from "react-hook-form";
+import paths from "routes/paths";
+import { useSnackbar } from "notistack";
+
+interface LoginAdminDto {
+	email: string;
+	password: string;
+}
 
 function Basic() {
 	const [showPassword, setShowPassword] = useState(false);
-	// SnackBar
-	const [successSB, setSuccessSB] = useState(false);
-	const [errorSB, setErrorSB] = useState(false);
-	const [textAlert, setTextAlert] = useState("");
-
 	const { post, loading, error } = usePost<UserLogin>();
 	const { setToken, setProfile, setRefreshToken } = useAuthContext();
+	const { enqueueSnackbar } = useSnackbar();
 	const navigate = useNavigate();
+	const {
+		register,
+		handleSubmit,
+		watch,
+		formState: { errors, isSubmitting },
+	} = useForm<LoginAdminDto>({ defaultValues: { email: "", password: "" } });
 
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -77,75 +86,22 @@ function Basic() {
 		console.log("Iniciar sesión con Google");
 		window.open(`${""}/auth/admin/google`, "_self");
 	};
-	// Handler Snackbars
-	const openSuccessSB = (content: string) => {
-		setSuccessSB(true);
-		setTextAlert(content);
-	};
-	const closeSuccessSB = () => setSuccessSB(false);
 
-	const openErrorSB = (content: string) => {
-		setErrorSB(true);
-		setTextAlert(content);
-	};
-	const closeErrorSB = () => setErrorSB(false);
-
-	const renderSuccessSB = (
-		<MDSnackbar
-			color="success"
-			icon={<CheckRoundedIcon color="action" />}
-			title="Credenciales correctos"
-			// content={"Hello, world! This is a notification message"}
-			content={textAlert}
-			dateTime={"Hace unos segundos"}
-			open={successSB}
-			onClose={closeSuccessSB}
-			close={closeSuccessSB}
-			// bgWhite
-		/>
-	);
-
-	const renderErrorSB = (
-		<MDSnackbar
-			color="error"
-			icon={<WarningRoundedIcon />}
-			title="Error de sesión"
-			// content="Hello, world! This is a notification message"
-			content={textAlert}
-			dateTime="Hace unos segundos"
-			open={errorSB}
-			onClose={closeErrorSB}
-			close={closeErrorSB}
-			// bgWhite
-		/>
-	);
-
-	const handleOnSubmit = (e: any) => {
-		e.preventDefault();
-		const data = new FormData(e.currentTarget);
-		const body = {
-			email: data.get("email"),
-			password: data.get("password"),
-		};
-		// console.log("Sendign to server...", body);
-		post(`/auth/admin/signin`, body)
-			.then((response) => {
-				if (response) {
-					openSuccessSB(response.message);
-					setTimeout(() => {
-						console.log(response);
-						setProfile(response.user);
-						setRefreshToken(response.myTokens.refreshToken);
-						setToken(response.myTokens.accessToken);
-						navigate(`/users`);
-					}, 1500);
-				}
-			})
-			.catch((err: any) => {
-				console.log(err);
-				openErrorSB(err.message);
-			})
-			.finally();
+	const onSubmit = async (data: LoginAdminDto) => {
+		try {
+			const response = await post("/auth/admin/signin", data);
+			if (response) {
+				setProfile(response.user);
+				setRefreshToken(response.myTokens.refreshToken);
+				setToken(response.myTokens.accessToken);
+				enqueueSnackbar("Inicio de sesión exitoso", { variant: "success" });
+				navigate(paths.users);
+			}
+		} catch (error) {
+			enqueueSnackbar("Error al iniciar sesión. Verifica tus credenciales.", {
+				variant: "error",
+			});
+		}
 	};
 
 	return (
@@ -180,54 +136,63 @@ function Basic() {
 							</MDTypography>
 						</Grid> */}
 						<Grid item xs={12}>
-							<MDTypography variant="h4" fontWeight="medium" color="white">
+							<Typography variant="h4" fontWeight="medium" color="white.main">
 								Iniciar sessión
-							</MDTypography>
+							</Typography>
 						</Grid>
 						<Grid item xs={12}>
-							<MDButton
-								color="inherit"
-								size="small"
-								fullWidth
+							<IconButton
+								aria-label="google-sign-in"
+								size="medium"
+								color="light"
 								onClick={() => signInWithGoogle()}
 							>
 								<GoogleIcon />
-							</MDButton>
+							</IconButton>
 						</Grid>
 					</Grid>
 				</MDBox>
-				<MDBox pt={3} pb={3} px={3}>
-					<MDBox
+				<Box pt={3} pb={3} px={2}>
+					<Box
 						component="form"
 						// noValidate
-						onSubmit={handleOnSubmit}
+						onSubmit={handleSubmit(onSubmit)}
 						role="form"
 					>
-						<MDBox mb={2}>
+						{/* Email */}
+						<Box mb={2}>
 							<FormControl fullWidth variant="outlined">
-								<InputLabel htmlFor="outlined-adornment-password">
+								<InputLabel htmlFor="outlined-adornment-email">
 									Email
 								</InputLabel>
 								<OutlinedInput
-									id="outlined-adornment-ci"
+									id="outlined-adornment-email"
 									type="text"
-									name="email"
-									required
+									{...register("email", {
+										required: "El email es obligatorio",
+										pattern: {
+											value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+											message: "Correo electrónico inválido",
+										},
+									})}
+									error={!!errors.email}
 									endAdornment={
 										<InputAdornment position="end">
-											<IconButton
-												aria-label="toggle password visibility"
-												edge="end"
-											>
-												<ContactEmergencyRoundedIcon />
+											<IconButton edge="end">
+												<VisibilityOff />
 											</IconButton>
 										</InputAdornment>
 									}
-									label="ci"
+									label="Email"
 								/>
 							</FormControl>
-						</MDBox>
-						<MDBox mb={2}>
+							<Typography variant="caption" color="error">
+								{errors.email?.message}
+							</Typography>
+						</Box>
+
+						{/* Contraseña */}
+						<Box mb={2}>
 							<FormControl fullWidth variant="outlined">
 								<InputLabel htmlFor="outlined-adornment-password">
 									Contraseña
@@ -235,55 +200,54 @@ function Basic() {
 								<OutlinedInput
 									id="outlined-adornment-password"
 									type={showPassword ? "text" : "password"}
-									name="password"
-									required
+									{...register("password", {
+										required: "La contraseña es obligatoria",
+										minLength: {
+											value: 6,
+											message: "Debe tener al menos 6 caracteres",
+										},
+									})}
+									error={!!errors.password}
 									endAdornment={
 										<InputAdornment position="end">
 											<IconButton
 												aria-label="toggle password visibility"
 												onClick={handleClickShowPassword}
-												onMouseDown={handleMouseDownPassword}
 												edge="end"
 											>
 												{showPassword ? <VisibilityOff /> : <Visibility />}
 											</IconButton>
 										</InputAdornment>
 									}
-									label="Password"
+									label="Contraseña"
 								/>
 							</FormControl>
-						</MDBox>
-						{/* <MDBox display="flex" alignItems="center" ml={-1}>
-							<Switch checked={rememberMe} onChange={handleSetRememberMe} />
-							<MDTypography
-								variant="button"
-								fontWeight="regular"
-								color="text"
-								onClick={handleSetRememberMe}
-								sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
-							>
-								&nbsp;&nbsp;Remember me
-							</MDTypography>
-						</MDBox> */}
-						<MDBox mt={4} mb={1}>
+							<Typography variant="caption" color="error">
+								{errors.password?.message}
+							</Typography>
+						</Box>
+
+						{/* Botón de envío */}
+						<Box mt={4} mb={1}>
 							<MDButton
 								variant="gradient"
-								// disabled ={}
 								type="submit"
 								color="info"
 								fullWidth
 								size="large"
 								disabled={loading}
 							>
-								Iniciar sessión
+								Iniciar sesión
 							</MDButton>
-						</MDBox>
-						<MDBox mt={3} mb={1} textAlign="center">
+						</Box>
+
+						{/* Enlace para crear cuenta */}
+						<Box mt={3} mb={1} textAlign="center">
 							<MDTypography variant="button" color="text">
-								No tienes una cuenta?&nbsp;
+								¿No tienes una cuenta?&nbsp;
 								<MDTypography
 									component={Link}
-									to="/authentication/sign-up"
+									to={paths.signup}
 									variant="button"
 									color="info"
 									fontWeight="medium"
@@ -292,13 +256,9 @@ function Basic() {
 									Crea una cuenta
 								</MDTypography>
 							</MDTypography>
-						</MDBox>
-						<MDBox>
-							{renderSuccessSB}
-							{renderErrorSB}
-						</MDBox>
-					</MDBox>
-				</MDBox>
+						</Box>
+					</Box>
+				</Box>
 			</Card>
 		</BasicLayout>
 	);

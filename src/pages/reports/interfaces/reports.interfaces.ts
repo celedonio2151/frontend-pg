@@ -30,10 +30,11 @@ export interface WaterMeter {
 }
 
 export interface Summary {
-  totalCubicMeters: number;
-  totalBalance:     number;
+  totalCubes:       number;
+  totalBilled:      number;
   totalPaid:        number;
-  totalPending:     number;
+  pendingAmount:    number;
+  paidAmount:       number;
 }
 
 

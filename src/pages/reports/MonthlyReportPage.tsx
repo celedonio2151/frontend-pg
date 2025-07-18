@@ -12,6 +12,7 @@ import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import SummarizeRoundedIcon from "@mui/icons-material/SummarizeRounded";
 import PriceCheckRoundedIcon from "@mui/icons-material/PriceCheckRounded";
 import WaterDropRoundedIcon from "@mui/icons-material/WaterDropRounded";
+import MonetizationOnRoundedIcon from "@mui/icons-material/MonetizationOnRounded";
 
 import MDBox from "components/MDBox";
 import MDTableLoading from "components/MDTableLoading/MDTableLoading";
@@ -26,7 +27,7 @@ import type {
 	Report,
 } from "pages/reports/interfaces/reports.interfaces";
 import DatePickerInput from "components/DataPicker/DataPicker";
-import useLocalStorage from "hooks/useStorage";
+import { useLocalStorage, useSessionStorage } from "hooks/useStorage";
 import getFirstEndDates from "helpers/getFirstEndDates";
 import EmptyLoader from "components/loader/EmptyLoader";
 import ErrorLoader from "components/loader/ErrorLoader";
@@ -48,12 +49,12 @@ const months = [
 
 export default function MonthlyReportPage() {
 	const { token } = useAuthContext();
-	const { storedValue, setValue } = useLocalStorage(
-		"reports-monthly",
+	const { storedValue, setValue } = useSessionStorage(
+		"selected-month-report",
 		dayjs().toISOString()
 	);
 	const initialMonth = useMemo(() => {
-		const savedMonth = sessionStorage.getItem("selectedMonthReport");
+		const savedMonth = storedValue;
 		return savedMonth ? new Date(savedMonth) : dayjs().toDate();
 	}, []);
 
@@ -76,7 +77,6 @@ export default function MonthlyReportPage() {
 			const d = newDate || date;
 			setSelectedMonth(d.toDate());
 			setValue(d.toISOString());
-			sessionStorage.setItem("selectedMonthReport", d.toISOString());
 		},
 		[date]
 	);
@@ -163,8 +163,8 @@ export default function MonthlyReportPage() {
 								coloredShadow="info"
 							>
 								<MDTypography variant="h5" color="white">
-									Reporte mes {months[selectedMonth]} {date.get("year")}{" "}
-									cancelados y no cancelados
+									Reporte mes {months[selectedMonth.getMonth()]}{" "}
+									{date.get("year")} cancelados y no cancelados
 								</MDTypography>
 							</MDBox>
 							{!loadingReports && reports && reports.reports.length === 0 && (
@@ -191,16 +191,17 @@ export default function MonthlyReportPage() {
 											minWidth={250}
 											maxWidth={300}
 										>
-											<SummarizeRoundedIcon color="primary" />
+											<SummarizeRoundedIcon color="inherit" />
 											<Box>
-												<Typography variant="subtitle2" color="text.primary">
+												<Typography variant="subtitle2" color="inherit.main">
 													Total de reportes
 												</Typography>
-												<Typography variant="h6" color="primary">
+												<Typography variant="h6" color="inherit.main">
 													{reports.total}
 												</Typography>
 											</Box>
 										</Box>
+
 										<Box
 											display="flex"
 											alignItems="center"
@@ -215,14 +216,53 @@ export default function MonthlyReportPage() {
 											<PriceCheckRoundedIcon color="success" />
 											<Box>
 												<Typography variant="subtitle2" color="success.main">
-													Cancelados
+													Facturado
 												</Typography>
 												<Typography variant="h6" color="success.main">
 													{reports.summary.totalPaid} Bs.
 												</Typography>
 											</Box>
 										</Box>
+
 										<Box
+											display="flex"
+											flexDirection="column"
+											bgcolor="#e3f2fd"
+											px={2}
+											py={1}
+											borderRadius={2}
+											minWidth={200}
+											maxWidth={300}
+										>
+											<Box display="flex" alignItems="center" gap={1}>
+												<MonetizationOnRoundedIcon color="action" />
+												<Typography variant="subtitle1" color="text.primary">
+													Resumen de pagos
+												</Typography>
+											</Box>
+
+											<Divider sx={{ my: 0.5 }} />
+
+											<Box display="flex" justifyContent="space-between">
+												<Typography variant="body2" color="success.main">
+													Cancelados
+												</Typography>
+												<Typography variant="h6" color="success.main">
+													Bs {reports.summary.paidAmount}
+												</Typography>
+											</Box>
+
+											<Box display="flex" justifyContent="space-between">
+												<Typography variant="body2" color="error.main">
+													Restantes
+												</Typography>
+												<Typography variant="h6" color="error.main">
+													Bs {reports.summary.pendingAmount}
+												</Typography>
+											</Box>
+										</Box>
+
+										{/* <Box
 											display="flex"
 											alignItems="center"
 											gap={1}
@@ -239,10 +279,11 @@ export default function MonthlyReportPage() {
 													No cancelados
 												</Typography>
 												<Typography variant="h6" color="error.main">
-													{reports.summary.totalPending} Bs.
+													{reports.summary.pendingAmount} Bs.
 												</Typography>
 											</Box>
-										</Box>
+										</Box> */}
+
 										<Box
 											display="flex"
 											alignItems="center"
@@ -260,7 +301,7 @@ export default function MonthlyReportPage() {
 													Metros cúbicos (m³)
 												</Typography>
 												<Typography variant="h6" color="info.main">
-													{reports.summary.totalCubicMeters} m³
+													{reports.summary.totalCubes} m³
 												</Typography>
 											</Box>
 										</Box>
@@ -280,6 +321,40 @@ export default function MonthlyReportPage() {
 						</Card>
 					</Grid>
 				</Grid>
+			</Box>
+		</Box>
+	);
+}
+
+function SummaryCard({
+	title,
+	value,
+	bgcolor,
+}: {
+	title: string;
+	value: number;
+	bgcolor: string;
+}) {
+	return (
+		<Box
+			display="flex"
+			alignItems="center"
+			gap={1}
+			bgcolor={bgcolor}
+			px={2}
+			py={1}
+			borderRadius={2}
+			minWidth={250}
+			maxWidth={300}
+		>
+			<SummarizeRoundedIcon color="primary" />
+			<Box>
+				<Typography variant="subtitle2" color="text.primary">
+					{title}
+				</Typography>
+				<Typography variant="h6" color="primary">
+					{value}
+				</Typography>
 			</Box>
 		</Box>
 	);
