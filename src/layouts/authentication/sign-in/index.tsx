@@ -35,6 +35,7 @@ import MDButton from "components/MDButton";
 // Material Icons
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
+import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 
 // Authentication layout components
 import BasicLayout from "layouts/authentication/components/BasicLayout";
@@ -72,15 +73,10 @@ function Basic() {
 	const {
 		register,
 		handleSubmit,
-		watch,
 		formState: { errors, isSubmitting },
 	} = useForm<LoginAdminDto>({ defaultValues: { email: "", password: "" } });
 
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-	const handleMouseDownPassword = (event) => {
-		event.preventDefault();
-	};
 
 	const signInWithGoogle = () => {
 		console.log("Iniciar sesión con Google");
@@ -152,7 +148,7 @@ function Basic() {
 						</Grid>
 					</Grid>
 				</MDBox>
-				<Box pt={3} pb={3} px={2}>
+				<Box pt={3} pb={1} px={2}>
 					<Box
 						component="form"
 						// noValidate
@@ -179,7 +175,7 @@ function Basic() {
 									endAdornment={
 										<InputAdornment position="end">
 											<IconButton edge="end">
-												<VisibilityOff />
+												<EmailRoundedIcon />
 											</IconButton>
 										</InputAdornment>
 									}
@@ -235,14 +231,14 @@ function Basic() {
 								color="info"
 								fullWidth
 								size="large"
-								disabled={loading}
+								disabled={isSubmitting}
 							>
-								Iniciar sesión
+								{isSubmitting ? "Cargando..." : "Iniciar sesión"}
 							</MDButton>
 						</Box>
 
 						{/* Enlace para crear cuenta */}
-						<Box mt={3} mb={1} textAlign="center">
+						<Box mt={1} mb={1} textAlign="center">
 							<MDTypography variant="button" color="text">
 								¿No tienes una cuenta?&nbsp;
 								<MDTypography

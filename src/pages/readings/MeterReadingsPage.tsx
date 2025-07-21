@@ -35,7 +35,7 @@ import CreateReadingPage from "pages/readings/CreateReadingPage";
 import getFirstEndDates from "helpers/getFirstEndDates";
 import paths from "routes/paths";
 import { useSnackbar } from "notistack";
-import useLocalStorage from "hooks/useStorage";
+import { useSessionStorage } from "hooks/useStorage";
 import EmptyLoader from "components/loader/EmptyLoader";
 import ErrorLoader from "components/loader/ErrorLoader";
 import DatePickerInput from "components/DataPicker/DataPicker";
@@ -59,13 +59,13 @@ export default function MeterReadingsPage() {
 	const { token } = useAuthContext();
 	const navigate = useNavigate();
 	const { enqueueSnackbar } = useSnackbar();
-	const { storedValue, setValue } = useLocalStorage<Date>(
-		"selectedDate",
+	const { storedValue, setValue } = useSessionStorage<Date>(
+		"selected-month-readings",
 		dayjs().toDate()
 	);
 
 	const initialMonth = useMemo(() => {
-		const savedMonth = sessionStorage.getItem("selectedMonth");
+		const savedMonth = storedValue;
 		return savedMonth ? new Date(savedMonth) : dayjs().toDate();
 	}, []);
 
@@ -90,7 +90,7 @@ export default function MeterReadingsPage() {
 		(newDate: Dayjs) => {
 			const d = newDate || date;
 			setSelectedMonth(d.toDate());
-			sessionStorage.setItem("selectedMonth", d.toDate().toISOString());
+			setValue(d.toDate());
 			console.log("Fecha selecionada: ", d.toDate());
 		},
 		[date]
@@ -345,10 +345,10 @@ export default function MeterReadingsPage() {
 						)}
 
 						{!loading && data && data?.readings?.length > 0 && (
-							<>
-								<CustomTable data={data.readings} columns={columns} />
+							<Box p={0}>
+								<CustomTable data={data.readings} columns={columns} filter  />
 								<JsonToExcel headers={headers} data={excelData} />
-							</>
+							</Box>
 						)}
 					</Card>
 				</Grid>

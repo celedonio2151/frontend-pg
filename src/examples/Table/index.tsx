@@ -35,6 +35,8 @@ import {
 	Select,
 	InputLabel,
 	FormControl,
+	OutlinedInput,
+	InputAdornment,
 } from "@mui/material";
 // MUI Icons
 import FirstPageRoundedIcon from "@mui/icons-material/FirstPageRounded";
@@ -301,20 +303,23 @@ const DebouncedInput: React.FC<DebouncedInputProps> = ({
 	};
 
 	return (
-		<TextField
-			{...props}
-			fullWidth
-			value={value}
-			onChange={handleChange}
-			slotProps={{
-				input: {
-					startAdornment: (
-						<Box display={"flex"} alignContent={"center"} pr={1}>
-							<SearchRoundedIcon color="primary" />
-						</Box>
-					),
-				},
-			}}
-		/>
+		<FormControl sx={{ m: 1, width: "25ch" }} variant="outlined">
+			<InputLabel htmlFor="outlined-adornment-password">Buscar</InputLabel>
+			<OutlinedInput
+				id="outlined-adornment-password"
+				type={"text"}
+				placeholder="Buscar..."
+				value={value}
+				onChange={handleChange}
+				endAdornment={
+					<InputAdornment position="end">
+						<IconButton aria-label="toggle password visibility" edge="end">
+							<SearchRoundedIcon />
+						</IconButton>
+					</InputAdornment>
+				}
+				label="Password"
+			/>
+		</FormControl>
 	);
 };
