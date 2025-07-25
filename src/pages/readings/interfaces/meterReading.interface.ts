@@ -2,9 +2,16 @@ export interface Readings {
   limit?:   number;
   offset?:  number;
   total:    number;
+  summary:  Summary;
   readings: Reading[];
 }
 
+
+interface Summary{
+		read:     number,
+		unread:   number,
+		total:    number
+}
 export interface Invoice {
   createdAt:    Date;
   updatedAt:    Date;

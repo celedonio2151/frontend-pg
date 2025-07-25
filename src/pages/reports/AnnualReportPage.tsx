@@ -196,7 +196,7 @@ export default function AnnualReportPage() {
 					</TabPanel>
 
 					<TabPanel value={value} index="two">
-						<AnnualReportComponent />
+						<AnnualReportComponent date={date.toDate()} />
 					</TabPanel>
 				</Grid>
 			</Grid>

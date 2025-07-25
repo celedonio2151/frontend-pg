@@ -31,6 +31,8 @@ import { useLocalStorage, useSessionStorage } from "hooks/useStorage";
 import getFirstEndDates from "helpers/getFirstEndDates";
 import EmptyLoader from "components/loader/EmptyLoader";
 import ErrorLoader from "components/loader/ErrorLoader";
+import { SummaryCard } from "pages/readings/components/SummaryCard";
+import { softColors } from "theme/palette";
 
 const months = [
 	"Enero",
@@ -180,49 +182,29 @@ export default function MonthlyReportPage() {
 										gap={2}
 										flexWrap="wrap"
 									>
-										<Box
-											display="flex"
-											alignItems="center"
-											gap={1}
-											bgcolor="#e3f2fd"
-											px={2}
-											py={1}
-											borderRadius={2}
-											minWidth={250}
-											maxWidth={300}
-										>
-											<SummarizeRoundedIcon color="inherit" />
-											<Box>
-												<Typography variant="subtitle2" color="inherit.main">
-													Total de reportes
-												</Typography>
-												<Typography variant="h6" color="inherit.main">
-													{reports.total}
-												</Typography>
-											</Box>
-										</Box>
+										<SummaryCard
+											color=""
+											bgColor={softColors.info}
+											icon={<SummarizeRoundedIcon color="info" />}
+											title="Reportes"
+											value={reports.total}
+										/>
 
-										<Box
-											display="flex"
-											alignItems="center"
-											gap={1}
-											bgcolor="#e8f5e9"
-											px={2}
-											py={1}
-											borderRadius={2}
-											minWidth={200}
-											maxWidth={300}
-										>
-											<PriceCheckRoundedIcon color="success" />
-											<Box>
-												<Typography variant="subtitle2" color="success.main">
-													Facturado
-												</Typography>
-												<Typography variant="h6" color="success.main">
-													{reports.summary.totalPaid} Bs.
-												</Typography>
-											</Box>
-										</Box>
+										<SummaryCard
+											color="success.main"
+											bgColor={softColors.success}
+											icon={<PriceCheckRoundedIcon color="success" />}
+											title="Facturado"
+											value={reports.summary.totalPaid}
+										/>
+
+										<SummaryCard
+											color="info.main"
+											bgColor={softColors.info}
+											icon={<WaterDropRoundedIcon color="info" />}
+											title="Cubos m³"
+											value={reports.summary.totalCubes}
+										/>
 
 										<Box
 											display="flex"
@@ -261,50 +243,6 @@ export default function MonthlyReportPage() {
 												</Typography>
 											</Box>
 										</Box>
-
-										{/* <Box
-											display="flex"
-											alignItems="center"
-											gap={1}
-											bgcolor="#ffebee"
-											px={2}
-											py={1}
-											borderRadius={2}
-											minWidth={200}
-											maxWidth={300}
-										>
-											<MoneyOffRoundedIcon color="error" />
-											<Box>
-												<Typography variant="subtitle2" color="error.main">
-													No cancelados
-												</Typography>
-												<Typography variant="h6" color="error.main">
-													{reports.summary.pendingAmount} Bs.
-												</Typography>
-											</Box>
-										</Box> */}
-
-										<Box
-											display="flex"
-											alignItems="center"
-											gap={1}
-											bgcolor="#e3f2fd"
-											px={2}
-											py={1}
-											borderRadius={2}
-											minWidth={200}
-											maxWidth={300}
-										>
-											<WaterDropRoundedIcon color="info" />
-											<Box>
-												<Typography variant="subtitle2" color="info.main">
-													Metros cúbicos (m³)
-												</Typography>
-												<Typography variant="h6" color="info.main">
-													{reports.summary.totalCubes} m³
-												</Typography>
-											</Box>
-										</Box>
 									</Box>
 									<MainTable columns={columns} data={reports.reports} />
 								</>
@@ -321,40 +259,6 @@ export default function MonthlyReportPage() {
 						</Card>
 					</Grid>
 				</Grid>
-			</Box>
-		</Box>
-	);
-}
-
-function SummaryCard({
-	title,
-	value,
-	bgcolor,
-}: {
-	title: string;
-	value: number;
-	bgcolor: string;
-}) {
-	return (
-		<Box
-			display="flex"
-			alignItems="center"
-			gap={1}
-			bgcolor={bgcolor}
-			px={2}
-			py={1}
-			borderRadius={2}
-			minWidth={250}
-			maxWidth={300}
-		>
-			<SummarizeRoundedIcon color="primary" />
-			<Box>
-				<Typography variant="subtitle2" color="text.primary">
-					{title}
-				</Typography>
-				<Typography variant="h6" color="primary">
-					{value}
-				</Typography>
 			</Box>
 		</Box>
 	);

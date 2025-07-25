@@ -25,7 +25,6 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
-import Footer from "examples/Footer";
 
 import useFetch from "hooks/useFetch";
 import { useState } from "react";
@@ -38,16 +37,21 @@ import PaymentBarChart from "./components/MejorData";
 import handlerErrors from "helpers/handlerErrors";
 import { useAuthContext } from "context/AuthContext";
 import type { ReportAnnualByMeter } from "pages/reports/interfaces/reports.annual.interface";
+import { getFirstEndDatesYear } from "helpers/getFirstEndDates";
 
-export default function AnnualReport() {
+type Props = {
+	date: Date;
+};
+
+export default function AnnualReport({ date }: Props) {
 	const { token } = useAuthContext();
+	const { startDate, endDate } = getFirstEndDatesYear(date);
 	const {
 		data: reports,
 		loading,
 		error,
 	} = useFetch<ReportAnnualByMeter>({
-		endpoint:
-			"/report/annual-by-meter?startDate=2023-01-01T16%3A37%3A42.000Z&endDate=2023-12-30T16%3A37%3A42.000Z",
+		endpoint: `/report/annual-by-meter?startDate=${startDate}&endDate=${endDate}`,
 		token,
 	});
 
@@ -90,7 +94,6 @@ export default function AnnualReport() {
 		},
 	];
 
-	console.log(reports, loading, error);
 	return (
 		<>
 			{/* <MDBox>{reports && <ReportAnnualTable data={reports} />}</MDBox> */}
@@ -106,7 +109,8 @@ export default function AnnualReport() {
 					coloredShadow="info"
 				>
 					<MDTypography variant="h5" color="white">
-						Reporte anual del año 202555555 cancelados y no cancelados
+						Reporte anual del año {date.getFullYear()} cancelados y no
+						cancelados
 					</MDTypography>
 				</MDBox>
 				{reports && reports.readings.length === 0 && (
@@ -127,7 +131,6 @@ export default function AnnualReport() {
 				)}
 				{loading && <MDTableLoading title={"Cargando reportes"} rows={5} />}
 			</Card>
-			<Footer />
 		</>
 	);
 }

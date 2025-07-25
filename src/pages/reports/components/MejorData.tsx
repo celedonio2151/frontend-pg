@@ -1,7 +1,9 @@
 import {
+	styled,
 	Table,
 	TableBody,
 	TableCell,
+	tableCellClasses,
 	TableContainer,
 	TableRow,
 } from "@mui/material";
@@ -13,15 +15,17 @@ import PriceCheckRoundedIcon from "@mui/icons-material/PriceCheckRounded";
 import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 import MDChip from "./MDChip";
-import { months } from "dayjs/locale/es";
-import type { Reading } from "pages/reports/interfaces/reports.annual.interface";
+import type {
+	MeterReading,
+	Reading,
+} from "pages/reports/interfaces/reports.annual.interface";
 
 type Props = {
 	readings: Reading[];
 };
 
 // Obtener el estado del mes en base a la lectura
-const getMonthStatus = (readings, monthIndex) => {
+const getMonthStatus = (readings: MeterReading[], monthIndex: number) => {
 	// Encontrar la lectura del mes
 	const reading = readings.find(
 		(r) => new Date(r.date).getMonth() === monthIndex
@@ -33,6 +37,7 @@ const getMonthStatus = (readings, monthIndex) => {
 				label={"Sin lectura"}
 				icon={<SpeedRoundedIcon />}
 				color={"error"}
+				variant="outlined"
 			/>
 		); // No hay lectura para este mes
 	}
@@ -43,6 +48,7 @@ const getMonthStatus = (readings, monthIndex) => {
 				label={"Sin recibo"}
 				icon={<CommentsDisabledRoundedIcon />}
 				color={"secondary"}
+				variant="filled"
 			/>
 		); // No hay invoice
 	}
@@ -53,6 +59,7 @@ const getMonthStatus = (readings, monthIndex) => {
 				label={"Sin pagar"}
 				icon={<MoneyOffRoundedIcon />}
 				color={"warning"}
+				variant="filled"
 			/>
 		); // No está pagado
 	}
@@ -72,42 +79,63 @@ export default function PaymentTable({ readings }: Props) {
 		<TableContainer>
 			<Table stickyHeader sx={{ width: "100%", textAlign: "left" }}>
 				<thead>
-					<TableRow>
-						<TableCell>Nº</TableCell>
-						<TableCell>Nombre</TableCell>
-						<TableCell>CI</TableCell>
-						<TableCell>Meter Number</TableCell>
-						<TableCell>Enero</TableCell>
-						<TableCell>Febrero</TableCell>
-						<TableCell>Marzo</TableCell>
-						<TableCell>Abril</TableCell>
-						<TableCell>Mayo</TableCell>
-						<TableCell>Junio</TableCell>
-						<TableCell>Julio</TableCell>
-						<TableCell>Agosto</TableCell>
-						<TableCell>Septiembre</TableCell>
-						<TableCell>Octubre</TableCell>
-						<TableCell>Noviembre</TableCell>
-						<TableCell>Diciembre</TableCell>
-					</TableRow>
+					<StyledTableRow>
+						<TableCell sx={{ fontWeight: "bold" }}>Nº</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Nombre</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Apellidos</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>CI</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Meter Number</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Enero</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Febrero</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Marzo</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Abril</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Mayo</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Junio</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Julio</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Agosto</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Septiembre</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Octubre</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Noviembre</TableCell>
+						<TableCell sx={{ fontWeight: "bold" }}>Diciembre</TableCell>
+					</StyledTableRow>
 				</thead>
-				<TableBody>
+				<TableBody sx={{ pt: 2 }}>
 					{readings.map((meter, index) => (
-						<TableRow hover key={index}>
-							<TableCell>{index + 1}</TableCell>
-							<TableCell>{meter.ci}</TableCell>
-							<TableCell>{meter.name}</TableCell>
-							<TableCell>{meter.surname}</TableCell>
-							<TableCell>{meter.meter_number}</TableCell>
+						<StyledTableRow hover key={index}>
+							<StyledTableCell>{index + 1}</StyledTableCell>
+							<StyledTableCell>{meter.name}</StyledTableCell>
+							<StyledTableCell>{meter.surname}</StyledTableCell>
+							<StyledTableCell>{meter.ci}</StyledTableCell>
+							<StyledTableCell>{meter.meter_number}</StyledTableCell>
 							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((_, monthIndex) => (
-								<TableCell key={monthIndex}>
+								<StyledTableCell key={monthIndex}>
 									{getMonthStatus(meter.meterReadings, monthIndex)}
-								</TableCell>
+								</StyledTableCell>
 							))}
-						</TableRow>
+						</StyledTableRow>
 					))}
 				</TableBody>
 			</Table>
 		</TableContainer>
 	);
 }
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+	[`&.${tableCellClasses.head}`]: {
+		backgroundColor: theme.palette.common.black,
+		color: theme.palette.common.white,
+	},
+	[`&.${tableCellClasses.body}`]: {
+		fontSize: 14,
+	},
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+	"&:nth-of-type(odd)": {
+		backgroundColor: theme.palette.action.hover,
+	},
+	// hide last border
+	"&:last-child td, &:last-child th": {
+		border: 0,
+	},
+}));

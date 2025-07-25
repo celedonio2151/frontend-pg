@@ -1,3 +1,4 @@
+// Devuelve las fechas de inicio y fin del mes basado en la fecha proporcionada
 export default function getFirstEndDates(date: Date) {
 	const year = date.getFullYear();
 	const month = date.getMonth();
@@ -14,6 +15,7 @@ export default function getFirstEndDates(date: Date) {
 	};
 }
 
+// Devuelve las fechas de inicio y fin del año basado en la fecha proporcionada
 export function getFirstEndDatesYear(date: Date) {
 	const year = date.getFullYear();
 

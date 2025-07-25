@@ -5,13 +5,19 @@ import {
 	Grid,
 	Divider,
 	Typography,
+	Stack,
 } from "@mui/material";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
-// import DeleteIcon from "@mui/icons-material/Delete";
+
+// MUI ICONS
 import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import ReceiptRoundedIcon from "@mui/icons-material/ReceiptRounded";
+import MarkUnreadChatAltRoundedIcon from "@mui/icons-material/MarkUnreadChatAltRounded";
+import MarkChatReadRoundedIcon from "@mui/icons-material/MarkChatReadRounded";
+import BallotRoundedIcon from "@mui/icons-material/BallotRounded";
+
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useMemo, useState, useCallback } from "react";
 import CustomTable from "examples/Table";
@@ -39,6 +45,8 @@ import { useSessionStorage } from "hooks/useStorage";
 import EmptyLoader from "components/loader/EmptyLoader";
 import ErrorLoader from "components/loader/ErrorLoader";
 import DatePickerInput from "components/DataPicker/DataPicker";
+import { softColors } from "theme/palette";
+import { SummaryCard } from "pages/readings/components/SummaryCard";
 
 const months = [
 	"Enero",
@@ -346,7 +354,36 @@ export default function MeterReadingsPage() {
 
 						{!loading && data && data?.readings?.length > 0 && (
 							<Box p={0}>
-								<CustomTable data={data.readings} columns={columns} filter  />
+								<Stack
+									direction="row"
+									justifyContent="space-between"
+									spacing={2}
+									mx={2}
+								>
+									<SummaryCard
+										color={"info.main"}
+										bgColor={softColors.info}
+										icon={<BallotRoundedIcon color="info" />}
+										title="Lecturas"
+										value={data.summary.total}
+									/>
+									<SummaryCard
+										color={"success.main"}
+										bgColor={softColors.success}
+										icon={<MarkChatReadRoundedIcon color="success" />}
+										title="Lecturados"
+										value={data.summary.read}
+									/>
+									<SummaryCard
+										color={"warning.main"}
+										bgColor={softColors.warning}
+										icon={<MarkUnreadChatAltRoundedIcon color="warning" />}
+										title="Lec. Pendientes"
+										value={data.summary.unread}
+									/>
+								</Stack>
+								<Divider />
+								<CustomTable data={data.readings} columns={columns} filter />
 								<JsonToExcel headers={headers} data={excelData} />
 							</Box>
 						)}
