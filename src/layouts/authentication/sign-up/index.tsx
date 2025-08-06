@@ -51,6 +51,7 @@ import usePost from "hooks/usePost";
 import { useForm } from "react-hook-form";
 import paths from "routes/paths";
 import { useAuthContext } from "context/AuthContext";
+import type { UserLogin } from "interfaces/Profile.interface";
 
 interface CreateUserForm {
 	ci: number;
@@ -68,7 +69,7 @@ export default function Cover() {
 	const { enqueueSnackbar } = useSnackbar();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showCodeAdmin, setShowCodeAdmin] = useState(false);
-	const { post, loading, error } = usePost();
+	const { post, loading, error } = usePost<UserLogin>();
 	const { setToken, setRefreshToken, setProfile } = useAuthContext();
 	const navigate = useNavigate();
 
@@ -77,7 +78,13 @@ export default function Cover() {
 		handleSubmit,
 		watch,
 		formState: { errors },
-	} = useForm<CreateUserForm>();
+	} = useForm<CreateUserForm>({
+		mode: "onChange", // Validación en tiempo real
+	});
+
+	// Expresión regular para contraseña fuerte
+	const strongPasswordRegex =
+		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};':",.<>/?\\|`~]).{6,50}$/;
 
 	const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -107,8 +114,8 @@ export default function Cover() {
 
 			const res = await post("/auth/admin/signup", formData);
 			if (res) {
-				setToken(res.token);
-				setRefreshToken(res.refreshToken);
+				setToken(res.myTokens.accessToken);
+				setRefreshToken(res.myTokens.refreshToken);
 				setProfile(res.user);
 				enqueueSnackbar("Usuario registrado exitosamente", {
 					variant: "success",
@@ -157,12 +164,7 @@ export default function Cover() {
 					</Grid>
 				</MDBox>
 				<Box pt={4} pb={3} px={2}>
-					<Box
-						component="form"
-						// noValidate
-						onSubmit={handleSubmit(onSubmit)}
-						role="form"
-					>
+					<Box component="form" onSubmit={handleSubmit(onSubmit)} role="form">
 						<Box mb={2}>
 							<TextField
 								type="number"
@@ -261,6 +263,15 @@ export default function Cover() {
 										minLength: {
 											value: 6,
 											message: "Debe tener al menos 6 caracteres",
+										},
+										maxLength: {
+											value: 50,
+											message: "No puede tener más de 50 caracteres",
+										},
+										pattern: {
+											value: strongPasswordRegex,
+											message:
+												"La contraseña debe tener mayúsculas, minúsculas, números y símbolos",
 										},
 									})}
 									error={!!errors.password}

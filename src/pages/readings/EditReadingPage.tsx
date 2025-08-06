@@ -187,6 +187,7 @@ export default function EditReadingPage() {
 										title="Informacion del medidor"
 										meter={reading?.waterMeter}
 										reading={reading!}
+										method="cash"
 									/>
 									{invoice && !invoice.isPaid && !loadingInvoice && (
 										<PayHere
@@ -221,6 +222,7 @@ export default function EditReadingPage() {
 										title="Informacion del medidor"
 										meter={reading?.waterMeter}
 										reading={reading}
+										method="qr"
 									/>
 									{invoice && !invoice.isPaid && !loadingInvoice && (
 										<PayQR

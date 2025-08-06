@@ -1,13 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-	Button,
-	Card,
-	Chip,
-	Grid,
-	IconButton,
-	Stack,
-	Typography,
-} from "@mui/material";
+import { Card, Chip, IconButton, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
 // MUI ICONS
@@ -86,7 +78,7 @@ export default function RolesPage() {
 				id: "acciones",
 				header: "Acciones",
 				cell: ({ row }: any) => (
-					<Stack direction="row" spacing={1}>
+					<Stack direction="row" justifyContent={"center"} spacing={1}>
 						<IconButton
 							size="small"
 							onClick={() => handleEdit(row.original._id)}

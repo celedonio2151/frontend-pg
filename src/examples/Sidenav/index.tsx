@@ -51,10 +51,12 @@ import {
 } from "context";
 import { LogarithmicScale } from "chart.js";
 import { useAuthContext } from "context/AuthContext";
+import { Box } from "@mui/material";
+import paths from "routes/paths";
 
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
 	const { token } = useAuthContext();
-	const postRequest = usePost(`/auth/logout`, token);
+	const { post: postRequest, loading, error } = usePost();
 	const navigate = useNavigate();
 	const [controller, dispatch] = useMaterialUIController();
 	const {
@@ -103,18 +105,18 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
 		return () => window.removeEventListener("resize", handleMiniSidenav);
 	}, [dispatch, location]);
 	// handle on close session when exit plataform
-	const handleOnCloseSession = () => {
+	const handleOnCloseSession = async () => {
 		console.log("Cerrando session");
-		postRequest()
+		postRequest("/auth/logout", null, token)
 			.then((response) => {
 				console.log(response);
 				localStorage.clear();
-				navigate(`/authentication/sign-in`);
+				navigate(paths.signin);
 			})
 			.catch((err) => {
 				console.log(err);
 				localStorage.clear();
-				navigate(`/authentication/sign-in`);
+				navigate(paths.signin);
 			})
 			.finally(() => {
 				window.location.reload(); // Refresca la página
@@ -239,7 +241,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
 				}
 			/>
 			<List>{renderRoutes}</List>
-			<MDBox p={2} mt="auto">
+			<Box p={2} mt="auto">
 				<MDButton
 					component="a"
 					// href="https://www.creative-tim.com/product/material-dashboard-pro-react"
@@ -253,7 +255,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
 				>
 					Cerrar session
 				</MDButton>
-			</MDBox>
+			</Box>
 		</SidenavRoot>
 	);
 }

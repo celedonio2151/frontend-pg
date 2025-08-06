@@ -14,33 +14,15 @@ Coded by www.creative-tim.com
 */
 
 // @mui material components
-import {
-	Box,
-	IconButton,
-	List,
-	ListItemButton,
-	ListItemIcon,
-	ListItem,
-	ListItemText,
-	Card,
-	Grid,
-	Stack,
-	Chip,
-	Avatar,
-} from "@mui/material";
+import { Box, IconButton, Card, Stack, Chip, Avatar } from "@mui/material";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
-// Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
-
 // MUI ICONS
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 // Data
@@ -127,6 +109,7 @@ export default function ListUsers() {
 			});
 		// console.log("Abriendo dialog", row.original);
 	};
+
 	function handleOnClickEdit(userId: string) {
 		navigate(paths.editUser.split(":")[0] + `${userId}`);
 	}
@@ -200,20 +183,18 @@ export default function ListUsers() {
 				id: "acciones",
 				header: "Acciones",
 				cell: ({ row }) => (
-					<Stack direction="row" spacing={1}>
+					<Stack direction="row" justifyContent={"center"} spacing={1}>
 						<IconButton
 							size="medium"
 							onClick={() => handleOnClickEdit(row.original._id)}
 						>
-							<EditNoteRoundedIcon color="info" />
-							{/* <IconifyIcon icon={"mdi:account-edit"} color="primary.main" /> */}
+							<EditRoundedIcon color="info" />
 						</IconButton>
 						<IconButton
 							size="medium"
 							onClick={() => openModal(row.original._id)}
 						>
 							<DeleteIcon color="error" />
-							{/* <IconifyIcon icon={"mdi:delete"} color={"error.main"} /> */}
 						</IconButton>
 					</Stack>
 				),
@@ -273,6 +254,7 @@ export default function ListUsers() {
 						{loading && <MDTableLoading title={"Cargando Usuarios"} rows={5} />}
 					</MDBox>
 				</Card>
+				{/* MODAL TO DELETE USER */}
 				<CustomModal
 					title="Eliminar usuario"
 					open={modal}
@@ -282,73 +264,6 @@ export default function ListUsers() {
 					confirmText="Eliminar"
 				/>
 			</MDBox>
-			{/* DIALOG */}
-			{/* <MDScrollDialog
-				open={openDiaolog}
-				setOpen={setOpenDialog}
-				title={`Medidores de ${row?.name} ${row?.surname}`}
-				closeButton={false}
-			>
-				<Box
-					sx={{
-						// width: "100%",
-						maxWidth: 360,
-						bgcolor: "background.paper",
-					}}
-				>
-					<List>
-						{waterMeters && waterMeters.length > 0 ? (
-							waterMeters.map((water, i) => (
-								<ListItem
-									key={i}
-									disablePadding={true}
-									secondaryAction={
-										<IconButton edge="start" aria-label="status">
-											{water.status ? (
-												<StatusCircle color={"green"} />
-											) : (
-												<StatusCircle color={"red"} />
-											)}
-										</IconButton>
-									}
-								>
-									<ListItemButton>
-										<ListItemIcon>
-											<SpeedRoundedIcon />
-										</ListItemIcon>
-										<ListItemText primary={water.meterNumber} />
-									</ListItemButton>
-								</ListItem>
-							))
-						) : (
-							<ListItem>
-								{loadingMeter ? (
-									<MDTypography sx={{ p: 2 }} component="h3" variant="p">
-										Cargado medidores
-									</MDTypography>
-								) : (
-									<MDTypography sx={{ p: 2 }} component="h3" variant="p">
-										No tiene medidores registrados
-									</MDTypography>
-								)}
-							</ListItem>
-						)}
-					</List>
-				</Box>
-			</MDScrollDialog> */}
 		</>
-	);
-}
-
-function StatusCircle({ color }) {
-	return (
-		<Box
-			sx={{
-				width: 15,
-				height: 15,
-				bgcolor: color,
-				borderRadius: "50%",
-			}}
-		/>
 	);
 }

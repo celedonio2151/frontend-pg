@@ -9,7 +9,6 @@ import FormDirector from "pages/directors/components/FormDirector";
 import { formateDate } from "helpers/formatDate";
 import { useAuthContext } from "context/AuthContext";
 import type { Directors } from "pages/directors/interfaces/director.interface";
-import PageLoader from "components/loader/PageLoader";
 import LoadingItem from "components/loader/LoadingItem";
 
 export default function DirectorPage() {

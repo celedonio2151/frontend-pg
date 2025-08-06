@@ -19,6 +19,7 @@ const AuthLayout = lazy(() => import("layouts/auth-layout"));
 // Autenticación
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
+import PublicRoute from "private/PublicRoute";
 const RegisterUserPage = lazy(() => import("layouts/authentication/register"));
 const Cover = lazy(() => import("layouts/authentication/sign-up"));
 
@@ -132,20 +133,29 @@ const routes = [
 				),
 				children: [
 					{
-						path: paths.signin,
 						element: (
-							<AuthLayout>
-								<SignIn />
-							</AuthLayout>
+							<PublicRoute>
+								<Outlet />
+							</PublicRoute>
 						),
-					},
-					{
-						path: paths.signup,
-						element: (
-							<AuthLayout>
-								<SignUp />
-							</AuthLayout>
-						),
+						children: [
+							{
+								path: paths.signin,
+								element: (
+									<AuthLayout>
+										<SignIn />
+									</AuthLayout>
+								),
+							},
+							{
+								path: paths.signup,
+								element: (
+									<AuthLayout>
+										<SignUp />
+									</AuthLayout>
+								),
+							},
+						],
 					},
 					{ path: paths.resetPassword, element: <Cover /> },
 				],

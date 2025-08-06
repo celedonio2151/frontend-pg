@@ -126,7 +126,7 @@ export default function Meters() {
 				id: "acciones",
 				header: "Acciones",
 				cell: ({ row }) => (
-					<Stack direction="row" spacing={1}>
+					<Stack direction="row" justifyContent={"center"} spacing={1}>
 						<IconButton
 							size="small"
 							onClick={() => handleOnClickEdit(row.original._id)}
@@ -151,9 +151,6 @@ export default function Meters() {
 	return (
 		<>
 			<Box pt={2} pb={3}>
-				<Box mb={5}>
-					<MDButton color={"info"}>Nuevo Medidor</MDButton>
-				</Box>
 				<Card>
 					<MDBox
 						mx={2}
