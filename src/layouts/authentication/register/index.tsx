@@ -12,7 +12,7 @@ Coded by www.creative-tim.com
  
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  */
-import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 
 // @mui material components
 import Grid from "@mui/material/Grid";
@@ -21,29 +21,22 @@ import InputAdornment from "@mui/material/InputAdornment";
 import {
 	Box,
 	FormControl,
+	FormHelperText,
 	IconButton,
 	InputLabel,
 	OutlinedInput,
+	TextField,
 } from "@mui/material";
 
 // @mui icons
 import ContactEmergencyRoundedIcon from "@mui/icons-material/ContactEmergencyRounded";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
-import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
-import StarRateRoundedIcon from "@mui/icons-material/StarRateRounded";
 import PhoneEnabledRoundedIcon from "@mui/icons-material/PhoneEnabledRounded";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-
-// Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
 
 // Images
 import bgImage from "assets/images/bg-sign-up-cover.jpeg";
@@ -55,58 +48,58 @@ import { useAuthContext } from "context/AuthContext";
 import { useSnackbar } from "notistack";
 import usePost from "hooks/usePost";
 import type { User } from "pages/users/interfaces/user.interface";
+import MDInput from "components/MDInput";
 
 export default function RegisterUserPage() {
 	const { enqueueSnackbar } = useSnackbar();
 	const navigate = useNavigate();
 	const { token } = useAuthContext();
-	const { post, loading, error } = usePost<User>();
+	const { post, loading } = usePost<User>();
 
-	// const postRequest = usePost(`/auth/signup`, token);
-	// console.log("register : ", token);
+	const {
+		control,
+		handleSubmit,
+		formState: { errors, isSubmitting },
+	} = useForm({
+		defaultValues: {
+			ci: "",
+			name: "",
+			surname: "",
+			meter_number: "",
+			phone_number: "",
+		},
+	});
 
-	const handleOnSubmit = async (e) => {
-		e.preventDefault();
-		console.log("onSubmit");
-		const data = new FormData(e.currentTarget);
-		data.append("password", 11111111);
-		data.append("birthdate", "2000-01-01");
-		data.append("roles", "USER");
-		data.append("status", true);
-		if (!data.get("phone_number")) {
-			data.delete("phone_number");
-		}
-		if (!data.get("meter_number")) {
-			data.delete("meter_number");
-		}
+	const onSubmit = async (data: any) => {
 		const body = {
-			ci: data.get("ci"),
-			name: data.get("name"),
-			surname: data.get("surname"),
-			meter_number: data.get("meter_number"),
-			phone_number: data.get("phone_number"),
+			...data,
+			password: "11111111", // Hardcoded password
+			birthdate: "2000-01-01", // Hardcoded birthdate
+			roles: ["USER"],
+			status: true,
 		};
-		try {
-			const res = await post("/auth/signup", body, token);
-			if (res) {
-				enqueueSnackbar("Usuario registrado correctamente", {
-					variant: "success",
-				});
-				navigate("/users");
-			}
-		} catch (err) {
-			const errorMessage = handlerErrors(err || error);
-			console.error("Error al registrar usuario:", errorMessage);
-			if (error) {
-				enqueueSnackbar(errorMessage, { variant: "error" });
-			}
-		}
+
+		if (!body.phone_number) delete body.phone_number;
+		if (!body.meter_number) delete body.meter_number;
+		console.log(body);
+
+		// try {
+		// 	const res = await post("/auth/signup", body, token);
+		// 	if (res) {
+		// 		enqueueSnackbar("Usuario registrado correctamente", {
+		// 			variant: "success",
+		// 		});
+		// 		navigate("/users");
+		// 	}
+		// } catch (err) {
+		// 	const errorMessage = handlerErrors(err);
+		// 	console.error("Error al registrar usuario:", errorMessage);
+		// 	enqueueSnackbar(errorMessage, { variant: "error" });
+		// }
 	};
 
 	return (
-		<DashboardLayout>
-			<DashboardNavbar />
-			<MDBox mb={2} />
+		<>
 			<MDBox
 				width="calc(100% - 2rem)"
 				minHeight={"35vh"}
@@ -146,7 +139,7 @@ export default function RegisterUserPage() {
 								coloredShadow="success"
 								mx={2}
 								mt={-3}
-								p={3}
+								p={2}
 								mb={1}
 								textAlign="center"
 							>
@@ -168,139 +161,201 @@ export default function RegisterUserPage() {
 									Mosoj Llajta
 								</MDTypography>
 							</MDBox>
-							<MDBox pt={4} pb={3} px={3}>
-								<MDBox
+
+							<Box pt={2} pb={1} px={2}>
+								<Box
 									component="form"
-									// noValidate
-									onSubmit={handleOnSubmit}
-									role="form"
+									onSubmit={handleSubmit(onSubmit)}
+									noValidate
 								>
-									<MDBox mb={2}>
-										<FormControl fullWidth variant="outlined">
-											<InputLabel htmlFor="outlined-adornment-ci">
-												CI
-											</InputLabel>
-											<OutlinedInput
-												id="outlined-adornment-ci"
-												type="number"
-												name="ci"
-												required
-												endAdornment={
-													<InputAdornment position="end">
-														<IconButton aria-label="toggle ci" edge="end">
-															<ContactEmergencyRoundedIcon />
-														</IconButton>
-													</InputAdornment>
-												}
-												label="ci"
-											/>
-										</FormControl>
-									</MDBox>
-									<MDBox mb={2}>
-										<FormControl fullWidth variant="outlined">
-											<InputLabel htmlFor="outlined-adornment_name">
-												Nombre
-											</InputLabel>
-											<OutlinedInput
-												id="outlined-adornment-name"
-												type="text"
-												name="name"
-												required
-												endAdornment={
-													<InputAdornment position="end">
-														<IconButton aria-label="toggle name" edge="end">
-															<AccountCircleRoundedIcon />
-														</IconButton>
-													</InputAdornment>
-												}
-												label="Nombre"
-											/>
-										</FormControl>
-									</MDBox>
-									<MDBox mb={2}>
-										<FormControl fullWidth variant="outlined">
-											<InputLabel htmlFor="outlined-surname">
-												Apellidos
-											</InputLabel>
-											<OutlinedInput
-												id="outlined-adornment-surname"
-												type="text"
-												name="surname"
-												required
-												endAdornment={
-													<InputAdornment position="end">
-														<IconButton aria-label="toggle surname" edge="end">
-															<ContactEmergencyRoundedIcon />
-														</IconButton>
-													</InputAdornment>
-												}
-												label="Apellido"
-											/>
-										</FormControl>
-									</MDBox>
-									<MDBox mb={2}>
-										<FormControl fullWidth variant="outlined">
-											<InputLabel htmlFor="outlined-meter_number">
-												Número del Medidor
-											</InputLabel>
-											<OutlinedInput
-												id="outlined-meter_number"
-												type="number"
-												name="meter_number"
-												// required
-												min="9999"
-												endAdornment={
-													<InputAdornment position="end">
-														<IconButton aria-label="toggle ci" edge="end">
-															<SpeedRoundedIcon />
-														</IconButton>
-													</InputAdornment>
-												}
-												label="Número del Medidor"
-											/>
-										</FormControl>
-									</MDBox>
-									<MDBox mb={2}>
-										<FormControl fullWidth variant="outlined">
-											<InputLabel htmlFor="outlined-meter_number">
-												Celular
-											</InputLabel>
-											<OutlinedInput
-												id="outlined-celular"
-												type="number"
-												name="phone_number"
-												min="9999999"
-												endAdornment={
-													<InputAdornment position="end">
-														<IconButton aria-label="toggle ci" edge="end">
-															<PhoneEnabledRoundedIcon />
-														</IconButton>
-													</InputAdornment>
-												}
-												label="Celular"
-											/>
-										</FormControl>
-									</MDBox>
-									<Box mt={4} mb={1}>
+									<Box mb={2}>
+										<Controller
+											name="ci"
+											control={control}
+											rules={{
+												required: "El CI es requerido",
+												minLength: 5,
+												maxLength: 12,
+											}}
+											render={({ field }) => (
+												<FormControl fullWidth variant="outlined">
+													<InputLabel
+														htmlFor="outlined-adornment-ci"
+														error={!!errors.ci}
+													>
+														CI
+													</InputLabel>
+													<OutlinedInput
+														{...field}
+														id="outlined-adornment-ci"
+														label="CI"
+														error={!!errors.ci}
+														endAdornment={
+															<InputAdornment position="end">
+																<IconButton edge="end">
+																	<ContactEmergencyRoundedIcon />
+																</IconButton>
+															</InputAdornment>
+														}
+													/>
+													{errors.ci && (
+														<FormHelperText error>
+															{errors.ci.message}
+														</FormHelperText>
+													)}
+												</FormControl>
+											)}
+										/>
+									</Box>
+
+									<Box mb={2}>
+										<Controller
+											name="name"
+											control={control}
+											rules={{
+												required: "El nombre es requerido",
+												minLength: 3,
+												maxLength: 30,
+												pattern: {
+													value: /^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+$/,
+													message: "El nombre no debe empezar con numero",
+												},
+											}}
+											render={({ field }) => (
+												<FormControl fullWidth variant="outlined">
+													<InputLabel
+														htmlFor="outlined-adornment-name"
+														error={!!errors.name}
+													>
+														Nombre
+													</InputLabel>
+													<OutlinedInput
+														{...field}
+														id="outlined-adornment-name"
+														type="text"
+														label="Nombre"
+														error={!!errors.name}
+														endAdornment={
+															<InputAdornment position="end">
+																<IconButton edge="end">
+																	<AccountCircleRoundedIcon />
+																</IconButton>
+															</InputAdornment>
+														}
+													/>
+													{errors.name && (
+														<FormHelperText error>
+															{errors.name.message}
+														</FormHelperText>
+													)}
+												</FormControl>
+											)}
+										/>
+									</Box>
+
+									<Box mb={2}>
+										<Controller
+											name="surname"
+											control={control}
+											rules={{
+												required: "El apellido es requerido",
+												minLength: 3,
+												maxLength: 30,
+												pattern: {
+													value: /^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+$/,
+													message: "El nombre no debe empezar con numero",
+												},
+											}}
+											render={({ field }) => (
+												<FormControl fullWidth variant="outlined">
+													<InputLabel
+														htmlFor="outlined-adornment-surname"
+														error={!!errors.surname}
+													>
+														Apellidos
+													</InputLabel>
+													<OutlinedInput
+														{...field}
+														id="outlined-adornment-surname"
+														type="text"
+														label="Apellidos"
+														required
+														error={!!errors.surname}
+														endAdornment={
+															<InputAdornment position="end">
+																<IconButton edge="end">
+																	<ContactEmergencyRoundedIcon />
+																</IconButton>
+															</InputAdornment>
+														}
+													/>
+													{errors.surname && (
+														<FormHelperText error>
+															{errors.surname.message}
+														</FormHelperText>
+													)}
+												</FormControl>
+											)}
+										/>
+									</Box>
+
+									<Box mb={2}>
+										<Controller
+											name="meter_number"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													type="number"
+													label="Número del Medidor"
+													fullWidth
+												/>
+											)}
+										/>
+									</Box>
+
+									<Box mb={2}>
+										<Controller
+											name="phone_number"
+											control={control}
+											rules={{
+												pattern: {
+													value: /^[0-9]+$/,
+													message:
+														"El número de teléfono no debe empezar con letras",
+												},
+											}}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													type="number"
+													label="Celular"
+													fullWidth
+												/>
+											)}
+										/>
+									</Box>
+
+									<Box mt={3} mb={1}>
 										<MDButton
 											variant="gradient"
 											color="info"
 											type="submit"
-											disabled={loading}
+											disabled={isSubmitting}
 											size="large"
 											fullWidth
 										>
-											Registrar usuario
+											{isSubmitting
+												? "Registrando usuario..."
+												: "Registrar usuario"}
 										</MDButton>
 									</Box>
-								</MDBox>
-							</MDBox>
+								</Box>
+							</Box>
 						</Card>
 					</Grid>
 				</Grid>
 			</MDBox>
-			{/* <Header></Header> */}
-			<Footer />
-		</DashboardLayout>
+		</>
 	);
 }
