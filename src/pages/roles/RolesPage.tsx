@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Card, Chip, IconButton, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useSnackbar } from "notistack";
 // MUI ICONS
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -19,17 +20,25 @@ import { useAuthContext } from "context/AuthContext";
 import MDButton from "components/MDButton";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
+import useDelete from "hooks/useDelete";
 
 export default function RolesPage() {
 	const { token } = useAuthContext();
+	const { enqueueSnackbar } = useSnackbar();
 	const navigate = useNavigate();
+	const [eventTrigger, setEventTrigger] = useState(new Date());
 	const { data, loading, error } = useFetch<Roles>({
 		endpoint: "/role",
-		eventTrigger: null,
+		eventTrigger,
 		token,
 	});
 	const [open, setOpen] = useState(false);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const {
+		del: deleteRequest,
+		loading: loadingDelete,
+		error: errorDelete,
+	} = useDelete();
 
 	const handleEdit = (roleId: any) => {
 		console.log("Editar rol:", roleId);
@@ -41,6 +50,18 @@ export default function RolesPage() {
 		console.log("Eliminar rol con ID:", selectedId);
 		setOpen(false);
 		// Hacer DELETE al endpoint /role/:id y refrescar la lista
+		deleteRequest(`/role/${selectedId}`)
+			.then(() => {
+				enqueueSnackbar("Rol eliminado correctamente", {
+					variant: "success",
+				});
+			})
+			.catch(() => {
+				enqueueSnackbar("Error al eliminar el rol", { variant: "error" });
+			})
+			.finally(() => {
+				setEventTrigger(new Date());
+			});
 	};
 
 	const openModal = (roleId: string) => {
