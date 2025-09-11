@@ -1,4 +1,3 @@
-import type { User } from "interfaces/Profile.interface";
 import {
 	createContext,
 	type ReactNode,
@@ -6,6 +5,10 @@ import {
 	useEffect,
 	useState,
 } from "react";
+import { useSnackbar } from "notistack";
+
+import type { User } from "interfaces/Profile.interface";
+import eventBus from "helpers/eventBus";
 
 // Definir las propiedades del contexto
 interface AuthContextProps {
@@ -32,38 +35,60 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	// Se inicializa como undefined para indicar que no hay un perfil cargado
 	const [userProfile, setUserProfile] = useState<User | undefined>(undefined);
 	const [loading, setLoading] = useState(true); // <--- Añadido
+	const { enqueueSnackbar } = useSnackbar();
 
 	// Cargar el token y el perfil al montar el componente
 	useEffect(() => {
 		const loadAuthData = async () => {
 			try {
-				const storedToken = await localStorage.getItem("token");
-				const storedRefreshToken = await localStorage.getItem("refreshToken");
+				const storedToken = localStorage.getItem("token");
+				const storedRefreshToken = localStorage.getItem("refreshToken");
 				const storedProfile = await localStorage.getItem("userProfile");
 
-				if (storedToken) setTokenState(storedToken);
-				if (storedRefreshToken) setRefreshTokenState(storedRefreshToken);
+				if (storedToken) setTokenState(JSON.parse(storedToken));
+				if (storedRefreshToken) {
+					setRefreshTokenState(JSON.parse(storedRefreshToken));
+				}
 				// Si el perfil de usuario está en formato JSON, lo parseamos
 				if (storedProfile) setUserProfile(JSON.parse(storedProfile));
 			} catch (error) {
 				console.error("Error al cargar los datos de autenticación:", error);
-				alert("Error al cargar la sesión");
+				enqueueSnackbar(
+					"Error al cargar los datos de autenticación desde el almacenamiento local",
+					{
+						variant: "error",
+					}
+				);
 			} finally {
 				setLoading(false); // <--- Finaliza la carga
 			}
 		};
 
+		const handleTokenRefresh = (data: { token: string }) => {
+			if (data?.token) {
+				setTokenState(data.token);
+			}
+		};
+
 		loadAuthData();
+
+		eventBus.on("tokenRefreshed", handleTokenRefresh);
+
+		return () => {
+			eventBus.remove("tokenRefreshed", handleTokenRefresh);
+		};
 	}, []);
 
 	// Función para establecer el token
 	const setToken = async (newToken: string) => {
 		try {
 			setTokenState(newToken);
-			await localStorage.setItem("token", newToken);
+			await localStorage.setItem("token", JSON.stringify(newToken));
 		} catch (error) {
 			console.error("Error al guardar el token:", error);
-			alert("Error al guardar el token");
+			enqueueSnackbar("Error al guardar el token", {
+				variant: "error",
+			});
 		}
 	};
 
@@ -71,10 +96,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const setRefreshToken = async (newToken: string) => {
 		try {
 			setRefreshTokenState(newToken);
-			await localStorage.setItem("refreshToken", newToken);
+			await localStorage.setItem("refreshToken", JSON.stringify(newToken));
 		} catch (error) {
 			console.error("Error al guardar el refresh token:", error);
-			alert("Error al guardar el refresh token");
+			enqueueSnackbar("Error al guardar el refresh token", {
+				variant: "error",
+			});
 		}
 	};
 
@@ -86,7 +113,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			await localStorage.setItem("userProfile", jsonValue);
 		} catch (error) {
 			console.error("Error al guardar el perfil del usuario:", error);
-			alert("Error al guardar el perfil del usuario");
+			enqueueSnackbar("Error al guardar el perfil del usuario", {
+				variant: "error",
+			});
 		}
 	};
 
@@ -96,12 +125,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			setTokenState(undefined);
 			setRefreshTokenState(undefined);
 			setUserProfile(undefined);
-			await localStorage.removeItem("token");
-			await localStorage.removeItem("refreshToken");
-			await localStorage.removeItem("userProfile");
+			localStorage.removeItem("token"); // localStorage es síncrono, no necesita await
+			localStorage.removeItem("refreshToken");
+			localStorage.removeItem("userProfile");
 		} catch (error) {
 			console.error("Error al cerrar sesión:", error);
-			alert("Error al cerrar sesión");
+			enqueueSnackbar("Error al cerrar sesión", {
+				variant: "error",
+			});
 		}
 	};
 

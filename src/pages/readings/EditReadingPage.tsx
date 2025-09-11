@@ -24,6 +24,7 @@ import MDButton from "components/MDButton";
 import PayHere from "pages/readings/components/PayHere";
 import MeterInfoCard from "pages/readings/components/MeterInfoCard";
 import PayQR from "pages/readings/components/PayQR";
+import PayManyInvoices from "pages/readings/components/PayManyInvoices";
 
 export default function EditReadingPage() {
 	const { token } = useAuthContext();
@@ -251,6 +252,9 @@ export default function EditReadingPage() {
 								</TabPanel>
 							</Grid>
 						</Grid>
+					)}
+					{reading && !loading && invoice && !loadingInvoice && (
+						<PayManyInvoices waterMeter={reading?.waterMeter} />
 					)}
 				</Grid>
 			</MDBox>
