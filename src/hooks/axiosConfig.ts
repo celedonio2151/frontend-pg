@@ -14,7 +14,7 @@ if (!URL_BASE) {
 // ============================================================================
 const axiosInstance: AxiosInstance = axios.create({
 	baseURL: URL_BASE,
-	timeout: 5000,
+	timeout: 10000,
 	headers: {
 		Accept: "application/json",
 	},
@@ -63,7 +63,12 @@ axiosInstance.interceptors.request.use(async (req) => {
 		return req;
 	} catch (error) {
 		console.error("No se pudo refrescar el token.", error);
-		// Aquí podrías limpiar los tokens y redirigir al login.
+		// El refresh token expiró o es inválido. Limpiamos todo.
+		localStorage.removeItem("token");
+		localStorage.removeItem("refreshToken");
+		localStorage.removeItem("userProfile");
+		eventBus.dispatch("logout"); // Notificamos al AuthContext para que limpie su estado.
+		window.location.href = "/auth/signin"; // Redirigimos al login.
 		return Promise.reject(error);
 	}
 });

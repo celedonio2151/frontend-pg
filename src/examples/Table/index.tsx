@@ -94,7 +94,7 @@ export default function MainTable({
 				// width={1}
 				// bgcolor={'red'}
 				justifyContent={"space-between"}
-				marginY={2}
+				marginY={1}
 			>
 				{showPerRow && (
 					<FormControl>

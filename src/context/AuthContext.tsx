@@ -1,6 +1,7 @@
 import {
 	createContext,
 	type ReactNode,
+	useCallback,
 	useContext,
 	useEffect,
 	useState,
@@ -19,7 +20,7 @@ interface AuthContextProps {
 	setToken: (token: string) => Promise<void>;
 	setRefreshToken: (token: string) => Promise<void>;
 	setProfile: (profile: User) => Promise<void>;
-	logout: () => Promise<void>;
+	logout: () => void;
 }
 
 // Crear un contexto con un valor inicial nulo
@@ -64,6 +65,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			}
 		};
 
+		// El interceptor de Axios llamará a esto cuando el refresh token falle.
+		const handleLogout = () => {
+			logout();
+		};
+
 		const handleTokenRefresh = (data: { token: string }) => {
 			if (data?.token) {
 				setTokenState(data.token);
@@ -72,12 +78,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 		loadAuthData();
 
+		// Suscribirse a los eventos
 		eventBus.on("tokenRefreshed", handleTokenRefresh);
+		eventBus.on("logout", handleLogout);
 
+		// Limpiar las suscripciones al desmontar
 		return () => {
 			eventBus.remove("tokenRefreshed", handleTokenRefresh);
+			eventBus.remove("logout", handleLogout);
 		};
-	}, []);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []); // El array de dependencias vacío es correcto aquí para que se ejecute solo una vez.
 
 	// Función para establecer el token
 	const setToken = async (newToken: string) => {
@@ -120,21 +131,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	// Función para cerrar sesión
-	const logout = async () => {
-		try {
-			setTokenState(undefined);
-			setRefreshTokenState(undefined);
-			setUserProfile(undefined);
-			localStorage.removeItem("token"); // localStorage es síncrono, no necesita await
-			localStorage.removeItem("refreshToken");
-			localStorage.removeItem("userProfile");
-		} catch (error) {
-			console.error("Error al cerrar sesión:", error);
-			enqueueSnackbar("Error al cerrar sesión", {
-				variant: "error",
-			});
-		}
-	};
+	const logout = useCallback(() => {
+		setTokenState(undefined);
+		setRefreshTokenState(undefined);
+		setUserProfile(undefined);
+		localStorage.removeItem("token");
+		localStorage.removeItem("refreshToken");
+		localStorage.removeItem("userProfile");
+		// Notificamos al usuario que su sesión ha expirado.
+		enqueueSnackbar("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.", {
+			variant: "warning",
+		});
+		// No es necesario redirigir aquí, ya que el interceptor lo hace.
+	}, [enqueueSnackbar]);
 
 	return (
 		<AuthContext.Provider

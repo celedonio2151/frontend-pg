@@ -58,6 +58,7 @@ import {
 	setMiniSidenav,
 	setOpenConfigurator,
 } from "context";
+import paths from "routes/paths";
 
 function DashboardNavbar({ absolute, light, isMini }) {
 	const [navbarType, setNavbarType] = useState();
@@ -176,7 +177,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
 						</MDBox>
 						<MDBox color={light ? "white" : "inherit"}>
 							{/* <Link to="/authentication/sign-in/basic"> */}
-							<Link to="/profile">
+							<Link to={`${paths.userMe}`}>
 								<IconButton sx={navbarIconButton} disableRipple>
 									<AccountCircleRoundedIcon fontSize="" sx={iconsStyle} />
 								</IconButton>

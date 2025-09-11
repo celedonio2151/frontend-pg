@@ -30,48 +30,46 @@ import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 import { useEffect, useMemo, useState } from "react";
 import CustomTable from "examples/Table";
 import { NavLink, useNavigate } from "react-router-dom";
-import MDButton from "components/MDButton";
-import MDScrollDialog from "components/MDDialog";
-import useFetchEvent from "hooks/useFetchEvent";
 import MDTableLoading from "components/MDTableLoading/MDTableLoading";
 import JsonToExcel from "components/XLSX/JsonToExcel";
 import useFetch from "hooks/useFetch";
 import { useAuthContext } from "context/AuthContext";
-import type { User, Users } from "layouts/users/interfaces/user.interface";
+import type { User, Users } from "pages/users/interfaces/user.interface";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formateDate } from "helpers/formatDate";
 import CustomModal from "components/Modal/CustomModal";
 import paths from "routes/paths";
+import EmptyLoader from "components/loader/EmptyLoader";
+import ErrorLoader from "components/loader/ErrorLoader";
 
 export default function ListUsers() {
 	const { token } = useAuthContext();
 	const navigate = useNavigate();
+	const [eventTrigger, setEventTrigger] = useState(new Date());
 	const [openDiaolog, setOpenDialog] = useState(false);
 	const [modal, setModal] = useState(false); // Modal para eliminar
 	const [userId, setUserId] = useState("");
-	const [waterMeters, setWaterMeters] = useState();
-	const [loadingMeter, setLoadingMeter] = useState(false);
-	const [row, setRow] = useState(null);
-	const [jsonToExcel, setJsonToExcel] = useState(null);
+	const [jsonToExcel, setJsonToExcel] = useState<any[] | null>(null);
 	const { data, loading, error } = useFetch<Users>({
 		endpoint: `/user`,
-		eventTrigger: null,
+		eventTrigger,
 		token,
 	});
 
 	useEffect(() => {
 		if (data) {
-			// setJsonToExcel(() =>
-			// 	data.users.map((item) => ({
-			// 		id: item._id,
-			// 		name: item.name,
-			// 		surname: item.surname,
-			// 		ci: item.ci,
-			// 		phone_number: item.phone_number,
-			// 		roles: item.roles.join(", "),
-			// 		status: item.status ? "Activo " : "Inactivo",
-			// 	}))
-			// );
+			setJsonToExcel(() =>
+				data.users.map((item: User) => ({
+					id: item._id,
+					name: item.name,
+					surname: item.surname,
+					ci: item.ci,
+					phone_number: item.phoneNumber,
+					roles:
+						JSON.stringify(item.roles?.map((r: any) => r.name)) || "Sin rol",
+					status: item.status ? "Activo " : "Inactivo",
+				}))
+			);
 		}
 
 		return () => {};
@@ -91,24 +89,7 @@ export default function ListUsers() {
 		setModal(false);
 	};
 
-	// console.log("🚀 ~ ListUsers ~ data:", data);
-	const handleClickOpenDialog = (row) => {
-		setOpenDialog(true);
-		setWaterMeters(null);
-		setLoadingMeter(true);
-		setRow(row.original);
-		useFetchEvent(`/meter/${row.original.ci}`, token)
-			.then((response) => {
-				setWaterMeters(response);
-			})
-			.catch((err) => {
-				// console.log(err);
-			})
-			.finally(() => {
-				setLoadingMeter(false);
-			});
-		// console.log("Abriendo dialog", row.original);
-	};
+	const reload = () => setEventTrigger(new Date());
 
 	function handleOnClickEdit(userId: string) {
 		navigate(paths.editUser.split(":")[0] + `${userId}`);
@@ -155,7 +136,7 @@ export default function ListUsers() {
 				cell: (info) => {
 					const roles = info.getValue().split(", ");
 					return (
-						<Stack direction="row" spacing={1}>
+						<Stack direction="row" spacing={1} justifyContent={"center"}>
 							{roles.map((r: string, idx: number) => (
 								<Chip
 									key={idx}
@@ -190,12 +171,12 @@ export default function ListUsers() {
 						>
 							<EditRoundedIcon color="info" />
 						</IconButton>
-						<IconButton
+						{/* <IconButton
 							size="medium"
 							onClick={() => openModal(row.original._id)}
 						>
 							<DeleteIcon color="error" />
-						</IconButton>
+						</IconButton> */}
 					</Stack>
 				),
 			},
@@ -205,7 +186,7 @@ export default function ListUsers() {
 
 	// console.log(data);
 	const headers = [
-		{ title: "ID", width: 4 },
+		{ title: "ID", width: 8 },
 		{ title: "NOMBRE", width: 20 },
 		{ title: "APELLIDO", width: 30 },
 		{ title: "CARNET DE IDENTIDAD", width: 20 },
@@ -232,7 +213,8 @@ export default function ListUsers() {
 							Lista de filiados Agua Potable Mosoj Llajta
 						</MDTypography>
 					</MDBox>
-					{data && data.users.length > 0 && (
+					{/* Show button export to excel */}
+					{data && data.users.length > 0 && jsonToExcel && (
 						<JsonToExcel
 							headers={headers}
 							data={jsonToExcel}
@@ -242,18 +224,31 @@ export default function ListUsers() {
 							// additionalInfo="Generado el 30/11/2024 por Admin"
 						/>
 					)}
-					<MDBox pt={3}>
+					<Box pt={0}>
 						{data && data.users.length === 0 && !loading && (
-							<MDTypography variant="h4" p={2}>
-								No hay usuarios registrados
-							</MDTypography>
+							<EmptyLoader
+								title="No hay usuarios registrados"
+								description="Lista de usuarios esta vacio"
+								onReload={reload}
+								reloadLabel="Recargar"
+							/>
 						)}
+
 						{data && data.users.length > 0 && !loading && (
-							<CustomTable data={data.users} columns={columns} />
+							<CustomTable data={data.users} columns={columns} filter />
 						)}
+
 						{loading && <MDTableLoading title={"Cargando Usuarios"} rows={5} />}
-					</MDBox>
+
+						{error && (
+							<ErrorLoader
+								title="Error al cargar los usuarios"
+								description={"Intente de nuevo mas tarde " + error.message}
+							/>
+						)}
+					</Box>
 				</Card>
+
 				{/* MODAL TO DELETE USER */}
 				<CustomModal
 					title="Eliminar usuario"

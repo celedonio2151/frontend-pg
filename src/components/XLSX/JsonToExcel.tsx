@@ -4,12 +4,12 @@ import * as XLSX from "xlsx";
 import SaveIcon from "@mui/icons-material/Save";
 
 import MDButton from "components/MDButton";
-import MDBox from "components/MDBox";
 import { formateDate } from "helpers/formatDate";
+import { Box } from "@mui/material";
 
 interface Header {
 	title: string;
-	field: string;
+	// field: string;
 	width?: number;
 }
 
@@ -46,7 +46,7 @@ export default function JsonToExcel<T>({
 
 	const createExcelFile = (
 		headers: Header[],
-		rows: T[],
+		rows: any[],
 		title: string,
 		additionalInfo: string
 	) => {
@@ -78,7 +78,7 @@ export default function JsonToExcel<T>({
 	};
 
 	return (
-		<MDBox p={2}>
+		<Box px={2} pt={2}>
 			{!loading ? (
 				<MDButton
 					color="success"
@@ -98,6 +98,6 @@ export default function JsonToExcel<T>({
 					Guardando
 				</MDButton>
 			)}
-		</MDBox>
+		</Box>
 	);
 }
