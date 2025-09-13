@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 import {
+	Box,
 	Card,
 	FormControl,
 	FormControlLabel,
@@ -120,7 +121,7 @@ export default function CreateRoleForm() {
 							</MDBox>
 
 							<MDBox pt={2} pb={3} px={3}>
-								<MDBox
+								<Box
 									component="form"
 									onSubmit={handleSubmit(onSubmit)}
 									role="form"
@@ -197,7 +198,7 @@ export default function CreateRoleForm() {
 											{isSubmitting ? "Registrando..." : "Registrar usuario"}
 										</MDButton>
 									</MDBox>
-								</MDBox>
+								</Box>
 							</MDBox>
 						</Card>
 					</Grid>

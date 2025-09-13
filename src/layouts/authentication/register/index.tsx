@@ -48,13 +48,12 @@ import { useAuthContext } from "context/AuthContext";
 import { useSnackbar } from "notistack";
 import usePost from "hooks/usePost";
 import type { User } from "pages/users/interfaces/user.interface";
-import MDInput from "components/MDInput";
 
 export default function RegisterUserPage() {
 	const { enqueueSnackbar } = useSnackbar();
 	const navigate = useNavigate();
 	const { token } = useAuthContext();
-	const { post, loading } = usePost<User>();
+	const { post, loading, error } = usePost<User>();
 
 	const {
 		control,
@@ -66,8 +65,9 @@ export default function RegisterUserPage() {
 			name: "",
 			surname: "",
 			meter_number: "",
-			phone_number: "",
+			phoneNumber: "",
 		},
+		shouldFocusError: true,
 	});
 
 	const onSubmit = async (data: any) => {
@@ -82,20 +82,18 @@ export default function RegisterUserPage() {
 		if (!body.phone_number) delete body.phone_number;
 		if (!body.meter_number) delete body.meter_number;
 		console.log(body);
-
-		// try {
-		// 	const res = await post("/auth/signup", body, token);
-		// 	if (res) {
-		// 		enqueueSnackbar("Usuario registrado correctamente", {
-		// 			variant: "success",
-		// 		});
-		// 		navigate("/users");
-		// 	}
-		// } catch (err) {
-		// 	const errorMessage = handlerErrors(err);
-		// 	console.error("Error al registrar usuario:", errorMessage);
-		// 	enqueueSnackbar(errorMessage, { variant: "error" });
-		// }
+		try {
+			const res = await post("/user", body, token);
+			if (res) {
+				enqueueSnackbar("Usuario registrado correctamente", {
+					variant: "success",
+				});
+				navigate("/users");
+			}
+		} catch (err) {
+			console.error("Error al registrar usuario:", error);
+			enqueueSnackbar(error?.message, { variant: "error" });
+		}
 	};
 
 	return (
@@ -191,7 +189,7 @@ export default function RegisterUserPage() {
 														label="CI"
 														error={!!errors.ci}
 														endAdornment={
-															<InputAdornment position="end">
+															<InputAdornment position="end" tabIndex={-1}>
 																<IconButton edge="end">
 																	<ContactEmergencyRoundedIcon />
 																</IconButton>
@@ -236,7 +234,7 @@ export default function RegisterUserPage() {
 														label="Nombre"
 														error={!!errors.name}
 														endAdornment={
-															<InputAdornment position="end">
+															<InputAdornment position="end" tabIndex={-1}>
 																<IconButton edge="end">
 																	<AccountCircleRoundedIcon />
 																</IconButton>
@@ -283,7 +281,7 @@ export default function RegisterUserPage() {
 														error={!!errors.surname}
 														endAdornment={
 															<InputAdornment position="end">
-																<IconButton edge="end">
+																<IconButton edge="end" tabIndex={-1}>
 																	<ContactEmergencyRoundedIcon />
 																</IconButton>
 															</InputAdornment>
@@ -316,7 +314,7 @@ export default function RegisterUserPage() {
 
 									<Box mb={2}>
 										<Controller
-											name="phone_number"
+											name="phoneNumber"
 											control={control}
 											rules={{
 												pattern: {
