@@ -40,7 +40,6 @@ export default function EditUserForm({ user, roles, token }: Props) {
 		register,
 		handleSubmit,
 		watch,
-		setValue,
 		formState: { isSubmitting, errors },
 	} = useForm<UserForm>({
 		defaultValues: {
