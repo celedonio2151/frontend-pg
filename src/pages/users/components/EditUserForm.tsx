@@ -40,6 +40,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 		register,
 		handleSubmit,
 		watch,
+		setValue,
 		formState: { isSubmitting, errors },
 	} = useForm<UserForm>({
 		defaultValues: {
@@ -54,9 +55,27 @@ export default function EditUserForm({ user, roles, token }: Props) {
 		},
 	});
 
+	const selectedRoles = watch("role_id");
+	const isAdminRoleSelected = selectedRoles?.includes(
+		roles.find((role) => role.name === "ADMIN")?._id || ""
+	);
+
+	const emailRules = {
+		required: isAdminRoleSelected
+			? "El correo electrónico es obligatorio para el rol de ADMIN"
+			: false,
+		pattern: {
+			value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+			message: "Debe ser un correo electrónico válido",
+		},
+	};
+
 	const onSubmit = async (data: UserForm) => {
 		console.log("🚀 ~ onSubmit ~ data:", data);
 		try {
+			if (!data.email) delete data.email;
+			console.log("🚀 ~ onSubmit ~ data:", data);
+
 			const response = await patch(`/user/${user._id}`, data, token);
 			if (response) {
 				enqueueSnackbar("Usuario actualizado correctamente", {
@@ -216,18 +235,13 @@ export default function EditUserForm({ user, roles, token }: Props) {
 						<FormControl
 							fullWidth
 							variant="outlined"
+							required={isAdminRoleSelected}
 							error={!!errors.phoneNumber}
 						>
 							<InputLabel htmlFor="outlined-phone-number">Correo</InputLabel>
 							<OutlinedInput
 								id="outlined-email-number"
-								{...register("email", {
-									required: false,
-									pattern: {
-										value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-										message: "Debe ser un correo válido",
-									},
-								})}
+								{...register("email", emailRules)}
 								endAdornment={
 									<InputAdornment position="end">
 										<IconButton aria-label="toggle email" edge="end">
