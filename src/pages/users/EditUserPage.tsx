@@ -94,7 +94,7 @@ export default function EditUserPage() {
 						{loading && <ErrorLoader title="Cargando usuario" />}
 						{error && <ErrorLoader title="Error al cargar el usuario" />}
 						{user && roles && !loading && (
-							<EditUserForm user={user} token={token!} roles={roles?.roles} />
+							<EditUserForm user={user} token={token!} roles={roles.roles} />
 						)}
 
 						{rolesLoading && <ErrorLoader title="Cargando roles" />}

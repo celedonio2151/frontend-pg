@@ -11,6 +11,7 @@ import {
 	Switch,
 	Select,
 	MenuItem,
+	Box,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import ContactEmergencyRoundedIcon from "@mui/icons-material/ContactEmergencyRounded";
@@ -90,9 +91,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 					Esta actualizando datos de un usuario
 				</MDTypography>
 			</MDBox>
-			<MDBox pt={4} pb={3} px={3}>
-				<MDBox component="form" onSubmit={handleSubmit(onSubmit)} role="form">
-					<MDBox mb={2}>
+			<Box pt={2} pb={1} px={2}>
+				<Box component="form" onSubmit={handleSubmit(onSubmit)} role="form">
+					<Box mb={2}>
 						<FormControl fullWidth variant="outlined" error={!!errors.ci}>
 							<InputLabel htmlFor="outlined-adornment-ci">CI</InputLabel>
 							<OutlinedInput
@@ -124,8 +125,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText>{errors.ci?.message}</FormHelperText>
 						</FormControl>
-					</MDBox>
-					<MDBox mb={2}>
+					</Box>
+
+					<Box mb={2}>
 						<FormControl fullWidth variant="outlined" error={!!errors.name}>
 							<InputLabel htmlFor="outlined-adornment-name">Nombre</InputLabel>
 							<OutlinedInput
@@ -149,8 +151,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText>{errors.name?.message}</FormHelperText>
 						</FormControl>
-					</MDBox>
-					<MDBox mb={2}>
+					</Box>
+
+					<Box mb={2}>
 						<FormControl fullWidth variant="outlined" error={!!errors.surname}>
 							<InputLabel htmlFor="outlined-adornment-surname">
 								Apellidos
@@ -168,7 +171,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 								endAdornment={
 									<InputAdornment position="end">
 										<IconButton aria-label="toggle surname" edge="end">
-											<ContactEmergencyRoundedIcon />
+											<AccountCircleRoundedIcon />
 										</IconButton>
 									</InputAdornment>
 								}
@@ -176,8 +179,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText>{errors.surname?.message}</FormHelperText>
 						</FormControl>
-					</MDBox>
-					<MDBox mb={2}>
+					</Box>
+
+					<Box mb={2}>
 						<FormControl
 							fullWidth
 							variant="outlined"
@@ -206,7 +210,36 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText>{errors.phoneNumber?.message}</FormHelperText>
 						</FormControl>
-					</MDBox>
+					</Box>
+
+					<Box mb={2}>
+						<FormControl
+							fullWidth
+							variant="outlined"
+							error={!!errors.phoneNumber}
+						>
+							<InputLabel htmlFor="outlined-phone-number">Correo</InputLabel>
+							<OutlinedInput
+								id="outlined-email-number"
+								{...register("email", {
+									required: false,
+									pattern: {
+										value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+										message: "Debe ser un correo válido",
+									},
+								})}
+								endAdornment={
+									<InputAdornment position="end">
+										<IconButton aria-label="toggle email" edge="end">
+											<PhoneForwardedRoundedIcon />
+										</IconButton>
+									</InputAdornment>
+								}
+								label="Correo"
+							/>
+							<FormHelperText error>{errors.email?.message}</FormHelperText>
+						</FormControl>
+					</Box>
 
 					<FormControl fullWidth variant="outlined" error={!!errors.role_id}>
 						<InputLabel id="demo-simple-select-label">Roles</InputLabel>
@@ -231,7 +264,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 						<FormHelperText>{errors.role_id?.message}</FormHelperText>
 					</FormControl>
 
-					<MDBox mb={2}>
+					<Box mt={1}>
 						<FormControl fullWidth>
 							<FormLabel id="estado-usuario-label" sx={{ fontSize: "1rem" }}>
 								Estado del usuario
@@ -247,8 +280,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 								label={watch("status") ? "Estado activo" : "Estado inactivo"}
 							/>
 						</FormControl>
-					</MDBox>
-					<MDBox mt={4} mb={1}>
+					</Box>
+
+					<Box my={1}>
 						<MDButton
 							variant="gradient"
 							color="primary"
@@ -261,9 +295,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 								? "Actualizando..."
 								: "Actualizar usuario"}
 						</MDButton>
-					</MDBox>
-				</MDBox>
-			</MDBox>
+					</Box>
+				</Box>
+			</Box>
 		</Card>
 	);
 }
