@@ -43,42 +43,21 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formateDate } from "helpers/formatDate";
 import { useNavigate } from "react-router-dom";
 import paths from "routes/paths";
+import EmptyLoader from "components/loader/EmptyLoader";
+import ErrorLoader from "components/loader/ErrorLoader";
 
 export default function Meters() {
 	const { token } = useAuthContext();
 	const navigate = useNavigate();
-	const [openDiaolog, setOpenDialog] = useState(false);
-	const [waterMeters, setWaterMeters] = useState();
-	const [loadingMeter, setLoadingMeter] = useState(false);
-	const [row, setRow] = useState(null);
+	const [eventTrigger, setEventTrigger] = useState(new Date());
 	const { data, loading, error } = useFetch<WaterMeters>({
 		endpoint: `/meter`,
-		eventTrigger: null,
+		eventTrigger,
 		token,
 	});
-	const [processData, setProcessData] = useState(null);
 
-	// useEffect(() => {
-	// 	setProcessData(data);
-	// }, [data]);
+	const onReload = () => setEventTrigger(new Date());
 
-	const handleClickOpenDialog = (row) => {
-		setOpenDialog(true);
-		setWaterMeters(null);
-		setLoadingMeter(true);
-		setRow(row.original);
-		useFetchEvent(`/meter/${row.original.ci}`, token)
-			.then((response) => {
-				setWaterMeters(response);
-			})
-			.catch((err) => {
-				// console.log(err);
-			})
-			.finally(() => {
-				setLoadingMeter(false);
-			});
-		// console.log("Abriendo dialog", row.original);
-	};
 	function handleOnClickEdit(meterId: string) {
 		console.log("Edit ", meterId);
 		navigate(paths.editWaterMeter.split(":")[0] + meterId);
@@ -97,7 +76,7 @@ export default function Meters() {
 			},
 			{
 				accessorKey: "ci",
-				header: "Carner identidad",
+				header: "Carnet Identidad",
 			},
 			{
 				accessorKey: "name",
@@ -166,17 +145,31 @@ export default function Meters() {
 							Medidores de Agua Potable Mosoj Llajta
 						</MDTypography>
 					</MDBox>
-					<MDBox pt={3}>
+					<Box pt={3}>
 						{data && data.waterMeters.length === 0 && !loading && (
-							<MDTypography variant="h4" p={2}>
-								No hay medidores registrados
-							</MDTypography>
+							<EmptyLoader
+								title="No hay medidores registrados"
+								description="Aun no hay medidores registrados, registre una"
+								reloadLabel="Refrescar pagina"
+								onReload={onReload}
+							/>
 						)}
+
 						{data && data.waterMeters.length > 0 && !loading && (
-							<CustomTable data={data.waterMeters} columns={columns} />
+							<CustomTable data={data.waterMeters} columns={columns} filter />
 						)}
+
 						{loading && <MDTableLoading title={"Cargando Usuarios"} rows={5} />}
-					</MDBox>
+
+						{error && (
+							<ErrorLoader
+								title="Error al cargar medidores"
+								description={`${
+									error?.message || "Intente refrescar la pagina"
+								}`}
+							/>
+						)}
+					</Box>
 				</Card>
 			</Box>
 			{/* DIALOG */}
@@ -234,18 +227,5 @@ export default function Meters() {
 				</Box>
 			</MDScrollDialog> */}
 		</>
-	);
-}
-
-function StatusCircle({ color }) {
-	return (
-		<Box
-			sx={{
-				width: 15,
-				height: 15,
-				bgcolor: color,
-				borderRadius: "50%",
-			}}
-		/>
 	);
 }
