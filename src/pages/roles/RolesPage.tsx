@@ -7,6 +7,7 @@ import { useSnackbar } from "notistack";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import AddModeratorRoundedIcon from '@mui/icons-material/AddModeratorRounded';
 
 import paths from "routes/paths";
 import Splash from "components/loader/Splash";
@@ -123,7 +124,7 @@ export default function RolesPage() {
 		<MDBox pt={0} pb={3}>
 			<MDButton
 				color="info"
-				startIcon={<AddRoundedIcon />}
+				startIcon={<AddModeratorRoundedIcon />}
 				onClick={() => navigate(paths.createRole)}
 			>
 				Crear nuevo rol

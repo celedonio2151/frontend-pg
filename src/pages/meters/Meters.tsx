@@ -112,12 +112,12 @@ export default function Meters() {
 						>
 							<EditRoundedIcon color="info" />
 						</IconButton>
-						<IconButton
+						{/* <IconButton
 							size="small"
-							// onClick={() => openModal(row.original._id)}
+							onClick={() => openModal(row.original._id)}
 						>
 							<DeleteIcon color="error" />
-						</IconButton>
+						</IconButton> */}
 					</Stack>
 				),
 			},

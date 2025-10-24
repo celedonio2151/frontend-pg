@@ -23,7 +23,9 @@ import MDTypography from "components/MDTypography";
 // MUI ICONS
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
+import PersonAddAltRoundedIcon from '@mui/icons-material/PersonAddAltRounded';
 
 // Data
 // import authorsTableData from "layouts/users/data/authorsTableData";
@@ -41,6 +43,7 @@ import CustomModal from "components/Modal/CustomModal";
 import paths from "routes/paths";
 import EmptyLoader from "components/loader/EmptyLoader";
 import ErrorLoader from "components/loader/ErrorLoader";
+import MDButton from "components/MDButton";
 
 export default function ListUsers() {
 	const { token } = useAuthContext();
@@ -198,7 +201,15 @@ export default function ListUsers() {
 	return (
 		<>
 			<MDBox pt={6} pb={3}>
-				<Card>
+				<MDButton
+					color="primary"
+					variant="gradient"
+					startIcon={<PersonAddAltRoundedIcon />}
+					onClick={() => navigate(paths.createUser)}
+				>
+					Crear nuevo usuario
+				</MDButton>
+				<Card sx={{ mt: 5, bgcolor: "transparent" }}>
 					<MDBox
 						mx={2}
 						mt={-3}
