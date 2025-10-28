@@ -114,12 +114,30 @@ export default function MonthlyReportPage() {
 				),
 			},
 			{
+				accessorFn: (row) => row.invoice?.isPaid,
+				header: "Estado de pago",
+				cell: ({ getValue }) => (
+					<Chip
+						color={getValue() ? "success" : "error"}
+						label={getValue() ? "Pagada" : "No pagada"}
+						icon={
+							getValue() ? (
+								<PriceCheckRoundedIcon />
+							) : (
+								<MoneyOffRoundedIcon color="error" />
+							)
+						}
+					/>
+				),
+			},
+			{
 				accessorFn: (row) => row.invoice?.status,
 				header: "Estado de factura",
 				cell: ({ getValue }) => (
 					<Chip
 						color={getValue() ? "success" : "error"}
-						label={getValue() ? "Pagada" : "No pagada"}
+						label={getValue() ? "Activo" : "Inactivo"}
+						variant="outlined"
 						icon={
 							getValue() ? (
 								<PriceCheckRoundedIcon />
@@ -191,19 +209,19 @@ export default function MonthlyReportPage() {
 										/>
 
 										<SummaryCard
-											color="success.main"
-											bgColor={softColors.success}
-											icon={<PriceCheckRoundedIcon color="success" />}
-											title="Facturado"
-											value={reports.summary.totalPaid}
-										/>
-
-										<SummaryCard
 											color="info.main"
 											bgColor={softColors.info}
 											icon={<WaterDropRoundedIcon color="info" />}
 											title="Cubos m³"
 											value={reports.summary.totalCubes}
+										/>
+
+										<SummaryCard
+											color="success.main"
+											bgColor={softColors.success}
+											icon={<PriceCheckRoundedIcon color="success" />}
+											title="Facturado"
+											value={reports.summary.totalPaid}
 										/>
 
 										<Box
@@ -216,30 +234,22 @@ export default function MonthlyReportPage() {
 											minWidth={200}
 											maxWidth={300}
 										>
-											<Box display="flex" alignItems="center" gap={1}>
-												<MonetizationOnRoundedIcon color="action" />
-												<Typography variant="subtitle1" color="text.primary">
-													Resumen de pagos
-												</Typography>
-											</Box>
-
-											<Divider sx={{ my: 0.5 }} />
 
 											<Box display="flex" justifyContent="space-between">
 												<Typography variant="body2" color="success.main">
-													Cancelados
+													Saldo Total
 												</Typography>
 												<Typography variant="h6" color="success.main">
-													Bs {reports.summary.paidAmount}
+													{reports.summary.totalBilled} Bs.
 												</Typography>
 											</Box>
-
+											<Divider sx={{ my: 0.5 }} />
 											<Box display="flex" justifyContent="space-between">
 												<Typography variant="body2" color="error.main">
-													Restantes
+													Restante
 												</Typography>
 												<Typography variant="h6" color="error.main">
-													Bs {reports.summary.pendingAmount}
+													{reports.summary.pendingAmount} Bs.
 												</Typography>
 											</Box>
 										</Box>

@@ -27,7 +27,7 @@ export default function DatePickerInput({ date, handlerDateChange }: Props) {
 				mb={1}
 				textAlign={"center"}
 			>
-				Seleccione una fecha para ver lecturas
+				Seleccione una fecha o un año
 			</Typography>
 
 			<DatePicker

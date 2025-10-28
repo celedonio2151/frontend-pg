@@ -87,6 +87,10 @@ export default function Meters() {
 				header: "Apellidos",
 			},
 			{
+				accessorKey: "meter_number",
+				header: "Medidor",
+			},
+			{
 				accessorFn: (row) => formateDate(row.createdAt, "DD-MM-YYYY"),
 				header: "Fecha registro",
 			},

@@ -24,11 +24,21 @@ import type {
 import DatePickerInput from "components/DataPicker/DataPicker";
 import { getFirstEndDatesYear } from "helpers/getFirstEndDates";
 import AnnualReportComponent from "pages/reports/AnnualReport";
+import { useSessionStorage } from "hooks/useStorage";
 
 export default function AnnualReportPage() {
 	const { token } = useAuthContext();
-	const [value, setValue] = useState("one"); // FOR TABS SELECTED
-	const [date, setDate] = useState<Dayjs>(dayjs());
+	const { storedValue, setValue } = useSessionStorage(
+		"selected-year-report",
+		dayjs().toISOString()
+	);
+	const initialMonth = useMemo(() => {
+		const savedMonth = storedValue;
+		return savedMonth ? new Date(savedMonth) : dayjs().toDate();
+	}, []);
+	const [date, setDate] = useState<Dayjs>(dayjs(initialMonth));
+
+	const [value, setValueTab] = useState("one"); // FOR TABS SELECTED
 	const params = useMemo(() => getFirstEndDatesYear(date.toDate()), [date]);
 	const {
 		data: reports,
@@ -43,13 +53,14 @@ export default function AnnualReportPage() {
 		(newDate: Dayjs | null) => {
 			if (newDate) {
 				setDate(newDate);
+				setValue(newDate.toISOString());
 			}
 		},
 		[date]
 	);
 
 	const handleChange = (event: SyntheticEvent, newValue: string) =>
-		setValue(newValue);
+		setValueTab(newValue);
 
 	const columns = useMemo<ColumnDef<MonthlyData, any>[]>(
 		() => [

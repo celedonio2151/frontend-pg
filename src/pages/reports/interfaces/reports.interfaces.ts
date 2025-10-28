@@ -20,6 +20,7 @@ export interface Report {
 
 export interface Invoice {
   status: boolean;
+  isPaid: boolean;
 }
 
 export interface WaterMeter {
@@ -34,7 +35,6 @@ export interface Summary {
   totalBilled:      number;
   totalPaid:        number;
   pendingAmount:    number;
-  paidAmount:       number;
 }
 
 
