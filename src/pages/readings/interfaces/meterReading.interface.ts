@@ -54,11 +54,17 @@ export interface WaterMeter {
   updatedAt:    Date;
   deletedAt:    null;
   _id:          string;
+  meter_number: number;
+  status:       boolean;
+  user:         User;
+}
+
+export interface User {
+  _id:          string;
   ci:           number;
   name:         string;
   surname:      string;
-  meter_number: number;
-  status:       boolean;
+  phoneNumber:  string;
 }
 
 export type ReadingForm = {

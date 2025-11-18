@@ -54,9 +54,10 @@ export default function CreateReadingPage() {
 		() =>
 			meters
 				? meters.waterMeters.map((meter) => ({
-						label: `${meter.name} ${meter.surname}`,
-						ci: meter.ci,
+						label: `${meter.user.name} ${meter.user.surname}`,
+						ci: meter.user.ci,
 						waterMeterId: meter._id,
+						meterNumber: meter.meter_number,
 				  }))
 				: [],
 		[meters]
@@ -72,9 +73,9 @@ export default function CreateReadingPage() {
 	} = useForm<ReadingForm>({
 		defaultValues: {
 			water_meterId: "",
-			date: dayjs(new Date()),
+			date: dayjs(),
 			beforeMonth: { date: new Date(), value: 0 },
-			lastMonth: { date: new Date(), value: 0 },
+			lastMonth: 0,
 			cubicMeters: 0,
 			balance: 0,
 			description: "",
@@ -147,9 +148,9 @@ export default function CreateReadingPage() {
 					Registrando una nueva lectura del medidor
 				</MDTypography>
 			</MDBox>
-			<MDBox pt={4} pb={3} px={3}>
+			<Box pt={4} pb={2} px={2}>
 				<Box component="form" onSubmit={handleSubmit(onSubmit)} role="form">
-					<Grid container spacing={2} mb={2}>
+					<Grid container spacing={2}>
 						<Grid item xs={12} sm={12}>
 							<Controller
 								name="water_meterId"
@@ -162,7 +163,7 @@ export default function CreateReadingPage() {
 										getOptionLabel={(option) =>
 											typeof option === "string"
 												? option
-												: `${option.label} (${option.ci})`
+												: `CI: ${option.ci} ➤ ${option.label} (Medidor: ${option.meterNumber})`
 										}
 										filterOptions={(opts, state) =>
 											opts.filter(
@@ -429,7 +430,7 @@ export default function CreateReadingPage() {
 						</Grid>
 					</Grid>
 				</Box>
-			</MDBox>
+			</Box>
 		</Card>
 	);
 }

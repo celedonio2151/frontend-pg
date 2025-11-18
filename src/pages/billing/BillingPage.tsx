@@ -54,13 +54,14 @@ export default function BillingPage() {
 						Tarifas por consumo de agua {formateDate(new Date(), "YYYY")}
 					</MDTypography>
 				</MDBox>
-				{data && !loading && (
+				{data && data.billings.length > 0 && (
 					<BillingTable dataTable={data.billings} setTrigger={setTrigger} />
 				)}
 			</Card>
 			{/* Grid para mostrar los primeros elementos */}
 
 			{loading && <MDTableLoading title="Cargando tabla de tarifas ..." />}
+
 			{data && data.billings.length <= 0 && !loading && (
 				<Grid container sx={{ justifyContent: "center" }} spacing={3}>
 					<Grid item xs={12} md={4} lg={4}>

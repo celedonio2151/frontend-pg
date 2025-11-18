@@ -156,11 +156,11 @@ export default function MeterReadingsPage() {
 			{
 				header: "NOMBRES",
 				accessorFn: (row) =>
-					row.waterMeter?.name + " " + row.waterMeter?.surname,
+					row.waterMeter.user.name + " " + row.waterMeter.user.surname,
 				cell: ({ row, getValue }) => (
 					<Box>
 						{getValue()} <br />
-						<strong>CI: {row.original.waterMeter?.ci}</strong>
+						<strong>CI: {row.original.waterMeter.user.ci}</strong>
 					</Box>
 				),
 			},
@@ -179,7 +179,8 @@ export default function MeterReadingsPage() {
 				cell: ({ getValue }) => (
 					<Box>
 						{formateDate(getValue()?.date, `DD/MM/YYYY`)}
-						<strong> {getValue()?.meterValue}</strong>
+						<br />
+						<strong> {getValue()?.value}</strong>
 					</Box>
 				),
 			},
@@ -189,7 +190,8 @@ export default function MeterReadingsPage() {
 				cell: ({ getValue }) => (
 					<Box>
 						{formateDate(getValue()?.date, `DD/MM/YYYY`)}
-						<strong> {getValue()?.meterValue}</strong>
+						<br />
+						<strong> {getValue()?.value}</strong>
 					</Box>
 				),
 			},
