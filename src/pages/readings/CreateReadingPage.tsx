@@ -36,11 +36,13 @@ import type {
 	ReadingForm,
 } from "pages/readings/interfaces/meterReading.interface";
 import type { WaterMeters } from "pages/meters/interfaces/meter.interface";
+import usePost from "hooks/usePost";
 
 export default function CreateReadingPage() {
 	const { enqueueSnackbar } = useSnackbar();
 	const { token } = useAuthContext();
 	const [disabledBalance, setDisabledBalance] = useState(true);
+	const { post, loading: loadingPost, error: errorPost } = usePost();
 
 	// 1. Obtener medidores solo una vez
 	const { data: meters } = useFetch<WaterMeters>({
@@ -75,14 +77,14 @@ export default function CreateReadingPage() {
 			water_meterId: "",
 			date: dayjs(),
 			beforeMonth: { date: new Date(), value: 0 },
-			lastMonth: 0,
+			lastMonthValue: 0,
 			cubicMeters: 0,
 			balance: 0,
 			description: "",
 		},
 	});
 	const beforeMonthValue = useWatch({ control, name: "beforeMonth.value" });
-	const lastMonth = watch("lastMonth");
+	const lastMonth = watch("lastMonthValue");
 	const cubicMeters = Math.max(Number(lastMonth) - Number(beforeMonthValue), 0);
 	const balanceEndpoint = `/billing/calculate-balance/${cubicMeters}`;
 
@@ -128,7 +130,18 @@ export default function CreateReadingPage() {
 			water_meterId: formData.water_meterId,
 		};
 		console.log("Peticion al servidor...", payload);
-		enqueueSnackbar("Lectura registrada correctamente", { variant: "success" });
+		try {
+			const response = await post("/reading", payload, token);
+			if (response)
+				enqueueSnackbar(response.message || "Lectura creada con éxito", {
+					variant: "success",
+				});
+		} catch (err) {
+			console.error("Error al crear la lectura:", err);
+			enqueueSnackbar((err as Error).message || "Error al crear la lectura", {
+				variant: "error",
+			});
+		}
 	};
 
 	return (
@@ -227,11 +240,11 @@ export default function CreateReadingPage() {
 						{/* Lectura anterior */}
 						<Grid item xs={12} sm={6}>
 							<FormControl fullWidth variant="outlined">
-								<InputLabel htmlFor="outlined-adornment-before-month">
+								<InputLabel htmlFor="outlined-adornment-before-month-value">
 									Lectura Anterior
 								</InputLabel>
 								<OutlinedInput
-									id="outlined-adornment-before-month"
+									id="outlined-adornment-before-month-value"
 									type="text"
 									disabled
 									value={
@@ -275,7 +288,7 @@ export default function CreateReadingPage() {
 						{/* Lectura actual */}
 						<Grid item xs={12} sm={6}>
 							<Controller
-								name="lastMonth"
+								name="lastMonthValue"
 								control={control}
 								rules={{
 									required: "La lectura actual es obligatoria",
@@ -288,7 +301,7 @@ export default function CreateReadingPage() {
 									<FormControl
 										fullWidth
 										variant="outlined"
-										error={!!errors.lastMonth}
+										error={!!errors.lastMonthValue}
 									>
 										<InputLabel htmlFor="outlined-adornment-name">
 											Lectura Actual
@@ -306,7 +319,9 @@ export default function CreateReadingPage() {
 												</InputAdornment>
 											}
 										/>
-										<FormHelperText>{errors.lastMonth?.message}</FormHelperText>
+										<FormHelperText>
+											{errors.lastMonthValue?.message}
+										</FormHelperText>
 									</FormControl>
 								)}
 							/>

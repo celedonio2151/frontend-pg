@@ -70,7 +70,7 @@ export interface User {
 export type ReadingForm = {
   date:           Date;
   beforeMonth:    BeforeMonth;
-  lastMonth:      number;
+  lastMonthValue: number;
   cubicMeters:    number;
   balance:        number;
   description:    string;
