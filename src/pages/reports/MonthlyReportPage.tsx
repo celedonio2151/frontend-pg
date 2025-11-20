@@ -95,7 +95,8 @@ export default function MonthlyReportPage() {
 				header: "N° de medidor",
 			},
 			{
-				accessorFn: (row) => `${row.waterMeter.name} ${row.waterMeter.surname}`,
+				accessorFn: (row) =>
+					`${row.waterMeter.user.name} ${row.waterMeter.user.surname}`,
 				header: "Nombre completo",
 			},
 			{
@@ -114,12 +115,21 @@ export default function MonthlyReportPage() {
 				),
 			},
 			{
-				accessorFn: (row) => row.invoice?.isPaid,
+				accessorFn: (row) => row.invoice,
 				header: "Estado de pago",
 				cell: ({ getValue }) => (
 					<Chip
-						color={getValue() ? "success" : "error"}
-						label={getValue() ? "Pagada" : "No pagada"}
+						color={
+							getValue() ? (getValue().isPaid ? "success" : "warning") : "error"
+						}
+						variant={getValue() ? "filled" : "outlined"}
+						label={
+							getValue()
+								? getValue().isPaid
+									? "Pagado"
+									: "Pendiente"
+								: "Sin recibo "
+						}
 						icon={
 							getValue() ? (
 								<PriceCheckRoundedIcon />
@@ -131,12 +141,18 @@ export default function MonthlyReportPage() {
 				),
 			},
 			{
-				accessorFn: (row) => row.invoice?.status,
+				accessorFn: (row) => row.invoice,
 				header: "Estado de factura",
 				cell: ({ getValue }) => (
 					<Chip
 						color={getValue() ? "success" : "error"}
-						label={getValue() ? "Activo" : "Inactivo"}
+						label={
+							getValue()
+								? getValue().status
+									? "Activa"
+									: "Anulada"
+								: "Sin recibo "
+						}
 						variant="outlined"
 						icon={
 							getValue() ? (
@@ -234,7 +250,6 @@ export default function MonthlyReportPage() {
 											minWidth={200}
 											maxWidth={300}
 										>
-
 											<Box display="flex" justifyContent="space-between">
 												<Typography variant="body2" color="success.main">
 													Saldo Total

@@ -24,10 +24,17 @@ export interface Invoice {
 }
 
 export interface WaterMeter {
-  ci:           number;
   meter_number: number
-  name:         string;
-  surname:      string;
+  status:       boolean;
+  user:         User;
+}
+
+interface User {
+  _id:         string;
+  ci:          number;
+  name:        string;
+  surname:     string;
+  status:      boolean;
 }
 
 export interface Summary {
