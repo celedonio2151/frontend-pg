@@ -46,11 +46,15 @@ export interface Summary {
 
 
 export interface AnnualReport {
-  startDate:   Date;
-  endDate:     Date;
+  period:      Period;
   year:        number;
-  summary:     Summary;
+  summary:     AnnualSummary;
   monthlyData: MonthlyData[];
+}
+
+export interface Period {
+  startDate: Date;
+  endDate:   Date;
 }
 
 export interface MonthlyData {
@@ -59,7 +63,10 @@ export interface MonthlyData {
   facturado: number;
 }
 
-export interface Summary {
-  totalConsumo:   number;
-  totalFacturado: number;
+export interface AnnualSummary {
+  totalMonths:   number;
+  totalCubes:    number;
+  totalBilled:   number;
+  pendingAmount: number;
+  paidAmount:    number;
 }

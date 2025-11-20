@@ -161,8 +161,8 @@ export default function AnnualReportPage() {
 											height={70}
 											gap={1}
 											bgcolor="#e3f2fd"
-											px={2}
-											py={1}
+											px={1}
+											py={0.5}
 											borderRadius={2}
 										>
 											<WaterDropRoundedIcon color="info" />
@@ -170,17 +170,38 @@ export default function AnnualReportPage() {
 												Consumo anual
 											</Typography>
 											<Typography variant="h6" color="info.main">
-												{reports.summary.totalConsumo} m³
+												{reports.summary.totalCubes} m³
 											</Typography>
 										</Box>
+
+										<Box
+											display="flex"
+											alignItems="center"
+											maxWidth={300}
+											height={70}
+											gap={1}
+											bgcolor="#e8f5e9"
+											px={1}
+											py={0.5}
+											borderRadius={2}
+										>
+											<PriceCheckRoundedIcon color="success" />
+											<Typography variant="subtitle2" color="success.main">
+												Pagado anual
+											</Typography>
+											<Typography variant="h6" color="success.main">
+												{reports.summary.paidAmount} Bs
+											</Typography>
+										</Box>
+
 										<Box
 											display="flex"
 											alignItems="center"
 											gap={1}
 											height={70}
 											maxWidth={300}
-											px={2}
-											py={1}
+											px={1}
+											py={0.5}
 											bgcolor="#e8f5e9" // Quiero verde suave mas suave
 											borderRadius={2}
 										>
@@ -189,7 +210,7 @@ export default function AnnualReportPage() {
 												Facturación anual
 											</Typography>
 											<Typography variant="h6" color="success.main">
-												{reports.summary.totalFacturado} Bs.
+												{reports.summary.totalBilled} Bs.
 											</Typography>
 										</Box>
 									</Box>

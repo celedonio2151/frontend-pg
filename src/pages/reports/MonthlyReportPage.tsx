@@ -13,6 +13,7 @@ import SummarizeRoundedIcon from "@mui/icons-material/SummarizeRounded";
 import PriceCheckRoundedIcon from "@mui/icons-material/PriceCheckRounded";
 import WaterDropRoundedIcon from "@mui/icons-material/WaterDropRounded";
 import MonetizationOnRoundedIcon from "@mui/icons-material/MonetizationOnRounded";
+import NoSimRoundedIcon from "@mui/icons-material/NoSimRounded";
 
 import MDBox from "components/MDBox";
 import MDTableLoading from "components/MDTableLoading/MDTableLoading";
@@ -132,9 +133,13 @@ export default function MonthlyReportPage() {
 						}
 						icon={
 							getValue() ? (
-								<PriceCheckRoundedIcon />
+								getValue().isPaid ? (
+									<PriceCheckRoundedIcon />
+								) : (
+									<MoneyOffRoundedIcon />
+								)
 							) : (
-								<MoneyOffRoundedIcon color="error" />
+								<NoSimRoundedIcon />
 							)
 						}
 					/>
@@ -155,10 +160,10 @@ export default function MonthlyReportPage() {
 						}
 						variant="outlined"
 						icon={
-							getValue() ? (
+							getValue()?.status ? (
 								<PriceCheckRoundedIcon />
 							) : (
-								<MoneyOffRoundedIcon color="error" />
+								<NoSimRoundedIcon color="error" />
 							)
 						}
 					/>
@@ -206,7 +211,7 @@ export default function MonthlyReportPage() {
 							{!loadingReports && reports && reports.reports.length === 0 && (
 								<EmptyLoader />
 							)}
-							{!loadingReports && reports && reports.reports.length > 0 && (
+							{reports && reports.reports.length > 0 && (
 								<>
 									<Box
 										m={2}

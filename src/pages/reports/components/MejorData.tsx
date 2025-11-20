@@ -103,9 +103,9 @@ export default function PaymentTable({ readings }: Props) {
 					{readings.map((meter, index) => (
 						<StyledTableRow hover key={index}>
 							<StyledTableCell>{index + 1}</StyledTableCell>
-							<StyledTableCell>{meter.name}</StyledTableCell>
-							<StyledTableCell>{meter.surname}</StyledTableCell>
-							<StyledTableCell>{meter.ci}</StyledTableCell>
+							<StyledTableCell>{meter.user.name}</StyledTableCell>
+							<StyledTableCell>{meter.user.surname}</StyledTableCell>
+							<StyledTableCell>{meter.user.ci}</StyledTableCell>
 							<StyledTableCell>{meter.meter_number}</StyledTableCell>
 							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((_, monthIndex) => (
 								<StyledTableCell key={monthIndex}>

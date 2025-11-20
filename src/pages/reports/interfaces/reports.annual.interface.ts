@@ -12,20 +12,25 @@ export interface Period {
 
 export interface Reading {
   _id:           string;
-  ci:            number;
-  name:          string;
-  surname:       string;
   meter_number:  number;
   status:        boolean;
+  user:          User;
   meterReadings: MeterReading[];
 }
 
+interface User {
+  _id:     string;
+  ci:      number;
+  name:    string;
+  surname: string;
+  status:  boolean;
+}
 export interface MeterReading {
   _id:         string;
   date:        Date;
   cubicMeters: number;
   balance:     number;
-  invoice:     Invoice;
+  invoice:     Invoice | null;
 }
 
 export interface Invoice {

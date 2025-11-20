@@ -75,6 +75,11 @@ export default function MainTable({
 		getPaginationRowModel: getPaginationRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
+		initialState: {
+			pagination: {
+				pageSize: 12,
+			},
+		},
 		state: {
 			sorting,
 			globalFilter: filtering,
@@ -107,7 +112,7 @@ export default function MainTable({
 							// SelectProps={{ native: true }}
 							sx={{ mx: 0, mt: 0.5, minWidth: 150, p: 0.5, borderRadius: 2 }}
 						>
-							{[5, 10, 20, 50].map((size) => (
+							{[6, 12, 25, 50, 100].map((size) => (
 								<MenuItem key={size} value={size}>
 									{size}
 								</MenuItem>
