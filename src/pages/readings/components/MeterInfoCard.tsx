@@ -1,5 +1,7 @@
 import { useState, type FC } from "react";
+
 import { Box, Card, Typography } from "@mui/material";
+import { useSnackbar } from "notistack";
 
 // Icons
 import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded";
@@ -12,33 +14,60 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
 
 // MD Components
-import type { WaterMeter } from "pages/meters/interfaces/meter.interface";
+import type {
+	Invoice,
+	WaterMeter,
+} from "pages/readings/interfaces/meterReading.interface";
 import type { Reading } from "pages/readings/interfaces/meterReading.interface";
 import { formateDate } from "helpers/formatDate";
 import MDButton from "components/MDButton";
 import CustomModal from "components/Modal/CustomModal";
+import usePatch from "hooks/usePatch";
 
 // Types
 interface MeterInfoCardProps {
 	title: string;
 	meter: WaterMeter;
 	reading: Reading;
+	invoice?: Invoice;
 	method: "cash" | "qr" | "transfer";
+	setTrigger: any;
 }
 
 const MeterInfoCard: FC<MeterInfoCardProps> = ({
 	title,
 	meter,
 	reading,
+	invoice,
 	method,
+	setTrigger,
 }) => {
 	const [open, setOpen] = useState(false); // Modal state
 
 	const modalOpen = () => setOpen(true);
 	const modalClose = () => setOpen(false);
+	const { patch, loading, error } = usePatch();
+	const { enqueueSnackbar } = useSnackbar();
 
-	const handlerPay = () => {
+	const handlerPay = async () => {
 		console.log("Pagar recibo");
+
+		try {
+			const response = await patch(
+				`/invoice/${invoice?._id}`,
+				{ isPaid: true }
+				// token
+			);
+			if (response) {
+				console.log("Respuesta: ", response);
+				enqueueSnackbar("Pagado correctamente", { variant: "success" });
+				setTrigger(new Date());
+			}
+		} catch (err) {
+			if (error) {
+				enqueueSnackbar("Ocurrio un error " + error, { variant: "error" });
+			}
+		}
 		modalClose();
 	};
 	return (
@@ -83,7 +112,7 @@ const MeterInfoCard: FC<MeterInfoCardProps> = ({
 								NOMBRE
 							</Typography>
 							<Typography variant="subtitle1" fontWeight="bold">
-								{meter.name} {meter.surname}
+								{meter.user.name} {meter.user.surname}
 							</Typography>
 						</Box>
 					</Box>
@@ -106,7 +135,7 @@ const MeterInfoCard: FC<MeterInfoCardProps> = ({
 								CI
 							</Typography>
 							<Typography variant="subtitle1" fontWeight="medium">
-								{meter.ci}
+								{meter.user.ci}
 							</Typography>
 						</Box>
 					</Box>
@@ -249,7 +278,7 @@ const MeterInfoCard: FC<MeterInfoCardProps> = ({
 							administración.
 						</Typography>
 					)}
-					{meter.status && reading.invoice && (
+					{meter.status && invoice && !invoice.isPaid && (
 						<MDButton
 							variant="gradient"
 							color="success"
@@ -257,7 +286,7 @@ const MeterInfoCard: FC<MeterInfoCardProps> = ({
 							startIcon={<MonetizationOnRoundedIcon />}
 							sx={{
 								fontSize: "1rem",
-								marginBottom: 2,
+								marginBottom: 1,
 							}}
 							onClick={modalOpen}
 						>
@@ -270,7 +299,7 @@ const MeterInfoCard: FC<MeterInfoCardProps> = ({
 						</MDButton>
 					)}
 					{/* Botón Pagar Múltiples Meses */}
-					{meter.status && reading.invoice && (
+					{/* {meter.status && reading.invoice && (
 						<MDButton
 							variant="gradient"
 							fullWidth
@@ -285,7 +314,7 @@ const MeterInfoCard: FC<MeterInfoCardProps> = ({
 						>
 							Pagar Múltiples Meses
 						</MDButton>
-					)}
+					)} */}
 				</Box>
 			</Card>
 			<CustomModal

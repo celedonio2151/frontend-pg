@@ -24,9 +24,6 @@ export interface Invoice {
 }
 
 export interface Reading {
-  createdAt:   Date;
-  updatedAt:   Date;
-  deletedAt:   Date | null;
   _id:         string;
   date:        Date;
   beforeMonth: BeforeMonth;
@@ -50,9 +47,6 @@ export interface LastMonth {
 }
 
 export interface WaterMeter {
-  createdAt:    Date;
-  updatedAt:    Date;
-  deletedAt:    null;
   _id:          string;
   meter_number: number;
   status:       boolean;

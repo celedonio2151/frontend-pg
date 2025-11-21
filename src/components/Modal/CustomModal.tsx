@@ -56,7 +56,7 @@ export default function CustomModal({
 				<MDButton onClick={onClose} color="light">
 					{cancelText}
 				</MDButton>
-				<MDButton onClick={onConfirm} color="error">
+				<MDButton onClick={onConfirm} variant="gradient" color="error">
 					{confirmText}
 				</MDButton>
 			</DialogActions>

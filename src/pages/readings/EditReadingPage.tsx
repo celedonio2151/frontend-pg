@@ -50,6 +50,7 @@ export default function EditReadingPage() {
 	} = useFetch<Invoice>({
 		endpoint: `/invoice/reading-id/${readingId}`,
 		token,
+		eventTrigger,
 	});
 
 	// console.log(invoice, loadingInvoice, errorInvoice);
@@ -188,16 +189,18 @@ export default function EditReadingPage() {
 										title="Informacion del medidor"
 										meter={reading?.waterMeter}
 										reading={reading!}
+										invoice={invoice || undefined}
 										method="cash"
+										setTrigger={setEventTrigger}
 									/>
-									{invoice && !invoice.isPaid && !loadingInvoice && (
+									{/* {invoice && !invoice.isPaid && !loadingInvoice && (
 										<PayHere
 											setPayHere={setPayHere}
 											readingId={readingId!}
 											token={token!}
 											setEventTrigger={setEventTrigger}
 										/>
-									)}
+									)} */}
 
 									{!invoice && !loadingInvoice && (
 										<EmptyLoader title="No hay recibo aun para pagar" />
@@ -223,7 +226,9 @@ export default function EditReadingPage() {
 										title="Informacion del medidor"
 										meter={reading?.waterMeter}
 										reading={reading}
+										invoice={invoice || undefined}
 										method="qr"
+										setTrigger={setEventTrigger}
 									/>
 									{invoice && !invoice.isPaid && !loadingInvoice && (
 										<PayQR
@@ -252,9 +257,6 @@ export default function EditReadingPage() {
 								</TabPanel>
 							</Grid>
 						</Grid>
-					)}
-					{reading && !loading && invoice && !loadingInvoice && (
-						<PayManyInvoices waterMeter={reading?.waterMeter} />
 					)}
 				</Grid>
 			</MDBox>
