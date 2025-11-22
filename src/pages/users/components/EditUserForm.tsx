@@ -282,7 +282,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 								{...register("role_id", {
 									required: "El rol es obligatorio",
 								})}
-								label="Rol"
+								label="Roles"
 							>
 								{roles.map((role) => (
 									<MenuItem key={role._id} value={role._id} sx={{ mb: 0.5 }}>
