@@ -48,6 +48,7 @@ import { useAuthContext } from "context/AuthContext";
 import { useSnackbar } from "notistack";
 import usePost from "hooks/usePost";
 import type { User } from "pages/users/interfaces/user.interface";
+import paths from "routes/paths";
 
 export default function RegisterUserPage() {
 	const { enqueueSnackbar } = useSnackbar();
@@ -73,7 +74,7 @@ export default function RegisterUserPage() {
 	const onSubmit = async (data: any) => {
 		const body = {
 			...data,
-			password: "11111111", // Hardcoded password
+			password: "Password20xx!", // Hardcoded password
 			birthdate: "2000-01-01", // Hardcoded birthdate
 			roles: ["USER"],
 			status: true,
@@ -81,18 +82,24 @@ export default function RegisterUserPage() {
 
 		if (!body.phone_number) delete body.phone_number;
 		if (!body.meter_number) delete body.meter_number;
-		console.log(body);
+		console.log("Peticion al servidor", body);
 		try {
 			const res = await post("/user", body, token);
 			if (res) {
 				enqueueSnackbar("Usuario registrado correctamente", {
 					variant: "success",
 				});
-				navigate("/users");
+				navigate(paths.users);
 			}
 		} catch (err) {
-			console.error("Error al registrar usuario:", error);
-			enqueueSnackbar(error?.message, { variant: "error" });
+			if (!loading) {
+				console.error("Error al registrar usuario:", error, err);
+				enqueueSnackbar(
+					// error?.response?.data.message ||
+					err?.response?.data.message || "Error al registrar usuario",
+					{ variant: "error" }
+				);
+			}
 		}
 	};
 
