@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
 	styled,
 	Table,
@@ -6,6 +7,7 @@ import {
 	tableCellClasses,
 	TableContainer,
 	TableRow,
+	Box,
 } from "@mui/material";
 
 // MUI Icons
@@ -15,6 +17,7 @@ import PriceCheckRoundedIcon from "@mui/icons-material/PriceCheckRounded";
 import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 import MDChip from "./MDChip";
+import MDInput from "components/MDInput";
 import type {
 	MeterReading,
 	Reading,
@@ -74,49 +77,77 @@ const getMonthStatus = (readings: MeterReading[], monthIndex: number) => {
 };
 
 export default function PaymentTable({ readings }: Props) {
-	console.log("🚀 ~ PaymentTable ~ reports:", readings);
+	const [searchQuery, setSearchQuery] = useState("");
+
+	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setSearchQuery(event.target.value);
+	};
+
+	const filteredReadings = readings.filter((meter) => {
+		const searchTerm = searchQuery.toLowerCase();
+		return (
+			meter.user.name.toLowerCase().includes(searchTerm) ||
+			meter.user.surname.toLowerCase().includes(searchTerm) ||
+			(meter.user.ci &&
+				meter.user.ci.toString().toLowerCase().includes(searchTerm)) ||
+			meter.meter_number.toString().toLowerCase().includes(searchTerm)
+		);
+	});
+
 	return (
-		<TableContainer>
-			<Table stickyHeader sx={{ width: "100%", textAlign: "left" }}>
-				<thead>
-					<StyledTableRow>
-						<TableCell sx={{ fontWeight: "bold" }}>Nº</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Nombre</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Apellidos</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>CI</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Meter Number</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Enero</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Febrero</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Marzo</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Abril</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Mayo</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Junio</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Julio</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Agosto</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Septiembre</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Octubre</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Noviembre</TableCell>
-						<TableCell sx={{ fontWeight: "bold" }}>Diciembre</TableCell>
-					</StyledTableRow>
-				</thead>
-				<TableBody sx={{ pt: 2 }}>
-					{readings.map((meter, index) => (
-						<StyledTableRow hover key={index}>
-							<StyledTableCell>{index + 1}</StyledTableCell>
-							<StyledTableCell>{meter.user.name}</StyledTableCell>
-							<StyledTableCell>{meter.user.surname}</StyledTableCell>
-							<StyledTableCell>{meter.user.ci}</StyledTableCell>
-							<StyledTableCell>{meter.meter_number}</StyledTableCell>
-							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((_, monthIndex) => (
-								<StyledTableCell key={monthIndex}>
-									{getMonthStatus(meter.meterReadings, monthIndex)}
-								</StyledTableCell>
-							))}
+		<Box>
+			<Box my={3} mx={2}>
+				<MDInput
+					label="Buscar por nombre, apellido, CI o medidor"
+					value={searchQuery}
+					onChange={handleSearchChange}
+					fullWidth
+				/>
+			</Box>
+			<TableContainer>
+				<Table stickyHeader sx={{ width: "100%", textAlign: "left" }}>
+					<thead>
+						<StyledTableRow>
+							<TableCell sx={{ fontWeight: "bold" }}>Nº</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Nombre</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Apellidos</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>CI</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Meter Number</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Enero</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Febrero</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Marzo</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Abril</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Mayo</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Junio</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Julio</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Agosto</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Septiembre</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Octubre</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Noviembre</TableCell>
+							<TableCell sx={{ fontWeight: "bold" }}>Diciembre</TableCell>
 						</StyledTableRow>
-					))}
-				</TableBody>
-			</Table>
-		</TableContainer>
+					</thead>
+					<TableBody sx={{ pt: 2 }}>
+						{filteredReadings.map((meter, index) => (
+							<StyledTableRow hover key={index}>
+								<StyledTableCell>{index + 1}</StyledTableCell>
+								<StyledTableCell>{meter.user.name}</StyledTableCell>
+								<StyledTableCell>{meter.user.surname}</StyledTableCell>
+								<StyledTableCell>{meter.user.ci}</StyledTableCell>
+								<StyledTableCell>{meter.meter_number}</StyledTableCell>
+								{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
+									(_, monthIndex) => (
+										<StyledTableCell key={monthIndex}>
+											{getMonthStatus(meter.meterReadings, monthIndex)}
+										</StyledTableCell>
+									)
+								)}
+							</StyledTableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+		</Box>
 	);
 }
 

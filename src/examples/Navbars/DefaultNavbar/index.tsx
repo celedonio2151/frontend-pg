@@ -140,13 +140,13 @@ export default function DefaultNavbar({ transparent, light, action }) {
 					/> */}
 					<DefaultNavbarLink
 						icon={<AccountCircleRoundedIcon />}
-						name="sign up"
+						name="Registrarse"
 						route={paths.signup}
 						light={light}
 					/>
 					<DefaultNavbarLink
 						icon={<KeyRoundedIcon />}
-						name="sign in"
+						name="Iniciar sesión"
 						route={paths.signin}
 						light={light}
 					/>

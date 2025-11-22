@@ -39,6 +39,7 @@ import MDBox from "components/MDBox";
 
 // Material Dashboard 2 React example components
 import DefaultNavbarLink from "examples/Navbars/DefaultNavbar/DefaultNavbarLink";
+import paths from "routes/paths";
 
 function DefaultNavbarMobile({ open, close }) {
 	const { width } = open && open.getBoundingClientRect();
@@ -68,14 +69,14 @@ function DefaultNavbarMobile({ open, close }) {
 				/>
 				<DefaultNavbarLink
 					icon={<PersonAddRoundedIcon />}
-					name="sign up"
-					route="/authentication/sign-up"
+					name="Registrarse"
+					route={paths.signup}
 					light={false}
 				/>
 				<DefaultNavbarLink
 					icon={<KeyRoundedIcon />}
-					name="sign in"
-					route="/authentication/sign-in"
+					name="Iniciar sesión"
+					route={paths.signin}
 					light={false}
 				/>
 			</MDBox>
