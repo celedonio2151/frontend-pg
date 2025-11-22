@@ -21,6 +21,7 @@ export interface User {
   authProvider:  string;
   status:        boolean;
   roles:         Role[] | null;
+  meters?:       string[];
 }
 
 export interface Role {
@@ -45,4 +46,5 @@ export type UserForm = {
   meter_number?:  number;
   status?:        boolean;
   role_id:        string[];
+  meters?:        string[];
 }

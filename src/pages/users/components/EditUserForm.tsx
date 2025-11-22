@@ -12,11 +12,14 @@ import {
 	Select,
 	MenuItem,
 	Box,
+	Divider,
+	Grid,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import ContactEmergencyRoundedIcon from "@mui/icons-material/ContactEmergencyRounded";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import PhoneForwardedRoundedIcon from "@mui/icons-material/PhoneForwardedRounded";
+
 import { useForm } from "react-hook-form";
 
 import MDButton from "components/MDButton";
@@ -25,6 +28,7 @@ import MDTypography from "components/MDTypography";
 import usePatch from "hooks/usePatch";
 import type { User, UserForm } from "pages/users/interfaces/user.interface";
 import type { Role } from "pages/roles/interfaces/role.interface";
+import WaterMeters from "pages/users/components/WaterMeters";
 
 type Props = {
 	user: User;
@@ -40,6 +44,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 		register,
 		handleSubmit,
 		watch,
+		setValue,
 		formState: { isSubmitting, errors },
 	} = useForm<UserForm>({
 		defaultValues: {
@@ -51,6 +56,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 			birthDate: user.birthDate || undefined,
 			role_id: user.roles?.map((role) => role._id) || [],
 			status: user.status,
+			meters: user.meters || [],
 		},
 	});
 
@@ -67,6 +73,10 @@ export default function EditUserForm({ user, roles, token }: Props) {
 			value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 			message: "Debe ser un correo electrónico válido",
 		},
+	};
+
+	const handleMetersChange = (meters: string[]) => {
+		setValue("meters", meters);
 	};
 
 	const onSubmit = async (data: UserForm) => {
@@ -110,8 +120,14 @@ export default function EditUserForm({ user, roles, token }: Props) {
 				</MDTypography>
 			</MDBox>
 			<Box pt={2} pb={1} px={2}>
-				<Box component="form" onSubmit={handleSubmit(onSubmit)} role="form">
-					<Box mb={2}>
+				<Grid
+					container
+					component="form"
+					onSubmit={handleSubmit(onSubmit)}
+					role="form"
+					spacing={2}
+				>
+					<Grid item xs={12} md={6}>
 						<FormControl fullWidth variant="outlined" error={!!errors.ci}>
 							<InputLabel htmlFor="outlined-adornment-ci">CI</InputLabel>
 							<OutlinedInput
@@ -143,9 +159,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText>{errors.ci?.message}</FormHelperText>
 						</FormControl>
-					</Box>
+					</Grid>
 
-					<Box mb={2}>
+					<Grid item xs={12} md={6}>
 						<FormControl fullWidth variant="outlined" error={!!errors.name}>
 							<InputLabel htmlFor="outlined-adornment-name">Nombre</InputLabel>
 							<OutlinedInput
@@ -169,9 +185,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText>{errors.name?.message}</FormHelperText>
 						</FormControl>
-					</Box>
+					</Grid>
 
-					<Box mb={2}>
+					<Grid item xs={12} md={6}>
 						<FormControl fullWidth variant="outlined" error={!!errors.surname}>
 							<InputLabel htmlFor="outlined-adornment-surname">
 								Apellidos
@@ -197,9 +213,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText>{errors.surname?.message}</FormHelperText>
 						</FormControl>
-					</Box>
+					</Grid>
 
-					<Box mb={2}>
+					<Grid item xs={12} md={6}>
 						<FormControl
 							fullWidth
 							variant="outlined"
@@ -228,9 +244,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText>{errors.phoneNumber?.message}</FormHelperText>
 						</FormControl>
-					</Box>
+					</Grid>
 
-					<Box mb={2}>
+					<Grid item xs={12} md={6}>
 						<FormControl
 							fullWidth
 							variant="outlined"
@@ -252,33 +268,43 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							/>
 							<FormHelperText error>{errors.email?.message}</FormHelperText>
 						</FormControl>
-					</Box>
+					</Grid>
 
-					<FormControl fullWidth variant="outlined" error={!!errors.role_id}>
-						<InputLabel id="demo-simple-select-label">Roles</InputLabel>
-						<Select
-							sx={{ p: 1.5 }}
-							labelId="demo-simple-select-label"
-							id="demo-simple-select"
-							multiple
-							defaultValue={user.roles?.map((role) => role._id)}
-							{...register("role_id", {
-								required: "El rol es obligatorio",
-							})}
-							label="Rol"
+					<Grid item xs={12} md={6}>
+						<FormControl fullWidth variant="outlined" error={!!errors.role_id}>
+							<InputLabel id="demo-simple-select-label">Roles</InputLabel>
+							<Select
+								sx={{ p: 1.5 }}
+								labelId="demo-simple-select-label"
+								id="demo-simple-select"
+								multiple
+								defaultValue={user.roles?.map((role) => role._id)}
+								{...register("role_id", {
+									required: "El rol es obligatorio",
+								})}
+								label="Rol"
+							>
+								{roles.map((role) => (
+									<MenuItem key={role._id} value={role._id} sx={{ mb: 0.5 }}>
+										{role.name}
+									</MenuItem>
+								))}
+							</Select>
+
+							<FormHelperText>{errors.role_id?.message}</FormHelperText>
+						</FormControl>
+					</Grid>
+
+					<Grid item xs={12}>
+						<FormControl
+							fullWidth
+							sx={{
+								display: "flex",
+								flexDirection: "row",
+								alignItems: "center",
+								justifyContent: "space-between",
+							}}
 						>
-							{roles.map((role) => (
-								<MenuItem key={role._id} value={role._id} sx={{ mb: 0.5 }}>
-									{role.name}
-								</MenuItem>
-							))}
-						</Select>
-
-						<FormHelperText>{errors.role_id?.message}</FormHelperText>
-					</FormControl>
-
-					<Box mt={1}>
-						<FormControl fullWidth>
 							<FormLabel id="estado-usuario-label" sx={{ fontSize: "1rem" }}>
 								Estado del usuario
 							</FormLabel>
@@ -293,9 +319,14 @@ export default function EditUserForm({ user, roles, token }: Props) {
 								label={watch("status") ? "Estado activo" : "Estado inactivo"}
 							/>
 						</FormControl>
-					</Box>
+						<Divider />
+						<WaterMeters
+							initialMeters={user.meters}
+							onChange={handleMetersChange}
+						/>
+					</Grid>
 
-					<Box my={1}>
+					<Grid item xs={12} mb={1}>
 						<MDButton
 							variant="gradient"
 							color="primary"
@@ -308,8 +339,8 @@ export default function EditUserForm({ user, roles, token }: Props) {
 								? "Actualizando..."
 								: "Actualizar usuario"}
 						</MDButton>
-					</Box>
-				</Box>
+					</Grid>
+				</Grid>
 			</Box>
 		</Card>
 	);
