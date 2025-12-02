@@ -25,7 +25,7 @@ export default function EditMeterPage() {
     data: users,
     loading: loadingUsers,
     error: errorUsers,
-  } = useFetch<Users>({ endpoint: `/user`, token });
+  } = useFetch<Users>({ endpoint: `/user?status=true`, token });
 
   return (
     <>
