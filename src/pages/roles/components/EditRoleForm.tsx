@@ -108,7 +108,7 @@ export default function EditRoleForm({ id, role }: Props) {
 						<Card sx={{ marginBottom: 3 }}>
 							<MDBox
 								variant="gradient"
-								bgColor="info"
+								bgColor="primary"
 								borderRadius="lg"
 								coloredShadow="success"
 								mx={2}
@@ -123,7 +123,7 @@ export default function EditRoleForm({ id, role }: Props) {
 									color="white"
 									mt={1}
 								>
-									Registrar nuevo rol
+									Editar rol {role?.name}
 								</MDTypography>
 							</MDBox>
 
@@ -195,13 +195,13 @@ export default function EditRoleForm({ id, role }: Props) {
 									<MDBox mt={2}>
 										<MDButton
 											variant="gradient"
-											color="info"
+											color="primary"
 											type="submit"
 											disabled={isSubmitting}
 											size="large"
 											fullWidth
 										>
-											{isSubmitting ? "Registrando..." : "Registrar usuario"}
+											{isSubmitting ? "Guardando..." : "Guardar cambios"}
 										</MDButton>
 									</MDBox>
 								</MDBox>

@@ -11,6 +11,7 @@ import {
 	CircularProgress,
 	Card,
 	Grid,
+	Box,
 } from "@mui/material";
 import { MobileDateTimePicker } from "@mui/x-date-pickers";
 import { DemoItem } from "@mui/x-date-pickers/internals/demo";
@@ -55,7 +56,7 @@ export default function EditReadingForm({ reading, token }: Props) {
 		defaultValues: {
 			water_meterId: reading.waterMeter._id,
 			beforeMonth: reading.beforeMonth,
-			lastMonth: reading.lastMonth.value,
+			lastMonthValue: reading.lastMonth.value,
 			balance: reading.balance,
 			date: reading.date,
 			cubicMeters: reading.cubicMeters,
@@ -63,7 +64,7 @@ export default function EditReadingForm({ reading, token }: Props) {
 		},
 	});
 
-	const lastMonth = watch("lastMonth");
+	const lastMonth = watch("lastMonthValue");
 	const cubicMeters = Math.max(Number(lastMonth) - Number(beforeMonthValue), 0);
 	const balanceEndpoint = `/billing/calculate-balance/${cubicMeters}`;
 
@@ -109,11 +110,12 @@ export default function EditReadingForm({ reading, token }: Props) {
 				textAlign="center"
 			>
 				<MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-					Editando Medidor de agua
+					Lectura de medidor de{" "}
+					{reading.waterMeter.user.name + " " + reading.waterMeter.user.surname}
 				</MDTypography>
 			</MDBox>
-			<MDBox pt={4} pb={3} px={3}>
-				<MDBox component="form" onSubmit={handleSubmit(onSubmit)} role="form">
+			<Box pt={4} pb={3} px={3}>
+				<Box component="form" onSubmit={handleSubmit(onSubmit)} role="form">
 					{/* Fecha de lectura */}
 					<Grid container spacing={2}>
 						<Grid item xs={6}>
@@ -170,7 +172,7 @@ export default function EditReadingForm({ reading, token }: Props) {
 							<FormControl
 								fullWidth
 								variant="outlined"
-								error={!!errors.lastMonth}
+								error={!!errors.lastMonthValue}
 							>
 								<InputLabel htmlFor="outlined-adornment-lastMonth">
 									Lectura Actual
@@ -178,7 +180,7 @@ export default function EditReadingForm({ reading, token }: Props) {
 								<OutlinedInput
 									id="outlined-adornment-lastMonth"
 									type="number"
-									{...register("lastMonth", {
+									{...register("lastMonthValue", {
 										required: "La lectura es obligatoria",
 										validate: (value) =>
 											Number(value) >= Number(beforeMonthValue) ||
@@ -193,7 +195,9 @@ export default function EditReadingForm({ reading, token }: Props) {
 									}
 									label="Lectura Actual"
 								/>
-								<FormHelperText>{errors.lastMonth?.message}</FormHelperText>
+								<FormHelperText>
+									{errors.lastMonthValue?.message}
+								</FormHelperText>
 							</FormControl>
 						</Grid>
 						<Grid item xs={6}>
@@ -267,12 +271,12 @@ export default function EditReadingForm({ reading, token }: Props) {
 								size="large"
 								fullWidth
 							>
-								{isSubmitting ? "Guardando ..." : "Editar Lectura"}
+								{isSubmitting ? "Guardando..." : "Guardar Cambios"}
 							</MDButton>
 						</Grid>
 					</Grid>
-				</MDBox>
-			</MDBox>
+				</Box>
+			</Box>
 		</Card>
 	);
 }
