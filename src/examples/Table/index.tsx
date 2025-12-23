@@ -199,10 +199,14 @@ export default function MainTable({
 				</TableFooter>
 			</Table>
 
-			<Stack direction={"row"} justifyContent={"space-between"}>
-				<Typography variant="body2" sx={{ alignSelf: "center", mx: 2 }}>
-					Página {table.getState().pagination.pageIndex + 1} de{" "}
-					{table.getPageCount()}
+			<Stack
+				direction={"row"}
+				justifyContent={"space-between"}
+				alignItems={"center"}
+				width={1}
+			>
+				<Typography variant="body2" sx={{ p: 2, fontWeight: "bold" }}>
+					Total de registros: {table.getPrePaginationRowModel().rows.length}
 				</Typography>
 				<Box
 					sx={{
@@ -232,9 +236,10 @@ export default function MainTable({
 						<SkipPreviousRoundedIcon />
 					</IconButton>
 
-					{/* <Typography variant="body2" sx={{ mx: 2 }}>
-          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-        </Typography> */}
+					<Typography variant="body2" sx={{ mx: 2 }}>
+						Página {table.getState().pagination.pageIndex + 1} de{" "}
+						{table.getPageCount()}
+					</Typography>
 
 					<IconButton
 						onClick={() => table.nextPage()}
@@ -309,21 +314,21 @@ const DebouncedInput: React.FC<DebouncedInputProps> = ({
 
 	return (
 		<FormControl sx={{ m: 1, width: "25ch" }} variant="outlined">
-			<InputLabel htmlFor="outlined-adornment-password">Buscar</InputLabel>
+			<InputLabel htmlFor="outlined-adornment-search">Buscar</InputLabel>
 			<OutlinedInput
-				id="outlined-adornment-password"
+				id="outlined-adornment-search"
 				type={"text"}
 				placeholder="Buscar..."
 				value={value}
 				onChange={handleChange}
 				endAdornment={
 					<InputAdornment position="end">
-						<IconButton aria-label="toggle password visibility" edge="end">
+						<IconButton aria-label="search" edge="end">
 							<SearchRoundedIcon />
 						</IconButton>
 					</InputAdornment>
 				}
-				label="Password"
+				label="Buscar"
 			/>
 		</FormControl>
 	);

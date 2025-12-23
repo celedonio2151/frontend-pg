@@ -82,12 +82,10 @@ export default function EditUserForm({ user, roles, token }: Props) {
 	};
 
 	const onSubmit = async (data: UserForm) => {
-		console.log("🚀 ~ onSubmit ~ data:", data);
+		const cleanedData = cleanBody(data);
+		console.log("🚀 ~ onSubmit ~ cleanedData:", cleanedData);
 		try {
-			if (!data.email) delete data.email;
-			console.log("🚀 ~ onSubmit ~ data:", data);
-
-			const response = await patch(`/user/${user._id}`, data, token);
+			const response = await patch(`/user/${user._id}`, cleanedData, token);
 			if (response) {
 				enqueueSnackbar("Usuario actualizado correctamente", {
 					variant: "success",
@@ -97,13 +95,31 @@ export default function EditUserForm({ user, roles, token }: Props) {
 			console.error("Error al actualizar el usuario", error);
 			enqueueSnackbar(
 				error?.response?.data.message || "Error al actualizar el usuario",
-				{
-					variant: "error",
-				}
+				{ variant: "error" }
 			);
 		}
 	};
 
+	const cleanBody = (body: UserForm) => {
+		const cleanedBody: UserForm = { ...body };
+		// Si los medidores son los mismo que el inicial, no los enviamos, solo enviar los nuevos y eliminar los iniciales
+		const equalMeters =
+			user.waterMeters &&
+			body.meter_numbers &&
+			user.waterMeters.length === body.meter_numbers.length &&
+			user.waterMeters.every((m) =>
+				body.meter_numbers?.includes(m.meter_number)
+			);
+		if (equalMeters) delete cleanedBody.meter_numbers;
+		if (!cleanedBody.password) delete cleanedBody.password;
+		if (!cleanedBody.email) delete cleanedBody.email;
+		// Filtrar los medidores existentes en user para no duplicar en la db
+		if (cleanedBody.meter_numbers)
+			cleanedBody.meter_numbers = body.meter_numbers?.filter((m) =>
+				user.waterMeters?.some((um) => um.meter_number !== m)
+			);
+		return cleanedBody;
+	};
 	return (
 		<Card sx={{ marginBottom: 3 }}>
 			<MDBox
@@ -129,6 +145,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 					role="form"
 					spacing={2}
 				>
+					{/* Documento de identidad */}
 					<Grid item xs={12} md={6}>
 						<FormControl fullWidth variant="outlined" error={!!errors.ci}>
 							<InputLabel htmlFor="outlined-adornment-ci">CI</InputLabel>
@@ -162,7 +179,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							<FormHelperText>{errors.ci?.message}</FormHelperText>
 						</FormControl>
 					</Grid>
-
+					{/* Nombre de usuario */}
 					<Grid item xs={12} md={6}>
 						<FormControl fullWidth variant="outlined" error={!!errors.name}>
 							<InputLabel htmlFor="outlined-adornment-name">Nombre</InputLabel>
@@ -188,7 +205,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							<FormHelperText>{errors.name?.message}</FormHelperText>
 						</FormControl>
 					</Grid>
-
+					{/* Apellido de usuario */}
 					<Grid item xs={12} md={6}>
 						<FormControl fullWidth variant="outlined" error={!!errors.surname}>
 							<InputLabel htmlFor="outlined-adornment-surname">
@@ -216,7 +233,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							<FormHelperText>{errors.surname?.message}</FormHelperText>
 						</FormControl>
 					</Grid>
-
+					{/* Número de celular */}
 					<Grid item xs={12} md={6}>
 						<FormControl
 							fullWidth
@@ -247,7 +264,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							<FormHelperText>{errors.phoneNumber?.message}</FormHelperText>
 						</FormControl>
 					</Grid>
-
+					{/* Correo electronico */}
 					<Grid item xs={12} md={6}>
 						<FormControl
 							fullWidth
@@ -296,7 +313,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							<FormHelperText>{errors.role_id?.message}</FormHelperText>
 						</FormControl>
 					</Grid>
-
+					{/* Medidores de agua */}
 					<Grid item xs={12}>
 						<FormControl
 							fullWidth
@@ -327,7 +344,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							onChange={handleMetersChange}
 						/>
 					</Grid>
-
+					{/* Botón de actualización */}
 					<Grid item xs={12} mb={1}>
 						<MDButton
 							variant="gradient"
