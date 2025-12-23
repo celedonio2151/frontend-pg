@@ -19,16 +19,19 @@ import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 import WaterDropRoundedIcon from "@mui/icons-material/WaterDropRounded";
 
 import MDButton from "components/MDButton";
+import type { WaterMeter } from "pages/meters/interfaces/meter.interface";
 
 type WaterMetersProps = {
-	initialMeters?: string[];
+	initialMeters?: WaterMeter[];
 	onChange: (meters: string[]) => void;
 };
 
 const WaterMeters = ({ initialMeters = [], onChange }: WaterMetersProps) => {
 	const [showMeters, setShowMeters] = useState(false);
 	const [meters, setMeters] = useState<string[]>(
-		initialMeters.length > 0 ? initialMeters : [""]
+		initialMeters.length > 0
+			? initialMeters.map((m) => String(m.meter_number))
+			: []
 	);
 	const [errors, setErrors] = useState<string[]>([]);
 
@@ -128,9 +131,16 @@ const WaterMeters = ({ initialMeters = [], onChange }: WaterMetersProps) => {
 									id={`outlined-adornment-meter-${index}`}
 									value={meter}
 									onChange={(e) => handleMeterChange(index, e.target.value)}
+									disabled={
+										initialMeters[index] ? initialMeters[index].status : false
+									}
 									endAdornment={
 										<InputAdornment position="end">
-											<IconButton aria-label="toggle meter" edge="end">
+											<IconButton
+												disableRipple
+												aria-label="toggle meter"
+												edge="end"
+											>
 												<SpeedRoundedIcon />
 											</IconButton>
 										</InputAdornment>
@@ -140,6 +150,9 @@ const WaterMeters = ({ initialMeters = [], onChange }: WaterMetersProps) => {
 								<FormHelperText>{errors[index]}</FormHelperText>
 							</FormControl>
 							<IconButton
+								disabled={
+									initialMeters[index] ? initialMeters[index].status : false
+								}
 								onClick={() => removeMeter(index)}
 								color="error"
 								sx={{ ml: 1 }}

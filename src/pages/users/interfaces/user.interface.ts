@@ -1,3 +1,5 @@
+import type { WaterMeter } from "pages/meters/interfaces/meter.interface";
+
 export interface Users {
   limit: number;
   total: number;
@@ -21,7 +23,7 @@ export interface User {
   authProvider:  string;
   status:        boolean;
   roles:         Role[] | null;
-  meters?:       string[];
+  waterMeters?:  WaterMeter[];
 }
 
 export interface Role {
@@ -46,5 +48,5 @@ export type UserForm = {
   meter_number?:  number;
   status?:        boolean;
   role_id:        string[];
-  meters?:        string[];
+  meter_numbers?: number[];
 }

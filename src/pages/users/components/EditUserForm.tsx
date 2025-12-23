@@ -56,10 +56,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 			birthDate: user.birthDate || undefined,
 			role_id: user.roles?.map((role) => role._id) || [],
 			status: user.status,
-			meters: user.meters || [],
+			meter_numbers: user.waterMeters?.map((m) => m.meter_number),
 		},
 	});
-
 	const selectedRoles = watch("role_id");
 	const isAdminRoleSelected = selectedRoles?.includes(
 		roles.find((role) => role.name === "ADMIN")?._id || ""
@@ -76,7 +75,10 @@ export default function EditUserForm({ user, roles, token }: Props) {
 	};
 
 	const handleMetersChange = (meters: string[]) => {
-		setValue("meters", meters);
+		setValue(
+			"meter_numbers",
+			meters.map((m) => Number(m))
+		);
 	};
 
 	const onSubmit = async (data: UserForm) => {
@@ -321,7 +323,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 						</FormControl>
 						<Divider />
 						<WaterMeters
-							initialMeters={user.meters}
+							initialMeters={user.waterMeters}
 							onChange={handleMetersChange}
 						/>
 					</Grid>
