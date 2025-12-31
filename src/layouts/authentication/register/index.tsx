@@ -47,7 +47,10 @@ import handlerErrors from "helpers/handlerErrors";
 import { useAuthContext } from "context/AuthContext";
 import { useSnackbar } from "notistack";
 import usePost from "hooks/usePost";
-import type { User } from "pages/users/interfaces/user.interface";
+import type {
+	User,
+	UserFormRegister,
+} from "pages/users/interfaces/user.interface";
 import paths from "routes/paths";
 
 export default function RegisterUserPage() {
@@ -60,12 +63,13 @@ export default function RegisterUserPage() {
 		control,
 		handleSubmit,
 		formState: { errors, isSubmitting },
-	} = useForm({
+	} = useForm<UserFormRegister>({
 		defaultValues: {
-			ci: "",
+			ci: undefined,
 			name: "",
 			surname: "",
-			meter_number: "",
+			email: "",
+			meter_number: undefined,
 			phoneNumber: "",
 		},
 		shouldFocusError: true,
@@ -76,15 +80,11 @@ export default function RegisterUserPage() {
 			...data,
 			password: "Password20xx!", // Hardcoded password
 			birthdate: "2000-01-01", // Hardcoded birthdate
-			roles: ["USER"],
-			status: true,
 		};
-
-		if (!body.phone_number) delete body.phone_number;
-		if (!body.meter_number) delete body.meter_number;
-		console.log("Peticion al servidor", body);
+		const dataCleaned = cleanBody(body);
+		console.log("Peticion al servidor", dataCleaned);
 		try {
-			const res = await post("/user", body, token);
+			const res = await post("/user", dataCleaned, token);
 			if (res) {
 				enqueueSnackbar("Usuario registrado correctamente", {
 					variant: "success",
@@ -93,14 +93,20 @@ export default function RegisterUserPage() {
 			}
 		} catch (err) {
 			if (!loading) {
-				console.error("Error al registrar usuario:", error, err);
-				enqueueSnackbar(
-					// error?.response?.data.message ||
-					err?.response?.data.message || "Error al registrar usuario",
-					{ variant: "error" }
-				);
+				console.error("Error al registrar usuario:", error);
+				const coolError = error?.response?.data.message?.join(", ");
+				enqueueSnackbar(coolError || "Error al registrar usuario", {
+					variant: "error",
+				});
 			}
 		}
+	};
+	const cleanBody = (body: UserFormRegister) => {
+		const cleanedBody: UserFormRegister = { ...body };
+		if (!cleanedBody.email) delete cleanedBody.email;
+		if (!cleanedBody.meter_number) delete cleanedBody.meter_number;
+		if (!cleanedBody.birthDate) delete cleanedBody.birthDate;
+		return cleanedBody;
 	};
 
 	return (
@@ -173,6 +179,7 @@ export default function RegisterUserPage() {
 									onSubmit={handleSubmit(onSubmit)}
 									noValidate
 								>
+									{/* Documento de identidad */}
 									<Box mb={2}>
 										<Controller
 											name="ci"
@@ -197,7 +204,7 @@ export default function RegisterUserPage() {
 														error={!!errors.ci}
 														endAdornment={
 															<InputAdornment position="end" tabIndex={-1}>
-																<IconButton edge="end">
+																<IconButton edge="end" disableRipple>
 																	<ContactEmergencyRoundedIcon />
 																</IconButton>
 															</InputAdornment>
@@ -212,7 +219,7 @@ export default function RegisterUserPage() {
 											)}
 										/>
 									</Box>
-
+									{/* Nombre de usuario */}
 									<Box mb={2}>
 										<Controller
 											name="name"
@@ -242,7 +249,7 @@ export default function RegisterUserPage() {
 														error={!!errors.name}
 														endAdornment={
 															<InputAdornment position="end" tabIndex={-1}>
-																<IconButton edge="end">
+																<IconButton edge="end" disableRipple>
 																	<AccountCircleRoundedIcon />
 																</IconButton>
 															</InputAdornment>
@@ -257,7 +264,7 @@ export default function RegisterUserPage() {
 											)}
 										/>
 									</Box>
-
+									{/* Apellidos del usuario */}
 									<Box mb={2}>
 										<Controller
 											name="surname"
@@ -288,7 +295,11 @@ export default function RegisterUserPage() {
 														error={!!errors.surname}
 														endAdornment={
 															<InputAdornment position="end">
-																<IconButton edge="end" tabIndex={-1}>
+																<IconButton
+																	edge="end"
+																	disableRipple
+																	tabIndex={-1}
+																>
 																	<ContactEmergencyRoundedIcon />
 																</IconButton>
 															</InputAdornment>
@@ -303,27 +314,15 @@ export default function RegisterUserPage() {
 											)}
 										/>
 									</Box>
-
-									<Box mb={2}>
-										<Controller
-											name="meter_number"
-											control={control}
-											render={({ field }) => (
-												<TextField
-													{...field}
-													type="number"
-													label="Número del Medidor"
-													fullWidth
-												/>
-											)}
-										/>
-									</Box>
-
+									{/* Número de celular */}
 									<Box mb={2}>
 										<Controller
 											name="phoneNumber"
 											control={control}
 											rules={{
+												required: "El celular es requerido",
+												minLength: 8,
+												maxLength: 10,
 												pattern: {
 													value: /^[0-9]+$/,
 													message:
@@ -336,11 +335,47 @@ export default function RegisterUserPage() {
 													type="number"
 													label="Celular"
 													fullWidth
+													error={!!errors.phoneNumber?.message}
+													helperText={errors.phoneNumber?.message}
+													// Como agregar icono?
+													InputProps={{
+														endAdornment: (
+															<InputAdornment position="end" tabIndex={-1}>
+																<IconButton disableRipple edge="end">
+																	<PhoneEnabledRoundedIcon />
+																</IconButton>
+															</InputAdornment>
+														),
+													}}
 												/>
 											)}
 										/>
 									</Box>
-
+									{/* Numero de medidor */}
+									<Box mb={2}>
+										<Controller
+											name="meter_number"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													type="number"
+													label="Número del Medidor"
+													fullWidth
+													InputProps={{
+														endAdornment: (
+															<InputAdornment position="end" tabIndex={-1}>
+																<IconButton disableRipple edge="end">
+																	<SpeedRoundedIcon />
+																</IconButton>
+															</InputAdornment>
+														),
+													}}
+												/>
+											)}
+										/>
+									</Box>
+									{/* Boton enviar formulario */}
 									<Box mt={3} mb={1}>
 										<MDButton
 											variant="gradient"

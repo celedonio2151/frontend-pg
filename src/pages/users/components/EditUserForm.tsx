@@ -83,7 +83,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 
 	const onSubmit = async (data: UserForm) => {
 		const cleanedData = cleanBody(data);
-		console.log("🚀 ~ onSubmit ~ cleanedData:", cleanedData);
+		// console.log("🚀 ~ onSubmit ~ cleanedData:", cleanedData);
 		try {
 			const response = await patch(`/user/${user._id}`, cleanedData, token);
 			if (response) {

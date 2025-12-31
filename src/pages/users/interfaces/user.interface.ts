@@ -50,3 +50,17 @@ export type UserForm = {
   role_id:        string[];
   meter_numbers?: number[];
 }
+
+export type UserFormRegister = {
+  ci:             number;
+  name:           string;
+  surname:        string;
+  email?:         string;
+  password?:      string;
+  phoneNumber:    string;
+  birthDate?:     Date;
+  profileImg?:    string;
+  meter_number?:  number;
+  status?:        boolean;
+  role_id:        string[];
+}
