@@ -1,13 +1,12 @@
-import { useMemo, useState } from "react";
-import { Card, Chip, IconButton, Stack, Typography } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { Card, Chip, IconButton, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useSnackbar } from "notistack";
 // MUI ICONS
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
-import AddModeratorRoundedIcon from '@mui/icons-material/AddModeratorRounded';
+import AddModeratorRoundedIcon from "@mui/icons-material/AddModeratorRounded";
 
 import paths from "routes/paths";
 import Splash from "components/loader/Splash";
@@ -22,12 +21,14 @@ import MDButton from "components/MDButton";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import useDelete from "hooks/useDelete";
+import type { ExportHeadersExcel } from "components/XLSX/JsonToExcel";
 
 export default function RolesPage() {
 	const { token } = useAuthContext();
 	const { enqueueSnackbar } = useSnackbar();
 	const navigate = useNavigate();
 	const [eventTrigger, setEventTrigger] = useState(new Date());
+	const [exportData, setExportData] = useState<any[]>([]);
 	const { data, loading, error } = useFetch<Roles>({
 		endpoint: "/role",
 		eventTrigger,
@@ -69,6 +70,27 @@ export default function RolesPage() {
 		setSelectedId(roleId);
 		setOpen(true);
 	};
+
+	// Seccion para exportar a excel
+	const headers: ExportHeadersExcel[] = [
+		{ title: "ID", key: "id", width: 30 },
+		{ title: "Nombre", key: "name", width: 30 },
+		{ title: "Descripción", key: "description", width: 50 },
+		{ title: "Estado", key: "status", width: 20 },
+	];
+	useEffect(() => {
+		if (data) {
+			setExportData(() =>
+				data.roles.map((item: Role) => ({
+					id: item._id,
+					name: item.name,
+					description: item.description,
+					status: item.status ? "Activo " : "Inactivo",
+				}))
+			);
+		}
+		return () => {};
+	}, [data]);
 
 	const columns = useMemo<ColumnDef<Role, any>[]>(
 		() => [
@@ -153,7 +175,15 @@ export default function RolesPage() {
 				) : data?.roles.length === 0 ? (
 					<EmptyLoader title="No hay roles disponibles" />
 				) : (
-					data && <MainTable columns={columns} data={data.roles} />
+					data && (
+						<MainTable
+							columns={columns}
+							data={data.roles}
+							exportHeaders={headers}
+							exportData={exportData}
+							exportFileName="Listado de roles"
+						/>
+					)
 				)}
 			</Card>
 

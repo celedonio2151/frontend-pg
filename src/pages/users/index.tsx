@@ -25,7 +25,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
-import PersonAddAltRoundedIcon from '@mui/icons-material/PersonAddAltRounded';
+import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 
 // Data
 // import authorsTableData from "layouts/users/data/authorsTableData";
@@ -33,7 +33,9 @@ import { useEffect, useMemo, useState } from "react";
 import CustomTable from "examples/Table";
 import { NavLink, useNavigate } from "react-router-dom";
 import MDTableLoading from "components/MDTableLoading/MDTableLoading";
-import JsonToExcel from "components/XLSX/JsonToExcel";
+import JsonToExcel, {
+	type ExportHeadersExcel,
+} from "components/XLSX/JsonToExcel";
 import useFetch from "hooks/useFetch";
 import { useAuthContext } from "context/AuthContext";
 import type { User, Users } from "pages/users/interfaces/user.interface";
@@ -44,6 +46,7 @@ import paths from "routes/paths";
 import EmptyLoader from "components/loader/EmptyLoader";
 import ErrorLoader from "components/loader/ErrorLoader";
 import MDButton from "components/MDButton";
+import type { Role } from "pages/roles/interfaces/role.interface";
 
 export default function ListUsers() {
 	const { token } = useAuthContext();
@@ -52,16 +55,26 @@ export default function ListUsers() {
 	const [openDiaolog, setOpenDialog] = useState(false);
 	const [modal, setModal] = useState(false); // Modal para eliminar
 	const [userId, setUserId] = useState("");
-	const [jsonToExcel, setJsonToExcel] = useState<any[] | null>(null);
+	const [exportData, setExportData] = useState<any[]>();
 	const { data, loading, error } = useFetch<Users>({
 		endpoint: `/user`,
 		eventTrigger,
 		token,
 	});
-
+	// Seccion para exportar a excel
+	const headerExcel: ExportHeadersExcel[] = [
+		{ title: "ID", key: "id", width: 8 },
+		{ title: "NOMBRE", key: "name", width: 20 },
+		{ title: "APELLIDO", key: "surname", width: 30 },
+		{ title: "CARNET DE IDENTIDAD", key: "ci", width: 20 },
+		{ title: "NUMERO DE CELULAR", key: "phone_number", width: 20 },
+		{ title: "ROLES", key: "roles", width: 20 },
+		{ title: "ESTADO", key: "status", width: 10 },
+	];
+	// Quiero aplanar los roles solo el nombre que son objetos
 	useEffect(() => {
 		if (data) {
-			setJsonToExcel(() =>
+			setExportData(() =>
 				data.users.map((item: User) => ({
 					id: item._id,
 					name: item.name,
@@ -69,7 +82,7 @@ export default function ListUsers() {
 					ci: item.ci,
 					phone_number: item.phoneNumber,
 					roles:
-						JSON.stringify(item.roles?.map((r: any) => r.name)) || "Sin rol",
+						JSON.stringify(item.roles?.map((r: Role) => r.name)) || "Sin rol",
 					status: item.status ? "Activo " : "Inactivo",
 				}))
 			);
@@ -187,17 +200,6 @@ export default function ListUsers() {
 		[]
 	);
 
-	// console.log(data);
-	const headers = [
-		{ title: "ID", width: 8 },
-		{ title: "NOMBRE", width: 20 },
-		{ title: "APELLIDO", width: 30 },
-		{ title: "CARNET DE IDENTIDAD", width: 20 },
-		{ title: "NUMERO DE CELULAR", width: 20 },
-		{ title: "ROLES", width: 20 },
-		{ title: "ESTADO", width: 10 },
-	];
-
 	return (
 		<>
 			<MDBox pt={6} pb={3}>
@@ -224,17 +226,6 @@ export default function ListUsers() {
 							Lista de filiados Agua Potable Mosoj Llajta
 						</MDTypography>
 					</MDBox>
-					{/* Show button export to excel */}
-					{data && data.users.length > 0 && jsonToExcel && (
-						<JsonToExcel
-							headers={headers}
-							data={jsonToExcel}
-							// fileName="Productos.xlsx"
-							// sheetName="Productos"
-							title="Listado de usuarios"
-							// additionalInfo="Generado el 30/11/2024 por Admin"
-						/>
-					)}
 					<Box pt={0}>
 						{data && data.users.length === 0 && !loading && (
 							<EmptyLoader
@@ -246,10 +237,20 @@ export default function ListUsers() {
 						)}
 
 						{data && data.users.length > 0 && !loading && (
-							<CustomTable data={data.users} columns={columns} filter />
+							<CustomTable
+								data={data.users}
+								columns={columns}
+								filter
+								canExport
+								exportHeaders={headerExcel}
+								exportData={exportData}
+								exportFileName="Listado de usuarios"
+							/>
 						)}
 
-						{loading && <MDTableLoading title={"Cargando Usuarios"} rows={5} />}
+						{loading && (
+							<MDTableLoading title={"Cargando Usuarios"} rows={12} />
+						)}
 
 						{error && (
 							<ErrorLoader

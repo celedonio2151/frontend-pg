@@ -7,22 +7,23 @@ import MDButton from "components/MDButton";
 import { formateDate } from "helpers/formatDate";
 import { Box } from "@mui/material";
 
-interface Header {
+export interface ExportHeadersExcel {
 	title: string;
-	// field: string;
+	// Optional: key/property name to read from each data row. If omitted, title will be used.
+	key?: string;
 	width?: number;
 }
 
-interface JsonToExcelProps<T> {
-	headers: Header[];
-	data: T[];
+interface JsonToExcelProps {
+	headers: ExportHeadersExcel[];
+	data: any[];
 	fileName?: string;
 	sheetName?: string;
 	title?: string;
 	additionalInfoP?: string;
 }
 
-export default function JsonToExcel<T>({
+export default function JsonToExcel({
 	headers,
 	data,
 	fileName = `Reporte ${formateDate(
@@ -32,7 +33,7 @@ export default function JsonToExcel<T>({
 	sheetName = "Hoja1",
 	title = "Reporte generado",
 	additionalInfoP = "Creado por: Skyline2154",
-}: JsonToExcelProps<T>) {
+}: JsonToExcelProps) {
 	const [loading, setLoading] = useState(false);
 
 	const handleDownload = () => {
@@ -45,12 +46,16 @@ export default function JsonToExcel<T>({
 	};
 
 	const createExcelFile = (
-		headers: Header[],
+		headers: ExportHeadersExcel[],
 		rows: any[],
 		title: string,
 		additionalInfo: string
 	) => {
+		// Titles shown in the sheet (A3 row)
 		const headerTitles = headers.map((header) => header.title);
+
+		// Keys used to extract values from each row and to enforce column order
+		const headerKeys = headers.map((header) => header.key ?? header.title);
 
 		const worksheet = XLSX.utils.json_to_sheet([]);
 
@@ -58,12 +63,15 @@ export default function JsonToExcel<T>({
 
 		XLSX.utils.sheet_add_aoa(worksheet, [headerTitles], { origin: "A3" });
 
+		// Add rows forcing the header order to headerKeys so values align with titles
 		XLSX.utils.sheet_add_json(worksheet, rows, {
 			skipHeader: true,
 			origin: "A4",
+			header: headerKeys,
 		});
 
-		worksheet["!cols"] = headers.map((header) => ({ wch: header.width }));
+		// Ensure sensible widths (number of characters) when width is not provided
+		worksheet["!cols"] = headers.map((header) => ({ wch: header.width ?? 15 }));
 
 		const finalRow = rows.length + 5;
 
@@ -73,8 +81,8 @@ export default function JsonToExcel<T>({
 
 		const workbook = XLSX.utils.book_new();
 		XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-
-		XLSX.writeFile(workbook, fileName);
+		const outName = fileName.endsWith(".xlsx") ? fileName : `${fileName}.xlsx`;
+		XLSX.writeFile(workbook, outName);
 	};
 
 	return (

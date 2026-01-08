@@ -26,7 +26,7 @@ import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 // Data
 // import authorsTableData from "layouts/users/data/authorsTableData";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomTable from "examples/Table";
 import MDButton from "components/MDButton";
 import MDScrollDialog from "components/MDDialog";
@@ -35,8 +35,8 @@ import useFetchEvent from "hooks/useFetchEvent";
 import MDTableLoading from "components/MDTableLoading/MDTableLoading";
 import { useAuthContext } from "context/AuthContext";
 import type {
-  WaterMeter,
-  WaterMeters,
+	WaterMeter,
+	WaterMeters,
 } from "pages/meters/interfaces/meter.interface";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formateDate } from "helpers/formatDate";
@@ -44,131 +44,170 @@ import { useNavigate } from "react-router-dom";
 import paths from "routes/paths";
 import EmptyLoader from "components/loader/EmptyLoader";
 import ErrorLoader from "components/loader/ErrorLoader";
+import type { ExportHeadersExcel } from "components/XLSX/JsonToExcel";
 
 export default function Meters() {
-  const { token } = useAuthContext();
-  const navigate = useNavigate();
-  const [eventTrigger, setEventTrigger] = useState(new Date());
-  const { data, loading, error } = useFetch<WaterMeters>({
-    endpoint: `/meter`,
-    eventTrigger,
-    token,
-  });
+	const { token } = useAuthContext();
+	const navigate = useNavigate();
+	const [eventTrigger, setEventTrigger] = useState(new Date());
+	const [exportData, setExportData] = useState<any[]>();
+	const { data, loading, error } = useFetch<WaterMeters>({
+		endpoint: `/meter`,
+		eventTrigger,
+		token,
+	});
 
-  const onReload = () => setEventTrigger(new Date());
+	const onReload = () => setEventTrigger(new Date());
 
-  function handleOnClickEdit(meterId: string) {
-    console.log("Edit ", meterId);
-    navigate(paths.editWaterMeter.split(":")[0] + meterId);
-  }
+	function handleOnClickEdit(meterId: string) {
+		console.log("Edit ", meterId);
+		navigate(paths.editWaterMeter.split(":")[0] + meterId);
+	}
 
-  function handleOnClickDelete(getValue) {
-    console.log("Delete ", getValue());
-  }
+	function handleOnClickDelete(getValue) {
+		console.log("Delete ", getValue());
+	}
+	// Seccion para exportar a excel
+	const headersExcel: ExportHeadersExcel[] = [
+		{ title: "ID", key: "id", width: 30 },
+		{ title: "Nombres", key: "name", width: 20 },
+		{ title: "Apellidos", key: "surname", width: 20 },
+		{ title: "Carnet Identidad", key: "ci", width: 15 },
+		{ title: "Número de Teléfono", key: "phone_number", width: 15 },
+		{ title: "Número de Medidor", key: "meter_number", width: 15 },
+		{ title: "Fecha de Registro", key: "createdAt", width: 20 },
+		{ title: "Estado", key: "status", width: 10 },
+	];
+	// let exportData;
+	useEffect(() => {
+		if (data) {
+			setExportData(() =>
+				data.waterMeters.map((item: WaterMeter) => ({
+					id: item._id,
+					name: item.user.name,
+					surname: item.user.surname,
+					ci: item.user.ci,
+					phone_number: item.user.phoneNumber,
+					meter_number: item.meter_number,
+					createdAt: formateDate(item.createdAt, "DD-MM-YYYY"),
+					status: item.status ? "Activo " : "Inactivo",
+				}))
+			);
+		}
 
-  const columns = useMemo<ColumnDef<WaterMeter, any>[]>(
-    () => [
-      {
-        id: "rowNumber",
-        header: "Nº",
-        cell: (info) => info.row.index + 1,
-      },
-      {
-        accessorKey: "user.ci",
-        header: "Carnet Identidad",
-      },
-      {
-        accessorKey: "user.name",
-        header: "Nombres",
-      },
-      {
-        accessorKey: "user.surname",
-        header: "Apellidos",
-      },
-      {
-        accessorKey: "meter_number",
-        header: "Medidor",
-      },
-      {
-        accessorFn: (row) => formateDate(row.createdAt, "DD-MM-YYYY"),
-        header: "Fecha registro",
-      },
-      {
-        accessorKey: "status",
-        header: "Estado",
-        cell: (info) => (
-          <Chip
-            label={info.getValue() ? "Activo" : "Inactivo"}
-            color={info.getValue() ? "success" : "error"}
-            size="small"
-          />
-        ),
-      },
-      {
-        id: "acciones",
-        header: "Acciones",
-        cell: ({ row }) => (
-          <Stack direction="row" justifyContent={"center"} spacing={1}>
-            <IconButton
-              size="small"
-              onClick={() => handleOnClickEdit(row.original._id)}
-            >
-              <EditRoundedIcon color="info" />
-            </IconButton>
-          </Stack>
-        ),
-      },
-    ],
-    []
-  );
+		return () => {};
+	}, [data]);
+	const columns = useMemo<ColumnDef<WaterMeter, any>[]>(
+		() => [
+			{
+				id: "rowNumber",
+				header: "Nº",
+				cell: (info) => info.row.index + 1,
+			},
+			{
+				accessorKey: "user.ci",
+				header: "Carnet Identidad",
+			},
+			{
+				accessorKey: "user.name",
+				header: "Nombres",
+			},
+			{
+				accessorKey: "user.surname",
+				header: "Apellidos",
+			},
+			{
+				accessorKey: "meter_number",
+				header: "Medidor",
+			},
+			{
+				accessorFn: (row) => formateDate(row.createdAt, "DD-MM-YYYY"),
+				header: "Fecha registro",
+			},
+			{
+				accessorKey: "status",
+				header: "Estado",
+				cell: (info) => (
+					<Chip
+						label={info.getValue() ? "Activo" : "Inactivo"}
+						color={info.getValue() ? "success" : "error"}
+						size="small"
+					/>
+				),
+			},
+			{
+				id: "acciones",
+				header: "Acciones",
+				cell: ({ row }) => (
+					<Stack direction="row" justifyContent={"center"} spacing={1}>
+						<IconButton
+							size="small"
+							onClick={() => handleOnClickEdit(row.original._id)}
+						>
+							<EditRoundedIcon color="info" />
+						</IconButton>
+					</Stack>
+				),
+			},
+		],
+		[]
+	);
 
-  return (
-    <>
-      <Box pt={2} pb={3}>
-        <Card>
-          <MDBox
-            mx={2}
-            mt={-3}
-            py={3}
-            px={2}
-            variant="gradient"
-            bgColor="info"
-            borderRadius="lg"
-            coloredShadow="info"
-          >
-            <MDTypography variant="h5" color="white">
-              Medidores de Agua Potable Mosoj Llajta
-            </MDTypography>
-          </MDBox>
-          <Box pt={3}>
-            {data && data.waterMeters.length > 0 && (
-              <CustomTable data={data.waterMeters} columns={columns} filter />
-            )}
+	return (
+		<>
+			<Box pt={2} pb={3}>
+				<Card>
+					<MDBox
+						mx={2}
+						mt={-3}
+						py={3}
+						px={2}
+						variant="gradient"
+						bgColor="info"
+						borderRadius="lg"
+						coloredShadow="info"
+					>
+						<MDTypography variant="h5" color="white">
+							Medidores de Agua Potable Mosoj Llajta
+						</MDTypography>
+					</MDBox>
+					<Box pt={3}>
+						{data && data.waterMeters.length > 0 && (
+							<CustomTable
+								data={data.waterMeters}
+								columns={columns}
+								filter
+								canExport
+								exportHeaders={headersExcel}
+								exportData={exportData}
+								exportFileName="Lista de medidores"
+							/>
+						)}
 
-            {data && data.waterMeters.length === 0 && (
-              <EmptyLoader
-                title="No hay medidores registrados"
-                description="Aun no hay medidores registrados, registre una"
-                reloadLabel="Refrescar pagina"
-                onReload={onReload}
-              />
-            )}
+						{data && data.waterMeters.length === 0 && (
+							<EmptyLoader
+								title="No hay medidores registrados"
+								description="Aun no hay medidores registrados, registre una"
+								reloadLabel="Refrescar pagina"
+								onReload={onReload}
+							/>
+						)}
 
-            {loading && <MDTableLoading title={"Cargando Usuarios"} rows={5} />}
+						{loading && <MDTableLoading title={"Cargando Usuarios"} rows={5} />}
 
-            {error && (
-              <ErrorLoader
-                title="Error al cargar medidores"
-                description={`${
-                  error?.message || "Intente refrescar la pagina"
-                }`}
-              />
-            )}
-          </Box>
-        </Card>
-      </Box>
-      {/* DIALOG */}
-      {/* <MDScrollDialog
+						{error && (
+							<ErrorLoader
+								title="Error al cargar medidores"
+								description={`${
+									error?.message || "Intente refrescar la pagina"
+								}`}
+							/>
+						)}
+					</Box>
+				</Card>
+			</Box>
+			{/* DIALOG */}
+			{/* <MDScrollDialog
 				open={openDiaolog}
 				setOpen={setOpenDialog}
 				title={`Medidores de ${row?.name} ${row?.surname}`}
@@ -221,6 +260,6 @@ export default function Meters() {
 					</List>
 				</Box>
 			</MDScrollDialog> */}
-    </>
-  );
+		</>
+	);
 }

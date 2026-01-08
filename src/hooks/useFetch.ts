@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
-import axiosInstance from "hooks/axiosConfig";
+import useFetchQuery from "./useFetchQuery";
 
 type FetchApi<T> = {
 	data: T | null;
@@ -15,49 +14,17 @@ type Props = {
 	token?: string;
 };
 
-export default function useFetch<T>({ ...params }: Props): FetchApi<T> {
-	const { endpoint, eventTrigger, token } = params;
+export default function useFetch<T>({ endpoint, token }: Props): FetchApi<T> {
+	const { data, isLoading, error } = useFetchQuery<T>({ endpoint, token });
 
-	const [data, setData] = useState<T | null>(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<AxiosError | null>(null);
-	const [controller, setController] = useState<AbortController>(
-		new AbortController()
-	);
-
-	useEffect(() => {
-		setLoading(true);
-		setError(null);
-		setData(null);
-		const abortController = new AbortController();
-		setController(abortController);
-		axiosInstance
-			.get(`${endpoint}`, {
-				headers: { Authorization: `Bearer ${token}` }, // Agrega el token al encabezado si está presente
-				// signal: controller.signal,
-			})
-			.then((response) => {
-				// console.log(response.data);
-				setData(response.data);
-			})
-			.catch((err: AxiosError) => {
-				// console.log(err.response.data);
-				setError(err);
-			})
-			.finally(() => {
-				setLoading(false);
-			});
-
-		return () => controller.abort();
-	}, [endpoint, eventTrigger, token]);
-
-	const handleCancelRequest = () => {
-		if (controller) {
-			controller.abort();
-			// const error = new AxiosError().message('Cance');
-			setError(error);
-		}
+	// Adapter to match the original interface
+	return {
+		data: data || null,
+		loading: isLoading,
+		error,
+		handleCancelRequest: () => {
+			// No-op for now as React Query handles cancellation differently
+			console.warn("handleCancelRequest is deprecated in favor of React Query's automatic cancellation");
+		},
 	};
-
-	return { data, loading, error, handleCancelRequest };
 }

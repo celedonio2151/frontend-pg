@@ -14,15 +14,12 @@ import {
 import {
 	Box,
 	Paper,
-	TextField,
 	TableContainer,
 	Table,
 	TableHead,
 	TableRow,
 	TableCell,
 	TableBody,
-	Divider,
-	Grid,
 	Stack,
 	Pagination,
 	IconButton,
@@ -43,15 +40,20 @@ import FirstPageRoundedIcon from "@mui/icons-material/FirstPageRounded";
 import LastPageRoundedIcon from "@mui/icons-material/LastPageRounded";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
-import ArrowDropDownRoundedIcon from "@mui/icons-material/ArrowDropDownRounded";
-import ArrowDropUpRoundedIcon from "@mui/icons-material/ArrowDropUpRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import JsonToExcel, {
+	type ExportHeadersExcel,
+} from "components/XLSX/JsonToExcel";
 
 interface TableProps {
-	data: any[]; // Replace `any[]` with your actual data structure
-	columns: ColumnDef<any>[]; // Replace `any` with your column type
-	filter?: boolean; // Replace `any` with your
+	data: any[];
+	columns: ColumnDef<any>[];
+	filter?: boolean;
 	showPerRow?: boolean;
+	canExport?: boolean;
+	exportFileName?: string;
+	exportData?: any[];
+	exportHeaders?: ExportHeadersExcel[];
 }
 interface DebouncedInputProps extends Omit<TextFieldProps, "onChange"> {
 	value: string | number;
@@ -64,6 +66,10 @@ export default function MainTable({
 	columns,
 	filter = false,
 	showPerRow = false,
+	canExport,
+	exportData,
+	exportHeaders,
+	exportFileName = `${new Date().toDateString()}`,
 }: TableProps) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [filtering, setFiltering] = useState("");
@@ -257,6 +263,26 @@ export default function MainTable({
 						<LastPageRoundedIcon />
 					</IconButton>
 				</Box>
+				{canExport && (
+					<Box ml={2}>
+						<JsonToExcel
+							// Use explicit exportData if provided, otherwise fall back to the table `data`.
+							data={(exportData ?? data).map((row) => row)}
+							// If exportHeaders provided use them, otherwise generate minimal headers
+							headers={
+								exportHeaders ??
+								columns.map((col, idx) => ({
+									title:
+										typeof col.header === "string" ? col.header : `col_${idx}`,
+									key:
+										(col as any).accessorKey ?? (col as any).id ?? `col_${idx}`,
+									width: 50,
+								}))
+							}
+							fileName={exportFileName}
+						/>
+					</Box>
+				)}
 			</Stack>
 		</TableContainer>
 	);

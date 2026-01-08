@@ -26,11 +26,11 @@ import useFetch from "hooks/useFetch";
 import { formateDate } from "helpers/formatDate";
 import MDTabMonth from "components/MDTabMonth/MDTabMonth";
 import MDTableLoading from "components/MDTableLoading/MDTableLoading";
-import { DemoItem } from "@mui/x-date-pickers/internals/demo";
-import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import usePost from "hooks/usePost";
-import JsonToExcel from "components/XLSX/JsonToExcel";
+import JsonToExcel, {
+	type ExportHeadersExcel,
+} from "components/XLSX/JsonToExcel";
 import { useAuthContext } from "context/AuthContext";
 import type { ColumnDef } from "@tanstack/react-table";
 import type {
@@ -79,6 +79,7 @@ export default function MeterReadingsPage() {
 
 	const [selectedMonth, setSelectedMonth] = useState<Date>(initialMonth);
 	const [newMeterReading, setNewMeter] = useState(false); // Show or hide new meter reading form
+	const [exportData, setExportData] = useState<any[]>();
 
 	const date = useMemo(() => dayjs(selectedMonth), [selectedMonth]);
 
@@ -236,39 +237,43 @@ export default function MeterReadingsPage() {
 		[handleEditReading]
 	);
 
-	const headers = [
-		{ title: "ID", width: 4 },
-		{ title: "CI", width: 20 },
-		{ title: "Nombre Completo", width: 30 },
-		{ title: "Número de Medidor", width: 20 },
-		{ title: "Estado Medidor", width: 20 },
-		{ title: "Fecha Lecturación", width: 20 },
-		{ title: "Fecha Mes Anterior", width: 20 },
-		{ title: "Valor Mes Anterior", width: 20 },
-		{ title: "Fecha Mes Actual", width: 20 },
-		{ title: "Valor Mes Actual", width: 20 },
-		{ title: "Metros Cúbicos", width: 20 },
-		{ title: "Saldo Bs.", width: 10 },
-		{ title: "Factura Pagada", width: 15 },
+	// Seccion para exportar a excel
+	const headers: ExportHeadersExcel[] = [
+		{ title: "ID", key: "id", width: 25 },
+		{ title: "CI", key: "ci", width: 10 },
+		{ title: "NOMBRES", key: "fullname", width: 30 },
+		{ title: "MEDIDOR", key: "meterNumber", width: 10 },
+		{ title: "ESTADO MEDIDOR", key: "status", width: 15 },
+		{ title: "FECHA LECTURA", key: "date", width: 20 },
+		{ title: "FECHA MES ANTERIOR", key: "beforeMonthDate", width: 20 },
+		{ title: "VALOR MES ANTERIOR", key: "beforeMonthValue", width: 20 },
+		{ title: "FECHA ULTIMO MES", key: "lastMonthDate", width: 20 },
+		{ title: "VALOR ULTIMO MES", key: "lastMonthValue", width: 20 },
+		{ title: "CONSUMO m3", key: "cubicMeters", width: 15 },
+		{ title: "SALDO Bs.", key: "balance", width: 15 },
+		{ title: "ESTADO RECIBO", key: "invoiceIsPaid", width: 15 },
 	];
-
-	const excelData = useMemo(() => {
-		if (!data?.readings) return [];
-		return data.readings.map((item) => ({
-			id: item._id,
-			ci: item.waterMeter.ci,
-			fullname: item.waterMeter.name + " " + item.waterMeter.surname,
-			meterNumber: item.waterMeter.meter_number,
-			status: item.waterMeter.status ? "ACTIVO" : "INACTIVO",
-			date: formateDate(item.date, "DD-MM-YYYY"),
-			beforeMonthDate: formateDate(item.beforeMonth.date, "DD-MM-YYYY"),
-			beforeMonthValue: item.beforeMonth.value,
-			lastMonthDate: formateDate(item.lastMonth.date, "DD-MM-YYYY"),
-			lastMonthValue: item.lastMonth.value,
-			cubicMeters: item.cubicMeters,
-			balance: item.balance,
-			invoiceIsPaid: item.invoice?.isPaid ? "PAGADO" : "SIN PAGAR",
-		}));
+	useMemo(() => {
+		if (data?.readings) {
+			setExportData(() =>
+				data.readings.map((item) => ({
+					id: item._id,
+					ci: item.waterMeter.user.ci,
+					fullname: `${item.waterMeter.user.name} ${item.waterMeter.user.surname}`,
+					meterNumber: item.waterMeter.meter_number,
+					status: item.waterMeter.status ? "ACTIVO" : "INACTIVO",
+					date: formateDate(item.date, "DD-MM-YYYY"),
+					beforeMonthDate: formateDate(item.beforeMonth.date, "DD-MM-YYYY"),
+					beforeMonthValue: item.beforeMonth.value,
+					lastMonthDate: formateDate(item.lastMonth.date, "DD-MM-YYYY"),
+					lastMonthValue: item.lastMonth.value,
+					cubicMeters: item.cubicMeters,
+					balance: item.balance,
+					invoiceIsPaid: item.invoice?.isPaid ? "PAGADO" : "SIN PAGAR",
+				}))
+			);
+		}
+		return [];
 	}, [data]);
 
 	return (
@@ -385,8 +390,17 @@ export default function MeterReadingsPage() {
 									/>
 								</Stack>
 								<Divider />
-								<CustomTable data={data.readings} columns={columns} filter />
-								<JsonToExcel headers={headers} data={excelData} />
+								<CustomTable
+									data={data.readings}
+									columns={columns}
+									filter
+									canExport
+									exportHeaders={headers}
+									exportData={exportData}
+									exportFileName={`Lecturas_${
+										months[selectedMonth.getMonth()]
+									}_${date.year()}`}
+								/>
 							</Box>
 						)}
 					</Card>

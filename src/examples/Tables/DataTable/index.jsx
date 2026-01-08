@@ -47,6 +47,7 @@ import MDPagination from "components/MDPagination";
 // Material Dashboard 2 React example components
 import DataTableHeadCell from "examples/Tables/DataTable/DataTableHeadCell";
 import DataTableBodyCell from "examples/Tables/DataTable/DataTableBodyCell";
+import JsonToExcel from "components/XLSX/JsonToExcel";
 
 function DataTable({
 	entriesPerPage,
@@ -56,6 +57,8 @@ function DataTable({
 	pagination,
 	isSorted,
 	noEndBorder,
+	canExport,
+	exportFileName,
 }) {
 	const defaultValue = entriesPerPage.defaultValue
 		? entriesPerPage.defaultValue
@@ -199,6 +202,18 @@ function DataTable({
 							/>
 						</MDBox>
 					)}
+					{canExport && (
+						<MDBox ml={2}>
+							<JsonToExcel
+								data={rows.map((row) => row.original)}
+								headers={columns.map((col) => ({
+									title: typeof col.Header === "string" ? col.Header : col.accessor,
+									width: col.width || 20,
+								}))}
+								fileName={exportFileName}
+							/>
+						</MDBox>
+					)}
 				</MDBox>
 			) : null}
 			<Table {...getTableProps()}>
@@ -307,6 +322,8 @@ DataTable.defaultProps = {
 	pagination: { variant: "gradient", color: "info" },
 	isSorted: true,
 	noEndBorder: false,
+	canExport: false,
+	exportFileName: "Reporte",
 };
 
 // Typechecking props for the DataTable
@@ -336,6 +353,8 @@ DataTable.propTypes = {
 	}),
 	isSorted: PropTypes.bool,
 	noEndBorder: PropTypes.bool,
+	canExport: PropTypes.bool,
+	exportFileName: PropTypes.string,
 };
 
 export default DataTable;

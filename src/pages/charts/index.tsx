@@ -41,13 +41,54 @@ import { lineChartDataDashboard } from "./data/lineChartData";
 import { lineChartOptionsDashboard } from "./data/lineChartOptions";
 import { useAuthContext } from "context/AuthContext";
 import useFetch from "hooks/useFetch";
+import { useEffect, useState } from "react";
+import type { CubesMonth } from "./interfaces/interfaces";
 
 export default function Charts() {
 	const { sales, tasks } = reportsLineChartData;
-	const { token } = useAuthContext();
-	const { data, loading, error } = useFetch({ endpoint: "/report", token });
+	const [paramDates, setParamDates] = useState({
+		startDate: new Date("2025-01-01"),
+		endDate: new Date(),
+	});
+	const [currentYear, setCurrentYear] = useState({
+		startDate: new Date("2025-05-01"),
+		endDate: new Date(),
+	});
+	const [cubes, setCubes] = useState<ApexAxisChartSeries>([]);
+	const { data, loading, error } = useFetch<CubesMonth>({
+		endpoint: `/report/sum-by-month/global?startDate=${paramDates.startDate}&endDate=${paramDates.endDate}`,
+	});
+	const {
+		data: currentYearData,
+		loading: loadinfCurrentYear,
+		error: errorCurrentYear,
+	} = useFetch<CubesMonth>({
+		endpoint: `/report/sum-by-month/global?startDate=${currentYear.startDate}&endDate=${currentYear.endDate}`,
+	});
 	console.log("🚀 ~ Charts ~ data:", data);
+	console.log("🚀 ~ Charts ~ currentData:", currentYearData);
 
+	useEffect(() => {
+		if (data && currentYearData) {
+			const serializeCubes = data?.readings.map(
+				(item) => item.totalCubicMeters
+			);
+			const serializeCubesCurrent = currentYearData?.readings.map(
+				(item) => item.totalCubicMeters
+			);
+			console.log(serializeCubes);
+			setCubes([
+				{
+					name: "Año 2024",
+					data: serializeCubes,
+				},
+				{
+					name: "Año 2026",
+					data: serializeCubesCurrent,
+				},
+			]);
+		}
+	}, [data]);
 	return (
 		<>
 			<Box py={3}>
@@ -114,7 +155,7 @@ export default function Charts() {
 				</Grid> */}
 				<Box mt={4.5}>
 					<Grid container spacing={3}>
-						{/* <Grid item xs={12} md={6} lg={4}>
+						<Grid item xs={12} md={6} lg={4}>
 							<MDBox mb={3}>
 								<ReportsBarChart
 									color="info"
@@ -124,8 +165,8 @@ export default function Charts() {
 									chart={reportsBarChartData}
 								/>
 							</MDBox>
-						</Grid> */}
-						{/* <Grid item xs={12} md={6} lg={12}>
+						</Grid>
+						<Grid item xs={12} md={6} lg={12}>
 							<MDBox mb={3}>
 								<ReportsLineChart
 									color="success"
@@ -139,7 +180,7 @@ export default function Charts() {
 									chart={sales}
 								/>
 							</MDBox>
-						</Grid> */}
+						</Grid>
 						{/* <Grid item xs={12} md={6} lg={12}>
 							<MDBox mb={3}>
 								<ReportsLineChart
@@ -192,7 +233,7 @@ export default function Charts() {
 									</Box>
 									<MDBox sx={{ height: "310px" }}>
 										<LineChart
-											lineChartData={lineChartDataDashboard}
+											lineChartData={cubes}
 											lineChartOptions={lineChartOptionsDashboard}
 										/>
 									</MDBox>
