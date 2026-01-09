@@ -240,9 +240,9 @@ export default function MeterReadingsPage() {
 	// Seccion para exportar a excel
 	const headers: ExportHeadersExcel[] = [
 		{ title: "ID", key: "id", width: 25 },
-		{ title: "CI", key: "ci", width: 10 },
+		{ title: "CI", key: "ci", width: 12 },
 		{ title: "NOMBRES", key: "fullname", width: 30 },
-		{ title: "MEDIDOR", key: "meterNumber", width: 10 },
+		{ title: "MEDIDOR", key: "meterNumber", width: 12 },
 		{ title: "ESTADO MEDIDOR", key: "status", width: 15 },
 		{ title: "FECHA LECTURA", key: "date", width: 20 },
 		{ title: "FECHA MES ANTERIOR", key: "beforeMonthDate", width: 20 },

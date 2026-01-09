@@ -20,9 +20,6 @@ import Grid from "@mui/material/Grid";
 import MDBox from "components/MDBox";
 
 // Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
 import ReportsBarChart from "examples/Charts/BarCharts/ReportsBarChart";
 import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
@@ -36,10 +33,9 @@ import Projects from "layouts/dashboard/components/Projects";
 import OrdersOverview from "layouts/dashboard/components/OrdersOverview";
 import MDTypography from "components/MDTypography";
 import LineChart from "./components/Charts/LineCharts/LineChart";
-import { Box, Card } from "@mui/material";
+import { Box, Card, Tabs, Tab, Paper } from "@mui/material";
 import { lineChartDataDashboard } from "./data/lineChartData";
 import { lineChartOptionsDashboard } from "./data/lineChartOptions";
-import { useAuthContext } from "context/AuthContext";
 import useFetch from "hooks/useFetch";
 import { useEffect, useState } from "react";
 import type { CubesMonth } from "./interfaces/interfaces";
@@ -47,51 +43,123 @@ import type { CubesMonth } from "./interfaces/interfaces";
 export default function Charts() {
 	const { sales, tasks } = reportsLineChartData;
 	const [paramDates, setParamDates] = useState({
-		startDate: new Date("2025-01-01"),
+		startDate: new Date(new Date().getFullYear(), 0, 1),
 		endDate: new Date(),
 	});
+
+	// Selected range for tabs: 'month' | '1' | '5' | '10' | '20' | '50'
+	const [selectedRange, setSelectedRange] = useState<string>("1");
 	const [currentYear, setCurrentYear] = useState({
 		startDate: new Date("2025-05-01"),
 		endDate: new Date(),
 	});
 	const [cubes, setCubes] = useState<ApexAxisChartSeries>([]);
+	// helper to format dates as yyyy-mm-dd (backend-friendly)
+	const formatDateParam = (d: Date) => d.toISOString().split("T")[0];
+
 	const { data, loading, error } = useFetch<CubesMonth>({
-		endpoint: `/report/sum-by-month/global?startDate=${paramDates.startDate}&endDate=${paramDates.endDate}`,
+		endpoint: `/report/sum-by-month/global?startDate=${formatDateParam(
+			paramDates.startDate
+		)}&endDate=${formatDateParam(paramDates.endDate)}`,
 	});
 	const {
 		data: currentYearData,
 		loading: loadinfCurrentYear,
 		error: errorCurrentYear,
 	} = useFetch<CubesMonth>({
-		endpoint: `/report/sum-by-month/global?startDate=${currentYear.startDate}&endDate=${currentYear.endDate}`,
+		endpoint: `/report/sum-by-month/global?startDate=${formatDateParam(
+			currentYear.startDate
+		)}&endDate=${formatDateParam(currentYear.endDate)}`,
 	});
 	console.log("🚀 ~ Charts ~ data:", data);
 	console.log("🚀 ~ Charts ~ currentData:", currentYearData);
 
 	useEffect(() => {
-		if (data && currentYearData) {
-			const serializeCubes = data?.readings.map(
-				(item) => item.totalCubicMeters
-			);
-			const serializeCubesCurrent = currentYearData?.readings.map(
-				(item) => item.totalCubicMeters
-			);
-			console.log(serializeCubes);
-			setCubes([
-				{
-					name: "Año 2024",
-					data: serializeCubes,
-				},
-				{
-					name: "Año 2026",
-					data: serializeCubesCurrent,
-				},
-			]);
+		// build series safely when data arrives; allow either dataset to be present
+		const series: ApexAxisChartSeries = [];
+
+		if (data && data.readings) {
+			series.push({
+				name: `Rango seleccionado`,
+				data: data.readings.map((r) => r.totalCubicMeters),
+			});
 		}
-	}, [data]);
+
+		if (currentYearData && currentYearData.readings) {
+			series.push({
+				name: `Año actual`,
+				data: currentYearData.readings.map((r) => r.totalCubicMeters),
+			});
+		}
+
+		if (series.length > 0) setCubes(series);
+	}, [data, currentYearData]);
+
+	// When selectedRange changes, compute new paramDates and set them
+	useEffect(() => {
+		const now = new Date();
+		let start = new Date();
+		let end = new Date();
+
+		switch (selectedRange) {
+			case "month":
+				// last 1 month
+				start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+				end = now;
+				break;
+			case "1":
+				start = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+				end = now;
+				break;
+			case "5":
+				start = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate());
+				end = now;
+				break;
+			case "10":
+				start = new Date(now.getFullYear() - 10, now.getMonth(), now.getDate());
+				end = now;
+				break;
+			case "20":
+				start = new Date(now.getFullYear() - 20, now.getMonth(), now.getDate());
+				end = now;
+				break;
+			case "50":
+				start = new Date(now.getFullYear() - 50, now.getMonth(), now.getDate());
+				end = now;
+				break;
+			default:
+				start = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+				end = now;
+		}
+
+		setParamDates({ startDate: start, endDate: end });
+	}, [selectedRange]);
 	return (
 		<>
 			<Box py={3}>
+				{/* Range selector tabs */}
+				<Card sx={{ mb: 2, p: 1 }}>
+					<Tabs
+						value={selectedRange}
+						onChange={(e, v) => setSelectedRange(v)}
+						variant="scrollable"
+						scrollButtons
+						allowScrollButtonsMobile
+					>
+						<Tab label="Mes" value="month" />
+						<Tab label="1 año" value="1" />
+						<Tab label="5 años" value="5" />
+						<Tab label="10 años" value="10" />
+						<Tab label="20 años" value="20" />
+						<Tab label="50 años" value="50" />
+					</Tabs>
+					<Box sx={{ mt: 1, px: 2 }}>
+						<MDTypography variant="caption" color="text">
+							Rango: {formatDateParam(paramDates.startDate)} —{" "}
+							{formatDateParam(paramDates.endDate)}
+						</MDTypography>
+					</Box>
+				</Card>
 				{/* <Grid container spacing={3}>
 					<Grid item xs={12} md={6} lg={3}>
 						<MDBox mb={1.5}>
@@ -155,7 +223,7 @@ export default function Charts() {
 				</Grid> */}
 				<Box mt={4.5}>
 					<Grid container spacing={3}>
-						<Grid item xs={12} md={6} lg={4}>
+						{/* <Grid item xs={12} md={6} lg={4}>
 							<MDBox mb={3}>
 								<ReportsBarChart
 									color="info"
@@ -180,7 +248,7 @@ export default function Charts() {
 									chart={sales}
 								/>
 							</MDBox>
-						</Grid>
+						</Grid> */}
 						{/* <Grid item xs={12} md={6} lg={12}>
 							<MDBox mb={3}>
 								<ReportsLineChart
