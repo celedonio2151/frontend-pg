@@ -9,3 +9,5 @@ contraseña por defecto -> Password20xx!
 al registrar usuarios rol USER
 
 Mejorar la muestra de error al registrar una lectura de medidor
+
+En el sudebar mostrar la fecha selecionada de cualquier pagina que tenga selector de fecha

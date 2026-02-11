@@ -1,75 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, Chip, IconButton, Stack } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Box, Card, Chip } from "@mui/material";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useSnackbar } from "notistack";
 // MUI ICONS
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
-import AddModeratorRoundedIcon from "@mui/icons-material/AddModeratorRounded";
 
-import paths from "routes/paths";
 import Splash from "components/loader/Splash";
 import ErrorLoader from "components/loader/ErrorLoader";
 import EmptyLoader from "components/loader/EmptyLoader";
 import type { Role, Roles } from "pages/roles/interfaces/role.interface";
-import CustomModal from "components/Modal/CustomModal";
 import useFetch from "hooks/useFetch";
 import MainTable from "examples/Table";
 import { useAuthContext } from "context/AuthContext";
-import MDButton from "components/MDButton";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import useDelete from "hooks/useDelete";
 import type { ExportHeadersExcel } from "components/XLSX/JsonToExcel";
 
 export default function RolesPage() {
 	const { token } = useAuthContext();
-	const { enqueueSnackbar } = useSnackbar();
-	const navigate = useNavigate();
-	const [eventTrigger, setEventTrigger] = useState(new Date());
 	const [exportData, setExportData] = useState<any[]>([]);
 	const { data, loading, error } = useFetch<Roles>({
 		endpoint: "/role",
-		eventTrigger,
 		token,
 	});
-	const [open, setOpen] = useState(false);
-	const [selectedId, setSelectedId] = useState<string | null>(null);
-	const {
-		del: deleteRequest,
-		loading: loadingDelete,
-		error: errorDelete,
-	} = useDelete();
-
-	const handleEdit = (roleId: any) => {
-		console.log("Editar rol:", roleId);
-		// Navegar a /pages/role-edit/:id o abrir modal
-		navigate(paths.editRole.split(":")[0] + `${roleId}`);
-	};
-
-	const handleDelete = () => {
-		console.log("Eliminar rol con ID:", selectedId);
-		setOpen(false);
-		// Hacer DELETE al endpoint /role/:id y refrescar la lista
-		deleteRequest(`/role/${selectedId}`)
-			.then(() => {
-				enqueueSnackbar("Rol eliminado correctamente", {
-					variant: "success",
-				});
-			})
-			.catch(() => {
-				enqueueSnackbar("Error al eliminar el rol", { variant: "error" });
-			})
-			.finally(() => {
-				setEventTrigger(new Date());
-			});
-	};
-
-	const openModal = (roleId: string) => {
-		setSelectedId(roleId);
-		setOpen(true);
-	};
 
 	// Seccion para exportar a excel
 	const headers: ExportHeadersExcel[] = [
@@ -86,7 +37,7 @@ export default function RolesPage() {
 					name: item.name,
 					description: item.description,
 					status: item.status ? "Activo " : "Inactivo",
-				}))
+				})),
 			);
 		}
 		return () => {};
@@ -118,39 +69,12 @@ export default function RolesPage() {
 					/>
 				),
 			},
-			{
-				id: "acciones",
-				header: "Acciones",
-				cell: ({ row }: any) => (
-					<Stack direction="row" justifyContent={"center"} spacing={1}>
-						<IconButton
-							size="small"
-							onClick={() => handleEdit(row.original._id)}
-						>
-							<EditRoundedIcon color="info" />
-						</IconButton>
-						<IconButton
-							size="small"
-							onClick={() => openModal(row.original._id)}
-						>
-							<DeleteRoundedIcon color="error" />
-						</IconButton>
-					</Stack>
-				),
-			},
 		],
-		[]
+		[],
 	);
 
 	return (
-		<MDBox pt={0} pb={3}>
-			<MDButton
-				color="info"
-				startIcon={<AddModeratorRoundedIcon />}
-				onClick={() => navigate(paths.createRole)}
-			>
-				Crear nuevo rol
-			</MDButton>
+		<Box pt={0} pb={3}>
 			<Card sx={{ mt: 5, bgcolor: "transparent" }}>
 				<MDBox
 					mx={2}
@@ -186,16 +110,6 @@ export default function RolesPage() {
 					)
 				)}
 			</Card>
-
-			<CustomModal
-				open={open}
-				onClose={() => setOpen(false)}
-				onConfirm={handleDelete}
-				title="Eliminar rol"
-				content="¿Estás seguro de que querés eliminar este rol? Esta acción no se puede deshacer."
-				confirmText="Sí, eliminar"
-				cancelText="Cancelar"
-			/>
-		</MDBox>
+		</Box>
 	);
 }

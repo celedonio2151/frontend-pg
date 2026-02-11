@@ -4,19 +4,21 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useRef,
 	useState,
 } from "react";
 import { useSnackbar } from "notistack";
+import axios from "axios";
 
 import type { User } from "interfaces/Profile.interface";
-import eventBus from "helpers/eventBus";
+import axiosInstance from "hooks/axiosConfig";
 
 // Definir las propiedades del contexto
 interface AuthContextProps {
 	token: string | undefined;
 	refreshToken: string | undefined;
 	userProfile: User | undefined;
-	loading: boolean; // <--- Añadido
+	loading: boolean;
 	setToken: (token: string) => Promise<void>;
 	setRefreshToken: (token: string) => Promise<void>;
 	setProfile: (profile: User) => Promise<void>;
@@ -26,31 +28,176 @@ interface AuthContextProps {
 // Crear un contexto con un valor inicial nulo
 const AuthContext = createContext<AuthContextProps | null>(null);
 
+// URL base del servidor
+const URL_BASE = import.meta.env.VITE_SERVER;
+
 // Proveedor del contexto
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [token, setTokenState] = useState<string | undefined>(undefined);
 	const [refreshToken, setRefreshTokenState] = useState<string | undefined>(
-		undefined
+		undefined,
 	);
-	// Estado para el perfil de usuario
-	// Se inicializa como undefined para indicar que no hay un perfil cargado
 	const [userProfile, setUserProfile] = useState<User | undefined>(undefined);
-	const [loading, setLoading] = useState(true); // <--- Añadido
+	const [loading, setLoading] = useState(true);
 	const { enqueueSnackbar } = useSnackbar();
 
-	// Cargar el token y el perfil al montar el componente
+	// Referencias para evitar closures obsoletos en los interceptores
+	const tokenRef = useRef<string | undefined>(undefined);
+	const refreshTokenRef = useRef<string | undefined>(undefined);
+
+	// Para evitar múltiples refreshes simultáneos
+	const isRefreshing = useRef(false);
+	const failedQueue = useRef<
+		Array<{
+			resolve: (token: string) => void;
+			reject: (error: unknown) => void;
+		}>
+	>([]);
+
+	// Actualizar refs cuando cambian los tokens
+	useEffect(() => {
+		tokenRef.current = token;
+	}, [token]);
+
+	useEffect(() => {
+		refreshTokenRef.current = refreshToken;
+	}, [refreshToken]);
+
+	// Función para procesar la cola de peticiones fallidas
+	const processQueue = useCallback(
+		(error: unknown, newToken: string | null = null) => {
+			failedQueue.current.forEach((prom) => {
+				if (newToken) {
+					prom.resolve(newToken);
+				} else {
+					prom.reject(error);
+				}
+			});
+			failedQueue.current = [];
+		},
+		[],
+	);
+
+	// Función para cerrar sesión (definida antes del interceptor)
+	const logout = useCallback(() => {
+		setTokenState(undefined);
+		setRefreshTokenState(undefined);
+		setUserProfile(undefined);
+		tokenRef.current = undefined;
+		refreshTokenRef.current = undefined;
+		localStorage.removeItem("accessToken");
+		localStorage.removeItem("refreshToken");
+		localStorage.removeItem("userProfile");
+		enqueueSnackbar(
+			"Tu sesión ha expirado. Por favor, inicia sesión de nuevo.",
+			{
+				variant: "warning",
+			},
+		);
+	}, [enqueueSnackbar]);
+
+	// Configurar interceptores de Axios
+	useEffect(() => {
+		// Request Interceptor - Añadir token a cada request
+		const requestInterceptor = axiosInstance.interceptors.request.use(
+			(config) => {
+				const storedToken = localStorage.getItem("accessToken");
+				if (storedToken) {
+					config.headers.Authorization = `Bearer ${JSON.parse(storedToken)}`;
+				}
+				return config;
+			},
+			(error) => Promise.reject(error),
+		);
+
+		// Response Interceptor - Manejar 401 y refresh token
+		const responseInterceptor = axiosInstance.interceptors.response.use(
+			(response) => response,
+			async (error) => {
+				const originalRequest = error.config;
+
+				// Si el error es 401 y no es un retry
+				if (error.response?.status === 401 && !originalRequest._retry) {
+					// Si ya hay un refresh en progreso, encolar esta petición
+					if (isRefreshing.current) {
+						return new Promise((resolve, reject) => {
+							failedQueue.current.push({ resolve, reject });
+						}).then((newToken) => {
+							originalRequest.headers.Authorization = `Bearer ${newToken}`;
+							return axiosInstance(originalRequest);
+						});
+					}
+
+					originalRequest._retry = true;
+					isRefreshing.current = true;
+
+					try {
+						const storedRefreshToken = localStorage.getItem("refreshToken");
+						const storedToken = localStorage.getItem("accessToken");
+						if (!storedRefreshToken || !storedToken) {
+							throw new Error("Refresh token o access token no disponible");
+						}
+
+						// Llamar al endpoint de refresh usando axios puro (no axiosInstance)
+						// para evitar el interceptor
+						const response = await axios.post(
+							`${URL_BASE}/auth/refresh-token`,
+							{
+								accessToken: JSON.parse(storedToken),
+								refreshToken: JSON.parse(storedRefreshToken),
+							},
+							{ headers: { Accept: "application/json" } },
+						);
+
+						const { accessToken, refreshToken } = response.data;
+
+						// Actualizar estado de React
+						setTokenState(accessToken);
+						setRefreshTokenState(refreshToken);
+
+						// Persistir en localStorage
+						localStorage.setItem("accessToken", JSON.stringify(accessToken));
+						localStorage.setItem("refreshToken", JSON.stringify(refreshToken));
+
+						// Procesar peticiones encoladas
+						processQueue(null, accessToken);
+
+						// Reintentar la petición original con el nuevo token
+						originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+						return axiosInstance(originalRequest);
+					} catch (refreshError) {
+						// Si falla el refresh, hacer logout
+						processQueue(refreshError, null);
+						logout();
+						return Promise.reject(refreshError);
+					} finally {
+						isRefreshing.current = false;
+					}
+				}
+
+				return Promise.reject(error);
+			},
+		);
+
+		// Cleanup: remover interceptores al desmontar
+		return () => {
+			axiosInstance.interceptors.request.eject(requestInterceptor);
+			axiosInstance.interceptors.response.eject(responseInterceptor);
+		};
+	}, [logout, processQueue]);
+
+	// Cargar datos de autenticación al montar el componente
 	useEffect(() => {
 		const loadAuthData = async () => {
 			try {
-				const storedToken = localStorage.getItem("token");
+				const storedToken = localStorage.getItem("accessToken");
 				const storedRefreshToken = localStorage.getItem("refreshToken");
-				const storedProfile = await localStorage.getItem("userProfile");
+				const storedProfile = localStorage.getItem("userProfile");
 
 				if (storedToken) setTokenState(JSON.parse(storedToken));
 				if (storedRefreshToken) {
 					setRefreshTokenState(JSON.parse(storedRefreshToken));
 				}
-				// Si el perfil de usuario está en formato JSON, lo parseamos
 				if (storedProfile) setUserProfile(JSON.parse(storedProfile));
 			} catch (error) {
 				console.error("Error al cargar los datos de autenticación:", error);
@@ -58,43 +205,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 					"Error al cargar los datos de autenticación desde el almacenamiento local",
 					{
 						variant: "error",
-					}
+					},
 				);
 			} finally {
-				setLoading(false); // <--- Finaliza la carga
-			}
-		};
-
-		// El interceptor de Axios llamará a esto cuando el refresh token falle.
-		const handleLogout = () => {
-			logout();
-		};
-
-		const handleTokenRefresh = (data: { token: string }) => {
-			if (data?.token) {
-				setTokenState(data.token);
+				setLoading(false);
 			}
 		};
 
 		loadAuthData();
-
-		// Suscribirse a los eventos
-		eventBus.on("tokenRefreshed", handleTokenRefresh);
-		eventBus.on("logout", handleLogout);
-
-		// Limpiar las suscripciones al desmontar
-		return () => {
-			eventBus.remove("tokenRefreshed", handleTokenRefresh);
-			eventBus.remove("logout", handleLogout);
-		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []); // El array de dependencias vacío es correcto aquí para que se ejecute solo una vez.
+	}, [enqueueSnackbar]);
 
 	// Función para establecer el token
 	const setToken = async (newToken: string) => {
 		try {
 			setTokenState(newToken);
-			await localStorage.setItem("token", JSON.stringify(newToken));
+			localStorage.setItem("accessToken", JSON.stringify(newToken));
 		} catch (error) {
 			console.error("Error al guardar el token:", error);
 			enqueueSnackbar("Error al guardar el token", {
@@ -107,7 +232,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const setRefreshToken = async (newToken: string) => {
 		try {
 			setRefreshTokenState(newToken);
-			await localStorage.setItem("refreshToken", JSON.stringify(newToken));
+			localStorage.setItem("refreshToken", JSON.stringify(newToken));
 		} catch (error) {
 			console.error("Error al guardar el refresh token:", error);
 			enqueueSnackbar("Error al guardar el refresh token", {
@@ -121,7 +246,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			setUserProfile(profile);
 			const jsonValue = JSON.stringify(profile);
-			await localStorage.setItem("userProfile", jsonValue);
+			localStorage.setItem("userProfile", jsonValue);
 		} catch (error) {
 			console.error("Error al guardar el perfil del usuario:", error);
 			enqueueSnackbar("Error al guardar el perfil del usuario", {
@@ -130,28 +255,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
-	// Función para cerrar sesión
-	const logout = useCallback(() => {
-		setTokenState(undefined);
-		setRefreshTokenState(undefined);
-		setUserProfile(undefined);
-		localStorage.removeItem("token");
-		localStorage.removeItem("refreshToken");
-		localStorage.removeItem("userProfile");
-		// Notificamos al usuario que su sesión ha expirado.
-		enqueueSnackbar("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.", {
-			variant: "warning",
-		});
-		// No es necesario redirigir aquí, ya que el interceptor lo hace.
-	}, [enqueueSnackbar]);
-
 	return (
 		<AuthContext.Provider
 			value={{
 				token,
 				refreshToken,
 				userProfile,
-				loading, // <--- Añadido
+				loading,
 				setToken,
 				setRefreshToken,
 				setProfile,
