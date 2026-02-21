@@ -43,6 +43,7 @@ export default function BillingTable({
 	const [editingRowId, setEditingRowId] = useState<string | null>(null);
 	const [tempData, setTempData] = useState<Billing | null>(null); // Form temporal
 	const { patch, loading, error } = usePatch<Billing>();
+	const { del: deleteRequest, loading: loadingDelete, error: errorDelete } = useDelete<Billing>();
 
 	// Nuevos estados para manejar la eliminación confirmada
 	const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -81,10 +82,11 @@ export default function BillingTable({
 	const handleDelete = useCallback(
 		async (id: string) => {
 			try {
-				await useDelete(`/billing/${id}`, token);
+				await deleteRequest(`/billing/${id}`, token);
 				enqueueSnackbar("Registro eliminado", { variant: "success" });
 				setTrigger(new Date());
 			} catch (err) {
+				console.error("Error eliminando registro:", err);
 				enqueueSnackbar(handlerErrors(err), { variant: "error" });
 			} finally {
 				setOpenDeleteDialog(false);

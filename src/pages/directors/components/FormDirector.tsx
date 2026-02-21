@@ -29,7 +29,11 @@ interface AutocompleteOption {
 	userId: string;
 }
 
-export default function FormDirector() {
+type FormDirectorProps = {
+	setEventTrigger: React.Dispatch<React.SetStateAction<Date>>;
+};
+
+export default function FormDirector({ setEventTrigger }: FormDirectorProps) {
 	const { token } = useAuthContext();
 	const [startDate, setStartDate] = useState<Dayjs | null>(dayjs());
 	const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
@@ -55,9 +59,9 @@ export default function FormDirector() {
 						label: `${user.name} ${user.surname}`,
 						ci: user.ci,
 						userId: user._id,
-				  }))
+					}))
 				: [],
-		[users]
+		[users],
 	);
 
 	const {
@@ -78,12 +82,12 @@ export default function FormDirector() {
 
 	const onSubmit = async (data: DirectorForm) => {
 		console.log("Form Data:", data);
-		const res = await post(
-			"/board-directors",
-			{ ...data, order: Number(data.order) },
-			token
-		);
+		const res = await post("/board-directors", {
+			...data,
+			order: Number(data.order),
+		});
 		if (res) {
+			setEventTrigger(new Date()); // Trigger para recargar la lista de directores
 			console.log("Director registrado:", res);
 			enqueueSnackbar("Director registrado correctamente", {
 				variant: "success",

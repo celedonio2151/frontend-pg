@@ -1,7 +1,7 @@
+import { useState } from "react";
 import Grid from "@mui/material/Grid";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import MDAvatar from "components/MDAvatar";
-import MDBox from "components/MDBox";
 import useFetch from "hooks/useFetch";
 import MDTypography from "components/MDTypography";
 import handlerErrors from "helpers/handlerErrors";
@@ -13,15 +13,16 @@ import LoadingItem from "components/loader/LoadingItem";
 
 export default function DirectorPage() {
 	const { token } = useAuthContext();
+	const [eventTrigger, setEventTrigger] = useState(new Date());
 	const { data, loading, error } = useFetch<Directors>({
 		endpoint: `/board-directors?status=true`,
-		eventTrigger: null,
+		eventTrigger: eventTrigger,
 		token,
 	});
 
 	return (
 		<>
-			<MDBox py={3}>
+			<Box py={3}>
 				{/* Grid para mostrar los primeros elementos */}
 				<Typography variant="h3" textAlign="center" py={2}>
 					Mesa directiva {formateDate(new Date(), "YYYY")}{" "}
@@ -58,9 +59,9 @@ export default function DirectorPage() {
 											mt={1}
 										>
 											{`Periodo: ${new Date(
-												item.startDate
+												item.startDate,
 											).toLocaleDateString()} - ${new Date(
-												item.endDate
+												item.endDate,
 											).toLocaleDateString()}`}
 										</Typography>
 									</CardContent>
@@ -103,9 +104,9 @@ export default function DirectorPage() {
 											mt={1}
 										>
 											{`Periodo: ${new Date(
-												item.startDate
+												item.startDate,
 											).toLocaleDateString()} - ${new Date(
-												item.endDate
+												item.endDate,
 											).toLocaleDateString()}`}
 										</Typography>
 									</CardContent>
@@ -131,11 +132,11 @@ export default function DirectorPage() {
 					</Grid>
 				)}
 				<Grid container sx={{ justifyContent: "center", mt: 4 }} spacing={3}>
-					<Grid item xs={12} md={6} lg={4}>
-						<FormDirector />
+					<Grid item xs={12} sm={6} md={6} lg={4}>
+						<FormDirector setEventTrigger={setEventTrigger} />
 					</Grid>
 				</Grid>
-			</MDBox>
+			</Box>
 		</>
 	);
 }
