@@ -61,7 +61,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 	});
 	const selectedRoles = watch("role_id");
 	const isAdminRoleSelected = selectedRoles?.includes(
-		roles.find((role) => role.name === "ADMIN")?._id || ""
+		roles.find((role) => role.name === "ADMIN")?._id || "",
 	);
 
 	const emailRules = {
@@ -77,13 +77,13 @@ export default function EditUserForm({ user, roles, token }: Props) {
 	const handleMetersChange = (meters: string[]) => {
 		setValue(
 			"meter_numbers",
-			meters.map((m) => Number(m))
+			meters.map((m) => Number(m)),
 		);
 	};
 
 	const onSubmit = async (data: UserForm) => {
 		const cleanedData = cleanBody(data);
-		// console.log("🚀 ~ onSubmit ~ cleanedData:", cleanedData);
+		console.log("🚀 ~ onSubmit ~ cleanedData:", cleanedData);
 		try {
 			const response = await patch(`/user/${user._id}`, cleanedData, token);
 			if (response) {
@@ -95,7 +95,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 			console.error("Error al actualizar el usuario", error);
 			enqueueSnackbar(
 				error?.response?.data.message || "Error al actualizar el usuario",
-				{ variant: "error" }
+				{ variant: "error" },
 			);
 		}
 	};
@@ -108,7 +108,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 			body.meter_numbers &&
 			user.waterMeters.length === body.meter_numbers.length &&
 			user.waterMeters.every((m) =>
-				body.meter_numbers?.includes(m.meter_number)
+				body.meter_numbers?.includes(m.meter_number),
 			);
 		if (equalMeters) delete cleanedBody.meter_numbers;
 		if (!cleanedBody.password) delete cleanedBody.password;
@@ -116,7 +116,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 		// Filtrar los medidores existentes en user para no duplicar en la db
 		if (cleanedBody.meter_numbers)
 			cleanedBody.meter_numbers = body.meter_numbers?.filter((m) =>
-				user.waterMeters?.some((um) => um.meter_number !== m)
+				user.waterMeters?.some((um) => um.meter_number !== m),
 			);
 		return cleanedBody;
 	};
@@ -288,7 +288,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							<FormHelperText error>{errors.email?.message}</FormHelperText>
 						</FormControl>
 					</Grid>
-
+					{/* Roles de usuario */}
 					<Grid item xs={12} md={6}>
 						<FormControl fullWidth variant="outlined" error={!!errors.role_id}>
 							<InputLabel id="demo-simple-select-label">Roles</InputLabel>
@@ -305,7 +305,15 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							>
 								{roles.map((role) => (
 									<MenuItem key={role._id} value={role._id} sx={{ mb: 0.5 }}>
-										{role.name}
+										{role.name === "READER"
+											? "LECTURADOR"
+											: role.name === "USER"
+												? "USUARIO"
+												: role.name === "TECHNICIAN"
+													? "TECNICO"
+													: role.name === "ADMIN"
+														? "ADMINISTRADOR"
+														: role.name}
 									</MenuItem>
 								))}
 							</Select>
@@ -313,6 +321,34 @@ export default function EditUserForm({ user, roles, token }: Props) {
 							<FormHelperText>{errors.role_id?.message}</FormHelperText>
 						</FormControl>
 					</Grid>
+					{/* Campo extra solo para ADMIN */}
+					{isAdminRoleSelected && (
+						<Grid item xs={12} md={6}>
+							<FormControl
+								fullWidth
+								variant="outlined"
+								error={!!errors.password}
+							>
+								<InputLabel htmlFor="outlined-adornment-admin-password">
+									Contraseña ADMIN
+								</InputLabel>
+								<OutlinedInput
+									id="outlined-adornment-admin-password"
+									{...register("password", {
+										required:
+											"La contraseña ADMIN es obligatoria para el rol de ADMIN",
+										minLength: {
+											value: 8,
+											message:
+												"La contraseña ADMIN debe tener al menos 8 caracteres",
+										},
+									})}
+									label="Contraseña ADMIN"
+								/>
+								<FormHelperText>{errors.password?.message}</FormHelperText>
+							</FormControl>
+						</Grid>
+					)}
 					{/* Medidores de agua */}
 					<Grid item xs={12}>
 						<FormControl

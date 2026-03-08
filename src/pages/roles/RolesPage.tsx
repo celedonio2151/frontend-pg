@@ -53,6 +53,16 @@ export default function RolesPage() {
 			{
 				accessorKey: "name",
 				header: "Nombre",
+				cell: (info) =>
+					info.getValue() === "READER"
+						? "LECTURADOR"
+						: info.getValue() === "USER"
+							? "USUARIO"
+							: info.getValue() === "TECHNICIAN"
+								? "TECNICO"
+								: info.getValue() === "ADMIN"
+									? "ADMINISTRADOR"
+									: info.getValue(),
 			},
 			{
 				accessorKey: "description",

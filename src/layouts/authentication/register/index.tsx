@@ -43,7 +43,7 @@ import bgImage from "assets/images/bg-sign-up-cover.jpeg";
 import MDButton from "components/MDButton";
 import { useNavigate } from "react-router-dom";
 
-import handlerErrors from "helpers/handlerErrors";
+import handlerErrors, { extractErrorMessage } from "helpers/handlerErrors";
 import { useAuthContext } from "context/AuthContext";
 import { useSnackbar } from "notistack";
 import usePost from "hooks/usePost";
@@ -52,6 +52,7 @@ import type {
 	UserFormRegister,
 } from "pages/users/interfaces/user.interface";
 import paths from "routes/paths";
+import type { AxiosError } from "axios";
 
 export default function RegisterUserPage() {
 	const { enqueueSnackbar } = useSnackbar();
@@ -78,11 +79,10 @@ export default function RegisterUserPage() {
 	const onSubmit = async (data: any) => {
 		const body = {
 			...data,
-			password: "Password20xx!", // Hardcoded password
-			birthdate: "2000-01-01", // Hardcoded birthdate
+			password: "Password123!", // Hardcoded password
 		};
 		const dataCleaned = cleanBody(body);
-		console.log("Peticion al servidor", dataCleaned);
+		// console.log("Peticion al servidor", dataCleaned);
 		try {
 			const res = await post("/user", dataCleaned, token);
 			if (res) {
@@ -94,7 +94,8 @@ export default function RegisterUserPage() {
 		} catch (err) {
 			if (!loading) {
 				console.error("Error al registrar usuario:", error);
-				const coolError = error?.response?.data.message?.join(", ");
+				const coolError = extractErrorMessage(error as AxiosError);
+				console.log("🚀 ~ onSubmit ~ coolError:", coolError);
 				enqueueSnackbar(coolError || "Error al registrar usuario", {
 					variant: "error",
 				});
@@ -127,7 +128,7 @@ export default function RegisterUserPage() {
 						bgImage &&
 						`${linearGradient(
 							rgba(gradients.dark.main, 0.4),
-							rgba(gradients.dark.state, 0.4)
+							rgba(gradients.dark.state, 0.4),
 						)}, url(${bgImage})`,
 					backgroundSize: "cover",
 					backgroundPosition: "center",

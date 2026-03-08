@@ -21,6 +21,7 @@ import { useMaterialUIController, setOpenConfigurator } from "context";
 
 // Pages
 import { useAuthContext } from "context/AuthContext";
+import Splash from "components/loader/Splash";
 
 function App() {
 	const { loading } = useAuthContext();
@@ -66,7 +67,7 @@ function App() {
 		</MDBox>
 	);
 
-	if (loading) return <h2>Cargand...</h2>; // O cualquier loader
+	if (loading) return <Splash />; // Use the same Splash loader to avoid layout shift
 	return (
 		<ThemeProvider theme={darkMode ? themeDark : theme}>
 			<CssBaseline />

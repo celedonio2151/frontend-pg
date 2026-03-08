@@ -12,12 +12,8 @@ Coded by www.creative-tim.com
 
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  */
-import { useContext, useEffect, useState } from "react";
-
 // @mui material components
 import Grid from "@mui/material/Grid";
-import { Box } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 
 // @mui icons
@@ -26,7 +22,6 @@ import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
-import MDTypography from "components/MDTypography";
 
 // Images
 import bgImage from "assets/images/bg-sign-up-cover.jpeg";

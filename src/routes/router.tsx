@@ -40,9 +40,6 @@ const EditMeterPage = lazy(() => import("pages/meters/EditMeterPage"));
 const MeterReadingsPage = lazy(
 	() => import("pages/readings/MeterReadingsPage")
 );
-const CreateReadingPage = lazy(
-	() => import("pages/readings/CreateReadingPage")
-);
 const EditReadingPage = lazy(() => import("pages/readings/EditReadingPage"));
 
 // Reportes
