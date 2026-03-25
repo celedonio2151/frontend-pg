@@ -77,12 +77,8 @@ export default function RegisterUserPage() {
 	});
 
 	const onSubmit = async (data: any) => {
-		const body = {
-			...data,
-			password: "Password123!", // Hardcoded password
-		};
+		const body = {...data};
 		const dataCleaned = cleanBody(body);
-		// console.log("Peticion al servidor", dataCleaned);
 		try {
 			const res = await post("/user", dataCleaned, token);
 			if (res) {

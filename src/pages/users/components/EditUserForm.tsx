@@ -20,7 +20,7 @@ import ContactEmergencyRoundedIcon from "@mui/icons-material/ContactEmergencyRou
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import PhoneForwardedRoundedIcon from "@mui/icons-material/PhoneForwardedRounded";
 
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 
 import MDButton from "components/MDButton";
 import MDBox from "components/MDBox";
@@ -45,6 +45,7 @@ export default function EditUserForm({ user, roles, token }: Props) {
 		handleSubmit,
 		watch,
 		setValue,
+		control,
 		formState: { isSubmitting, errors },
 	} = useForm<UserForm>({
 		defaultValues: {
@@ -56,13 +57,17 @@ export default function EditUserForm({ user, roles, token }: Props) {
 			birthDate: user.birthDate || undefined,
 			role_id: user.roles?.map((role) => role._id) || [],
 			status: user.status,
-			meter_numbers: user.waterMeters?.map((m) => m.meter_number),
+			meter_numbers:
+				user.waterMeters?.map((m) => ({ value: m.meter_number.toString() })) ||
+				[],
 		},
 	});
 	const selectedRoles = watch("role_id");
 	const isAdminRoleSelected = selectedRoles?.includes(
 		roles.find((role) => role.name === "ADMIN")?._id || "",
 	);
+	// Flag para saber si el usuario ya era ADMIN antes de editar
+	const initialIsAdmin = user.roles?.some((role) => role.name === "ADMIN");
 
 	const emailRules = {
 		required: isAdminRoleSelected
@@ -72,13 +77,6 @@ export default function EditUserForm({ user, roles, token }: Props) {
 			value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 			message: "Debe ser un correo electrónico válido",
 		},
-	};
-
-	const handleMetersChange = (meters: string[]) => {
-		setValue(
-			"meter_numbers",
-			meters.map((m) => Number(m)),
-		);
 	};
 
 	const onSubmit = async (data: UserForm) => {
@@ -101,24 +99,27 @@ export default function EditUserForm({ user, roles, token }: Props) {
 	};
 
 	const cleanBody = (body: UserForm) => {
-		const cleanedBody: UserForm = { ...body };
+		const cleanedBody: any = { ...body };
+		const currentMeterNumbers = body.meter_numbers?.map(m => Number(m.value)) || [];
+		
 		// Si los medidores son los mismo que el inicial, no los enviamos, solo enviar los nuevos y eliminar los iniciales
 		const equalMeters =
 			user.waterMeters &&
-			body.meter_numbers &&
-			user.waterMeters.length === body.meter_numbers.length &&
-			user.waterMeters.every((m) =>
-				body.meter_numbers?.includes(m.meter_number),
-			);
+			user.waterMeters.length === currentMeterNumbers.length &&
+			user.waterMeters.every((m) => currentMeterNumbers.includes(m.meter_number));
+			
 		if (equalMeters) delete cleanedBody.meter_numbers;
 		if (!cleanedBody.password) delete cleanedBody.password;
 		if (!cleanedBody.email) delete cleanedBody.email;
+		
 		// Filtrar los medidores existentes en user para no duplicar en la db
-		if (cleanedBody.meter_numbers)
-			cleanedBody.meter_numbers = body.meter_numbers?.filter((m) =>
-				user.waterMeters?.some((um) => um.meter_number !== m),
+		if (cleanedBody.meter_numbers) {
+			cleanedBody.meter_numbers = currentMeterNumbers.filter((m) =>
+				!user.waterMeters?.some((um) => um.meter_number === m),
 			);
-		return cleanedBody;
+		}
+		
+		return cleanedBody as UserForm;
 	};
 	return (
 		<Card sx={{ marginBottom: 3 }}>
@@ -330,20 +331,24 @@ export default function EditUserForm({ user, roles, token }: Props) {
 								error={!!errors.password}
 							>
 								<InputLabel htmlFor="outlined-adornment-admin-password">
-									Contraseña ADMIN
+									Contraseña ADMIN (Vacio para mantener)
 								</InputLabel>
 								<OutlinedInput
 									id="outlined-adornment-admin-password"
 									{...register("password", {
-										required:
-											"La contraseña ADMIN es obligatoria para el rol de ADMIN",
-										minLength: {
-											value: 8,
-											message:
-												"La contraseña ADMIN debe tener al menos 8 caracteres",
+										validate: (value) => {
+											if (
+												isAdminRoleSelected &&
+												!initialIsAdmin &&
+												(!value || value.length === 0)
+											)
+												return "La contraseña ADMIN es obligatoria para el rol de ADMIN";
+											if (value && value.length < 8)
+												return "La contraseña ADMIN debe tener al menos 8 caracteres";
+											return true;
 										},
 									})}
-									label="Contraseña ADMIN"
+									label="Contraseña ADMIN (Vacio para mantener)"
 								/>
 								<FormHelperText>{errors.password?.message}</FormHelperText>
 							</FormControl>
@@ -377,7 +382,9 @@ export default function EditUserForm({ user, roles, token }: Props) {
 						<Divider />
 						<WaterMeters
 							initialMeters={user.waterMeters}
-							onChange={handleMetersChange}
+							control={control}
+							register={register}
+							errors={errors}
 						/>
 					</Grid>
 					{/* Botón de actualización */}

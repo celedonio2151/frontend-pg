@@ -4,13 +4,11 @@ cancelar un QR generado
 Hace un replica al registrar un usuario y muestra un error anterior
 
 
-
-contraseña por defecto -> Password20xx!
-al registrar usuarios rol USER
-
 Mejorar la muestra de error al registrar una lectura de medidor
+Si la lectura no es secuencial no muestra bien el error de respuesta
 
 En el sudebar mostrar la fecha selecionada de cualquier pagina que tenga selector de fecha
 
-Al editar un usuario no esta dejando editar ERROR {Email y password son requeridos}
-Si el rol ADMIN Password es requerido
+La primera vez al iniciar session no quiere registrar un usuario hasta refrescar la pagina
+
+Al editar un usuario esta pidiendo contraseña con ROL ADMIN

@@ -52,19 +52,23 @@ import team3 from "assets/images/team-3.jpg";
 import team4 from "assets/images/team-4.jpg";
 import useFetch from "hooks/useFetch";
 import { useAuthContext } from "context/AuthContext";
+import type { Profile } from "./interfaces/profile.interface";
 
 function Overview() {
 	const { token } = useAuthContext();
 	// console.log("USER ME ", token);
-	const [userMe, loading, error, handleCancel] = useFetch(
-		`/user/me`,
-		null,
-		token
-	);
+	const {
+		data: userMe,
+		loading,
+		error,
+	} = useFetch<Profile>({
+		endpoint: `/user/me`,
+		token,
+		eventTrigger: null,
+	});
 	// console.log(userMe);
 	return (
-		<DashboardLayout>
-			<DashboardNavbar />
+		<>
 			<MDBox mb={2} />
 			<Header userMe={userMe}>
 				<MDBox mt={5} mb={3}>
@@ -81,9 +85,12 @@ function Overview() {
 									Nombre: `${userMe?.name} ${userMe?.surname}`,
 									CI: `${userMe?.ci}`,
 									Gmail: userMe?.email || "Sin email",
-									Celular: `${userMe?.phone_number}` || "Sin celular",
+									Celular: `${userMe?.phoneNumber}` || "Sin celular",
 									ubicación: "Bolivia",
-									rol: userMe?.roles?.length > 0 ? userMe?.roles[0] : "Error",
+									rol:
+										userMe && userMe?.roles?.length > 0
+											? userMe?.roles.flatMap((r) => r.name + " ")
+											: "Error",
 								}}
 								social={[
 									{
@@ -211,8 +218,7 @@ function Overview() {
 					</Grid>
 				</MDBox>
 			</Header>
-			<Footer />
-		</DashboardLayout>
+		</>
 	);
 }
 

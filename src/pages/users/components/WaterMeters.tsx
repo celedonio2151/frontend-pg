@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
 	Switch,
 	IconButton,
-	Icon,
 	Box,
 	Typography,
 	FormControl,
@@ -20,69 +19,38 @@ import WaterDropRoundedIcon from "@mui/icons-material/WaterDropRounded";
 
 import MDButton from "components/MDButton";
 import type { WaterMeter } from "pages/meters/interfaces/meter.interface";
+import type { Control, UseFormRegister, FieldErrors } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
+import type { UserForm } from "pages/users/interfaces/user.interface";
 
 type WaterMetersProps = {
 	initialMeters?: WaterMeter[];
-	onChange: (meters: string[]) => void;
+	control: Control<UserForm>;
+	register: UseFormRegister<UserForm>;
+	errors: FieldErrors<UserForm>;
 };
 
-const WaterMeters = ({ initialMeters = [], onChange }: WaterMetersProps) => {
-	const [showMeters, setShowMeters] = useState(false);
-	const [meters, setMeters] = useState<string[]>(
-		initialMeters.length > 0
-			? initialMeters.map((m) => String(m.meter_number))
-			: []
+const WaterMeters = ({ initialMeters = [], control, register, errors }: WaterMetersProps) => {
+	// Initialize showMeters based on validation errors or initial meters
+	const [showMeters, setShowMeters] = useState(
+		initialMeters.length > 0 || (errors.meter_numbers && errors.meter_numbers.length! > 0) ? true : false
 	);
-	const [errors, setErrors] = useState<string[]>([]);
 
-	useEffect(() => {
-		const newErrors: string[] = new Array(meters.length).fill("");
-		const seenMeters = new Map<string, number>();
-
-		meters.forEach((meter, index) => {
-			const trimmedMeter = meter.trim();
-			if (trimmedMeter === "") return;
-
-			if (!/^\d+$/.test(trimmedMeter)) {
-				newErrors[index] = "Debe ser numérico";
-			} else {
-				if (seenMeters.has(trimmedMeter)) {
-					const firstIndex = seenMeters.get(trimmedMeter)!;
-					newErrors[index] = "Medidor duplicado";
-					if (newErrors[firstIndex] === "") {
-						newErrors[firstIndex] = "Medidor duplicado";
-					}
-				} else {
-					seenMeters.set(trimmedMeter, index);
-				}
-			}
-		});
-
-		setErrors(newErrors);
-		onChange(meters.filter((meter) => meter.trim() !== ""));
-	}, [meters, onChange]);
+	const { fields, append, remove } = useFieldArray({
+		control,
+		name: "meter_numbers",
+	});
 
 	const handleToggleMeters = () => {
 		setShowMeters(!showMeters);
 	};
 
 	const addMeter = () => {
-		setMeters([...meters, ""]);
+		append({ value: "" });
 	};
 
 	const removeMeter = (index: number) => {
-		const newMeters = meters.filter((_, i) => i !== index);
-		if (newMeters.length === 0) {
-			setMeters([""]);
-		} else {
-			setMeters(newMeters);
-		}
-	};
-
-	const handleMeterChange = (index: number, value: string) => {
-		const newMeters = [...meters];
-		newMeters[index] = value;
-		setMeters(newMeters);
+		remove(index);
 	};
 
 	return (
@@ -121,16 +89,28 @@ const WaterMeters = ({ initialMeters = [], onChange }: WaterMetersProps) => {
 						</Typography>
 					</Box>
 
-					{meters.map((meter, index) => (
-						<Box key={index} display="flex" alignItems="center" mb={1}>
-							<FormControl fullWidth variant="outlined" error={!!errors[index]}>
+					{fields.map((field, index) => (
+						<Box key={field.id} display="flex" alignItems="center" mb={1}>
+							<FormControl fullWidth variant="outlined" error={!!errors.meter_numbers?.[index]?.value}>
 								<InputLabel htmlFor={`outlined-adornment-meter-${index}`}>
 									Número de Medidor
 								</InputLabel>
 								<OutlinedInput
 									id={`outlined-adornment-meter-${index}`}
-									value={meter}
-									onChange={(e) => handleMeterChange(index, e.target.value)}
+									{...register(`meter_numbers.${index}.value`, {
+										required: "Debe ingresar un número",
+										pattern: {
+											value: /^\d+$/,
+											message: "Debe ser numérico",
+										},
+										validate: (value, formValues) => {
+											const allMeters = formValues.meter_numbers?.map(m => m.value) || [];
+											if (allMeters.filter(v => v === value).length > 1) {
+												return "Medidor duplicado";
+											}
+											return true;
+										}
+									})}
 									disabled={
 										initialMeters[index] ? initialMeters[index].status : false
 									}
@@ -147,7 +127,7 @@ const WaterMeters = ({ initialMeters = [], onChange }: WaterMetersProps) => {
 									}
 									label="Número de Medidor"
 								/>
-								<FormHelperText>{errors[index]}</FormHelperText>
+								<FormHelperText>{errors.meter_numbers?.[index]?.value?.message}</FormHelperText>
 							</FormControl>
 							<IconButton
 								disabled={

@@ -48,7 +48,7 @@ export type UserForm = {
   meter_number?:  number;
   status?:        boolean;
   role_id:        string[];
-  meter_numbers?: number[];
+  meter_numbers?: { value: string }[];
 }
 
 export type UserFormRegister = {

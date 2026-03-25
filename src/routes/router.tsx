@@ -7,7 +7,7 @@ import paths, { rootPaths } from "./paths";
 
 const ProtectedRoute = lazy(() => import("private/ProtectedRoute"));
 const UnauthorizedPage = lazy(
-	() => import("pages/unauthorized/UnauthorizedPage")
+	() => import("pages/unauthorized/UnauthorizedPage"),
 );
 const Error404 = lazy(() => import("pages/errors/Error404"));
 
@@ -20,6 +20,7 @@ const AuthLayout = lazy(() => import("layouts/auth-layout"));
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 import PublicRoute from "private/PublicRoute";
+import Overview from "layouts/profile";
 const RegisterUserPage = lazy(() => import("layouts/authentication/register"));
 const Cover = lazy(() => import("layouts/authentication/sign-up"));
 
@@ -38,7 +39,7 @@ const EditMeterPage = lazy(() => import("pages/meters/EditMeterPage"));
 
 // Lecturas de medidores
 const MeterReadingsPage = lazy(
-	() => import("pages/readings/MeterReadingsPage")
+	() => import("pages/readings/MeterReadingsPage"),
 );
 const EditReadingPage = lazy(() => import("pages/readings/EditReadingPage"));
 
@@ -89,7 +90,7 @@ const routes = [
 							{ path: paths.users, element: <ListUsers /> },
 							{ path: paths.createUser, element: <RegisterUserPage /> },
 							{ path: paths.editUser, element: <EditUserPage /> },
-							{ path: paths.userMe, element: <ListUsers /> },
+							{ path: paths.userMe, element: <Overview /> },
 
 							// Roles
 							{ path: paths.roles, element: <RolesPage /> },
